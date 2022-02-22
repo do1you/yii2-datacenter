@@ -1,0 +1,22 @@
+{
+    "name": "do1you/yii2-datacenter",
+    "description": "业务数据平台，用于整合各个业务的数据仓库。",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension","datacenter"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "统一",
+            "email": "do1you@163.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "~2.0.0",
+	"do1you/yii2-webadmin": "~1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "datacenter\\": "src"
+        }
+    }
+}
