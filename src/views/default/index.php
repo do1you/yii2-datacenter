@@ -11,6 +11,7 @@
 			<a class="btn btn-primary" target="_blank" href="<?php echo \yii\helpers\Url::to(['sets-rel/index']);?>">数据集关系</a>
 			<a class="btn btn-primary" target="_blank" href="<?php echo \yii\helpers\Url::to(['report/index']);?>">数据报表</a>
 			<a class="btn btn-primary" target="_blank" href="<?php echo \yii\helpers\Url::to(['user-report/index']);?>">用户报表</a>
+			<a class="btn btn-primary" target="_blank" href="<?php echo \yii\helpers\Url::to(['report-view/index']);?>">报表查询</a>
 		</div>
 	</div>
 </div>

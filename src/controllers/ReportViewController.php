@@ -7,6 +7,7 @@ namespace datacenter\controllers;
 use Yii;
 use datacenter\models\DcReport;
 use datacenter\models\DcSets;
+use datacenter\models\DcUserReport;
 
 class ReportViewController extends \webadmin\BController
 {
@@ -19,11 +20,73 @@ class ReportViewController extends \webadmin\BController
     }
     
     /**
+     * 报表首页
+     */
+    public function actionIndex()
+    {
+        $treeData = \datacenter\models\DcCat::treeData(); // 获取所有分类
+        $reportList = \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,null,1],7200);
+        $myreportList = \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,['is_collection'=>'1']],7200);
+        $haveCatIds = [];
+        foreach($reportList as $catId=>$reports){
+            if(is_array($reports)){
+                foreach($reports as $report){
+                    if(($parentIds = $report['cat']['parentIds'])){
+                        $haveCatIds = array_merge($haveCatIds,$parentIds);                        
+                    }
+                }
+            }
+        }
+        
+        return $this->render('index', [
+            'treeData' => $treeData,
+            'reportList' => $reportList,
+            'haveCatIds' => $haveCatIds,
+            'myreportList' => $myreportList,
+        ]);
+    }
+    
+    /**
+     * 收藏报表
+     */
+    public function actionCollection($id,$show='')
+    {
+        $result = [];
+        $model = DcUserReport::find()->where(['report_id'=>$id,'user_id'=>Yii::$app->user->id])->one();
+        if(empty($show)){
+            $report = DcReport::findOne($id);
+            if(empty($model) && $report['create_user']==Yii::$app->user->id){
+                $model = new DcUserReport;
+                $model->loadDefaultValues();
+            }
+            
+            if($model){
+                $model->load([
+                    'report_id'     =>  $id,
+                    'user_id'       =>  Yii::$app->user->id,
+                    'is_collection' =>  ($model['is_collection']=='0' ? '1' : '0'),
+                ],'');
+                $model->save(false);
+                $result['success'] = true;
+                
+                // 清除缓存
+                \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,['is_collection'=>'1']],7200,true);                
+            }else{
+                $result['msg'] = "您没有权限收藏该报表";
+            }
+        }else{
+            $result['success'] = true;
+        }
+        $result['state'] = $model['is_collection'];
+        return $result;
+    }
+    
+    /**
      * 报表显示
      */
     public function actionView($id)
     {
-        return $this->render('view', [
+        return $this->render('display', [
             'list' => $this->findModel($id ? explode(',',$id) : []),
         ]);
     }
@@ -33,7 +96,7 @@ class ReportViewController extends \webadmin\BController
      */
     public function actionSetView($id)
     {
-        return $this->render('view', [
+        return $this->render('display', [
             'list' => $this->findSetModel($id ? explode(',',$id) : []),
         ]);
     }

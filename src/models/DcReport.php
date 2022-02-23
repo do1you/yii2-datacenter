@@ -105,6 +105,11 @@ class DcReport extends \webadmin\ModelCAR
         return $this->hasMany(DcReportColumns::className(), ['report_id' => 'id'])->addOrderBy("is_frozen desc,paixu desc,id asc");
     }
     
+    // 获取用户报表关系
+    public function getUserReport(){
+        return $this->hasMany(DcUserReport::className(), ['report_id' => 'id'])->addOrderBy("paixu desc,id asc");
+    }
+    
     // 获取数据集类型
     public function getV_state($val = null)
     {
