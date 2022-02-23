@@ -77,7 +77,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
     {
         $source_col = $this->getV_source_col();
         $ids = array_merge(array_keys($source_col), array_values($source_col));
-        $cModels = $ids ? DcSetsColumns::findAll($ids) : [];
+        $cModels = $ids ? DcSetsColumns::find()->where(['id'=>$ids])->with(['sets'])->all() : [];
         return \yii\helpers\ArrayHelper::map($cModels, 'id', 'v_self');
     }
     

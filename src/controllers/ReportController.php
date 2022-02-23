@@ -285,7 +285,7 @@ class ReportController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcReport();
-        $dataProvider = $model->search(Yii::$app->request->queryParams);
+        $dataProvider = $model->search(Yii::$app->request->queryParams,null,['columns.sets','user','cat']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

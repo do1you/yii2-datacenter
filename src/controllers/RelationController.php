@@ -53,7 +53,7 @@ class RelationController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcRelation();
-        $dataProvider = $model->search(Yii::$app->request->queryParams);
+        $dataProvider = $model->search(Yii::$app->request->queryParams,null,['sourceModel.source','targetModel.source']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

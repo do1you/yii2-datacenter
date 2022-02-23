@@ -62,7 +62,7 @@ class SetsRelController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcSetsRelation();
-        $dataProvider = $model->search(Yii::$app->request->queryParams);
+		$dataProvider = $model->search(Yii::$app->request->queryParams,null,['sourceSets','targetSets']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

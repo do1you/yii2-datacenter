@@ -6,7 +6,7 @@ use yii\helpers\Url;
 
 ?>
 <?php Pjax::begin(['timeout'=>5000]); ?>
-<div class="row dc-report-index">
+<div class="row dc-user-report-index">
 	<div class="col-xs-12 col-md-12">
 		<?php echo $this->render('_search', ['model' => $model]); ?>
     	<div class="widget flat radius-bordered">
@@ -21,7 +21,8 @@ use yii\helpers\Url;
     			<div class="row">
     				<div class="col-xs-12 col-md-12">
     					<div class="pull-right margin-bottom-10">
-    						<a class="btn btn-primary" href="<?php echo Url::to(['build']);?>" data-pjax="0"><i class='fa fa-building'></i> <?= Yii::t('datacenter','构建报表')?></a>
+    						<?php /* <a class="btn btn-primary" href="<?php echo Url::to(['tree']);?>"><i class='fa fa-sitemap'></i> <?= Yii::t('common','树型数据')?></a> */?>
+    						<a class="btn btn-primary" href="<?php echo Url::to(['create']);?>"><i class='fa fa-plus'></i> <?= Yii::t('common','添加')?></a>
     						<button class="btn btn-primary checkSubmit" reaction="<?php echo Url::to(['delete']);?>" type="button"><i class='fa fa-trash-o'></i> <?= Yii::t('common','批量删除')?></button>
     						<?php echo Html::hiddenInput(Yii::$app->request->csrfParam, Yii::$app->request->getCsrfToken());?>
     		    		</div>
@@ -43,54 +44,33 @@ use yii\helpers\Url;
                     	//['class' => '\yii\grid\SerialColumn'],
 
                 	     'id',
-                	     'title',
                 	     [
-                	         'attribute' => 'cat_id',
-                	         'value' => 'cat.name',
+                	         'attribute' => 'report_id',
+                	         'value' => 'report.v_title',
                 	         'filter' => false,
                 	     ],
+                	     'alias_name',
                 	     [
-                	         'attribute' => 'state',
-                	         'value' => 'v_state',
-                	         'filter' => false,
-                	     ],
-                	     [
-                	         'attribute' => 'show_type',
-                	         'value' => 'v_show_type',
-                	         'filter' => false,
-                	     ],
-                	     [
-                	         'attribute' => 'set_ids',
-                	         'value' => 'v_sets_str',
-                	         'filter' => false,
-                	     ],
-                	     [
-                	         'attribute' => 'paixu',
-                	         'value' => 'paixu',
-                	         'filter' => false,
-                	     ],
-                	     [
-                	         'attribute' => 'create_user',
+                	         'attribute' => 'user_id',
                 	         'value' => 'user.name',
                 	         'filter' => false,
                 	     ],
-                	     'update_time',
-
                 	     [
-                	         'class' => '\yii\grid\ActionColumn',
-                	         'buttonOptions' => ['data-pjax'=>'0'],
-                    	     'headerOptions'=>['width'=>'120'],
-                    	     'template' => '{show} {delete}',
-                    	     'buttons'=>[
-                    	         'show'=>function($url,$model){
-                    	         return Html::a('<span class="fa fa-navicon"></span>', ['report-view/view', 'id' => $model->id], [
-                        	             'title' => Yii::t('datacenter', '查看报表'),
-                        	             'target' => '_blank',
-                        	             'data-pjax'=>'0',
-                        	         ]);
-                        	     },
-                    	     ],
+                	         'attribute' => 'grant_user',
+                	         'value' => 'grantUser.name',
+                	         'filter' => false,
                 	     ],
+                	     [
+                	         'attribute' => 'is_collection',
+                	         'value' => 'v_is_collection',
+                	         'filter' => false,
+                	     ],
+                	     'paixu',
+                	     'create_time',
+                        [
+                        	'class' => '\yii\grid\ActionColumn',
+                        	'buttonOptions' => ['data-pjax'=>'1'],
+                        ],
                     ],
                 ]); ?>
 

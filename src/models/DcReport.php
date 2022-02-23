@@ -117,6 +117,12 @@ class DcReport extends \webadmin\ModelCAR
         return \webadmin\modules\config\models\SysLdItem::dd('dc_show_type', ($val !== null ? $val : $this->show_type));
     }
     
+    // 返回格式化标题
+    public function getV_title()
+    {
+        return "{$this->title}[{$this->user['name']}]";
+    }
+    
     // 获取显示模板
     public function getV_show_type_tp()
     {

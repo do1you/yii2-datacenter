@@ -43,7 +43,7 @@ class SetsController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcSets();
-        $dataProvider = $model->search(Yii::$app->request->queryParams);
+        $dataProvider = $model->search(Yii::$app->request->queryParams,null,['cat','mainModel.source','columns.model.source']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

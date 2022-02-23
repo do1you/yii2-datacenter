@@ -25,7 +25,7 @@ class CatController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcCat();
-        $dataProvider = $model->search(Yii::$app->request->queryParams);
+        $dataProvider = $model->search(Yii::$app->request->queryParams,null,['parent.parent.parent.parent']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 
