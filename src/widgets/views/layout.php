@@ -1,3 +1,4 @@
+<?php echo $search;?>
 <div class="widget flat radius-bordered">
 	<div class="widget-header bg-themeprimary">
 	    <span class="widget-caption"><?php echo $model['title']?>&nbsp;</span>
@@ -13,6 +14,6 @@
 	    </div>
 	</div>
 	<div class="widget-body">
-    	<?php echo $content?>
+    	<?php echo $content;?>
     </div>
 </div>

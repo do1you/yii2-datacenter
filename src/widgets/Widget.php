@@ -24,6 +24,11 @@ class Widget extends \yii\base\Widget
     public $isCache = true;
     
     /**
+     * 是否显示过滤条件
+     */
+    public $showSearchBox = true;
+    
+    /**
      * 数据接口地址
      */
     public $apiUrl = '';
@@ -45,17 +50,19 @@ class Widget extends \yii\base\Widget
     {
         $this->renderAsset();
         $content = $this->renderContent();
-        return $this->renderLayout($content);
+        $search = $this->showSearchBox ? $this->renderSearch() : '';
+        return $this->renderLayout($content, $search);
     }
     
     /**
      * 全局容器
      */
-    public function renderLayout($content)
+    public function renderLayout($content, $search='')
     {
         if($this->layout){
             return $this->render($this->layout,[
                 'model' => $this->reportModel,
+                'search' => $search,
                 'content' => $content,
                 'cache' => $this->isCache,
             ]);
@@ -76,5 +83,17 @@ class Widget extends \yii\base\Widget
      */
     public function renderContent()
     {
+    }
+    
+    /**
+     * 过滤条件
+     */
+    public function renderSearch()
+    {
+        return $this->render('search',[
+            'model' => $this->reportModel,
+            'apiUrl' => $this->apiUrl,
+            'id' => $this->getId(),
+        ]);
     }
 }

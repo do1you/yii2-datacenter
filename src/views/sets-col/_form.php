@@ -66,10 +66,12 @@ use webadmin\widgets\ActiveForm;
             
             <?= $form->field($model, 'is_frozen')->textInput()->dropDownList($model->getV_is_frozen(false), []) ?>
             
+            <?= $form->field($model, 'paixu')->textInput(['maxlength' => true]) ?>
+            
             <?= $form->field($model, 'type')->textInput(['maxlength' => true])->dropDownList($model->getV_type(false), ['prompt'=>'请选择']) ?>
             
-            <?= $form->field($model, 'paixu')->textInput(['maxlength' => true]) ?>
-
+            <?= $form->field($model, 'search_params')->textarea(['rows' => 6]) ?>
+            
             <?php if(Yii::$app->controller->action->id!='view'):?>
                 <div class="form-group">
                 	<div class="col-sm-offset-2 col-sm-10">

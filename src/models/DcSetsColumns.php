@@ -34,7 +34,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return [
             [['name', 'label', 'set_id'], 'required'],
             [['set_id', 'is_search', 'paixu'], 'integer'],
-            [['name', 'label', 'type', 'model_id', 'formula', 'fun', 'is_frozen'], 'safe'],
+            [['name', 'label', 'type', 'model_id', 'formula', 'fun', 'is_frozen', 'search_params'], 'safe'],
             [['name', 'label', 'type', 'fun'], 'string', 'max' => 50],
             [['formula'], 'string', 'max' => 150],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
@@ -54,6 +54,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'label' => Yii::t('datacenter', '标签'),
             'is_search' => Yii::t('datacenter', '是否可查'),
             'type' => Yii::t('datacenter', '查询类型'),
+            'search_params' => Yii::t('datacenter', '查询参数'),
             'formula' => Yii::t('datacenter', '计算公式'),
             'fun' => Yii::t('datacenter', '处理函数'),
             'paixu' => Yii::t('datacenter', '排序'),
@@ -79,7 +80,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     // 获取数据集类型
     public function getV_type($val = null)
     {
-        return \webadmin\modules\config\models\SysLdItem::dd('dc_set_columns_type', ($val !== null ? $val : $this->type));
+        return \webadmin\modules\config\models\SysLdItem::dd('config_type', ($val !== null ? $val : $this->type));
     }
     
     // 获取数据集类型
@@ -145,6 +146,36 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function getV_format_label()
     {
         return "{{$this->v_label}}";
+    }
+    
+    // 配置参数数组
+    public function getV_search_params()
+    {
+        $search_params = $this->search_params ? $this->search_params : "";
+        $result = [];
+        $list = explode("\n", $search_params);
+        if($list){
+            foreach($list as $val){
+                if(stripos($val,'|')===false){
+                    $result[$val] = $val;
+                }else{
+                    list($k,$v) = explode('|',$val);
+                    $result[$k] = $v;
+                }
+            }
+        }
+        return $result;
+    }
+    
+    // 配置参数网络
+    public function getV_search_ajax()
+    {
+        $search_params = $this->search_params ? $this->search_params : "";
+        if(stripos($search_params, '.')!==false){
+            return \yii\helpers\Url::to(['/config/sys-config/select2','key'=>$this->key]);
+        }else{
+            return \yii\helpers\Url::to($search_params);
+        }
     }
     
     // 保存前动作
