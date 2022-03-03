@@ -121,7 +121,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     // 返回字段别名
     public function getV_alias()
     {
-        return "sol_{$this->id}";
+        return "s_{$this->id}";
     }
     
     // 返回字段原名称

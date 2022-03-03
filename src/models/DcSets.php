@@ -280,7 +280,6 @@ class DcSets extends \webadmin\ModelCAR
         
         if($joinSets){
             foreach($joinSets as $set){
-                $set->getModels();
                 if(!empty($sets)){
                     $set->joinSets($sets);
                 }
@@ -321,7 +320,7 @@ class DcSets extends \webadmin\ModelCAR
     }
     
     // 数据集关联条件过滤，参数：查询字段，查询值
-    public function where($columns, $values)
+    public function where($columns, $values, $op = false)
     {
         $colModels = \yii\helpers\ArrayHelper::map($this['columns'], 'id', 'v_self');
         $dataProvider = $this->getDataProvider();
@@ -349,7 +348,21 @@ class DcSets extends \webadmin\ModelCAR
                         $columns = $colModels[$columns]['v_column'];
                     }
                 }
-                $dataProvider->query->andWhere(['in', $columns, $values]);
+                
+                if($op && !is_array($columns) && !is_array($values)){
+                    if($op=='like'){
+                        $likeKeyword = $dataProvider->db->driverName === 'pgsql' ? 'ilike' : 'like';
+                        $dataProvider->query->andFilterWhere([$likeKeyword, $columns, $values]);
+                    }else{
+                        $dataProvider->query->andFilterWhere([$op, $columns, $values]);
+                    }
+                }else{
+                    if(is_array($columns) && is_array($values)){
+                        $dataProvider->query->andWhere(['in', $columns, $values]);
+                    }else{
+                        $dataProvider->query->andFilterWhere([$columns => $values]);
+                    }                    
+                }
                 break;
             default: // 未知
                 throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
@@ -376,7 +389,15 @@ class DcSets extends \webadmin\ModelCAR
     // 返回API请求地址
     public function getV_apiurl($cache='1')
     {
-        return \yii\helpers\Url::to(['report-api/set-data', 'cache'=>$cache, 'id'=>$this['id'], 'access-token'=>Yii::$app->user->identity['access_token']]);
+        $params = Yii::$app->request->get("SysConfig",[]);
+        $arr = [
+            'report-api/set-data',
+            'cache'=>$cache,
+            'id'=>$this['id'],
+            'access-token'=>Yii::$app->user->identity['access_token'],
+        ];
+        $params && ($arr['SysConfig'] = $params);
+        return \yii\helpers\Url::to($arr);
     }
     
     // 返回汇总字段（预留）
@@ -388,7 +409,11 @@ class DcSets extends \webadmin\ModelCAR
     // 组装数据集数据
     protected function prepareModels()
     {
-        $data = $this->getDataProvider()->getModels();
+        $dataProvider = $this->getDataProvider();
+        
+        // 应用过滤条件
+        $this->setSearchModels(false);
+        $data = $dataProvider->getModels();
         foreach($data as $k=>$v){
             $data[$k] = $this->formatValue($v, $this->columns);
         }

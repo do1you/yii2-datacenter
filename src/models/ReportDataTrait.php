@@ -27,7 +27,8 @@ trait ReportDataTrait
     {
         if($this->_dataProvider === null){
             $dataProvider = $this->prepareDataProvider();
-            $this->_dataProvider = clone $dataProvider;
+            // $this->_dataProvider = clone $dataProvider;
+            $this->_dataProvider = $dataProvider;
         }
         
         return $this->_dataProvider;
@@ -74,26 +75,6 @@ trait ReportDataTrait
     protected function prepareModels()
     {
         return [];
-    }
-    
-    // 返回查询数据的模型
-    public function getSearch()
-    {
-        $list = [];
-        foreach($this->columns as $item){
-            if(($colnmn = $item['setsCol'])){
-                $_ = [
-                    'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
-                    'value' => '',
-                    'label_name' => $colnmn['v_label'],
-                    'config_params' => $colnmn['search_params'],
-                    'v_config_params' => $colnmn['v_search_params'],
-                    'v_config_ajax' => $colnmn['v_search_ajax'],
-                ];
-                $list[] = $_;
-            }
-        }
-        return $list;
     }
     
     // 返回数据模型

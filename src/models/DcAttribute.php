@@ -101,7 +101,7 @@ class DcAttribute extends \webadmin\ModelCAR
     // 返回字段别名
     public function getV_alias()
     {
-        return "col_{$this->id}";
+        return "c_{$this->id}";
     }
     
     // 返回字段原名称

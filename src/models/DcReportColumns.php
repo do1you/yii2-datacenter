@@ -78,7 +78,7 @@ class DcReportColumns extends \webadmin\ModelCAR
     // 返回字段别名
     public function getV_alias()
     {
-        return "rol_{$this->id}";
+        return "r_{$this->id}";
     }
     
     // 返回计算公式替换内容

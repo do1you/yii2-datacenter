@@ -1,4 +1,4 @@
-<?php echo $search;?>
+<?php if(isset($cache) && $cache===true) echo $search;?>
 <div class="widget flat radius-bordered">
 	<div class="widget-header bg-themeprimary">
 	    <span class="widget-caption"><?php echo $model['title']?>&nbsp;</span>

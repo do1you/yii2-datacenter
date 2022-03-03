@@ -30,7 +30,7 @@ class DcReport extends \webadmin\ModelCAR
      * 关联的主数据集
      */
     private $_mainSet;
-            
+     
     /**
      * 返回数据库表名称
      */
@@ -231,7 +231,15 @@ class DcReport extends \webadmin\ModelCAR
     // 返回API请求地址
     public function getV_apiurl($cache='1')
     {
-        return \yii\helpers\Url::to(['report-api/data', 'cache'=>$cache, 'id'=>$this['id'], 'access-token'=>Yii::$app->user->identity['access_token']]);
+        $params = Yii::$app->request->get("SysConfig",[]);
+        $arr = [
+            'report-api/data',
+            'cache'=>$cache,
+            'id'=>$this['id'],
+            'access-token'=>Yii::$app->user->identity['access_token'],
+        ];
+        $params && ($arr['SysConfig'] = $params);
+        return \yii\helpers\Url::to($arr);
     }
     
     // 返回汇总字段（预留）
@@ -247,6 +255,10 @@ class DcReport extends \webadmin\ModelCAR
         $this->orderColumns($this->getSort());
         $mainSet = $this->getV_mainSet();
         $allSets = $setLists = $this->v_sets;
+        
+        // 应用过滤条件
+        $this->setSearchModels(false);
+        
         $mainSet && $mainSet->joinSets($setLists);
         if($setLists){
             $set = reset($setLists);
