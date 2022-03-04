@@ -280,6 +280,7 @@ class DcSets extends \webadmin\ModelCAR
         
         if($joinSets){
             foreach($joinSets as $set){
+                $set->getModels();
                 if(!empty($sets)){
                     $set->joinSets($sets);
                 }
