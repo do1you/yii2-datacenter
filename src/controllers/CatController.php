@@ -12,7 +12,7 @@ class CatController extends \webadmin\BController
 {
 	// 执行前
     public function beforeAction($action){
-        Yii::$app->controller->pageTitle = Yii::t('datacenter', '模型分类');
+        Yii::$app->controller->pageTitle = Yii::t('datacenter', '数据分类');
 		Yii::$app->controller->currNav[] = Yii::$app->controller->pageTitle;
 		
         return parent::beforeAction($action);
@@ -71,10 +71,12 @@ class CatController extends \webadmin\BController
     /**
      * 添加模型
      */
-    public function actionCreate()
+    public function actionCreate($id='')
     {
         $model = new DcCat();
         $model->loadDefaultValues();
+        
+        if($id) $model->parent_id = $id;
 
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));

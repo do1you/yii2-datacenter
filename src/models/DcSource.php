@@ -247,7 +247,7 @@ class DcSource extends \webadmin\ModelCAR
             if($model->load([
                 'source_db' => $this->id,
                 'tb_name' => $tb,
-                'tb_label' => ($model['tb_label'] ? $model['tb_label'] : $comments[$tb]),
+                'tb_label' => ($model['tb_label'] ? $model['tb_label'] : (isset($comments[$tb]) ? $comments[$tb] : '')),
                 'update_time' => ($model['tb_label']&&$model['update_time'] ? $model['update_time'] : date('Y-m-d H:i:s')),
             ],'') && $model->save()){
                 $columns = isset($models[$tb]) ? $model['columns'] : [];

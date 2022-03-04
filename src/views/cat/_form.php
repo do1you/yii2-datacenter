@@ -33,7 +33,7 @@ use webadmin\widgets\ActiveForm;
             <?php 
             $dataList = \datacenter\models\DcCat::treeOptions('0',"id!='{$model['id']}'",0,true,true);
         	?>
-            <?= $form->field($model, 'parent_id')->textInput()->select2($dataList, []) ?>
+            <?= $form->field($model, 'parent_id')->textInput()->select2($dataList, ['prompt'=>'根节点']) ?>
             
             <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
