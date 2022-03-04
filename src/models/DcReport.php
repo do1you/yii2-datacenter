@@ -16,7 +16,7 @@ namespace datacenter\models;
 
 use Yii;
 
-class DcReport extends \webadmin\ModelCAR
+class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInterface
 {
     use ReportDataTrait;
     use ReportOrmTrait;
@@ -256,14 +256,14 @@ class DcReport extends \webadmin\ModelCAR
         $mainSet = $this->getV_mainSet();
         $allSets = $setLists = $this->v_sets;
         
-        // 应用过滤条件
-        $this->setSearchModels(false);
-        
         $mainSet && $mainSet->joinSets($setLists);
         if($setLists){
             $set = reset($setLists);
             throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的数据集')."{$set['title']}({$set['id']})");
         }
+        
+        // 应用过滤条件
+        $this->setSearchModels(false);
         
         // 提取数据集数据
         $mainSet = $this->getV_mainSet();
@@ -289,6 +289,7 @@ class DcReport extends \webadmin\ModelCAR
     // 返回数据集提供器
     protected function prepareDataProvider()
     {
-        return $this->getV_mainSet()->getDataProvider();
+        $mainSet = $this->getV_mainSet();
+        return $mainSet->getDataProvider();
     }
 }

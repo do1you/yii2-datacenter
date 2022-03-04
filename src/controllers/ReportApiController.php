@@ -57,8 +57,7 @@ class ReportApiController extends \webadmin\restful\AController
     public function actionData($id,$cache='1')
     {
         $model = $this->findModel($id,$cache);
-        $model->getModels();
-        return $model->getDataProvider();        
+        return $model;        
     }
     
     /**
@@ -76,8 +75,7 @@ class ReportApiController extends \webadmin\restful\AController
     public function actionSetData($id,$cache='1')
     {
         $model = $this->findSetModel($id,$cache);
-        $model->getModels();
-        return $model->getDataProvider();
+        return $model;
     }
     
     /**

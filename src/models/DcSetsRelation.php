@@ -12,6 +12,7 @@
 namespace datacenter\models;
 
 use Yii;
+use yii\base\ModelEvent;
 
 class DcSetsRelation extends \webadmin\ModelCAR
 {
@@ -205,16 +206,27 @@ class DcSetsRelation extends \webadmin\ModelCAR
     }
     
     // 从源数据集写入目标数据集关联条件
-    public function joinWhere(DcSets $source, DcSets $target)
+    public function joinWhere(DcSets $source, DcSets $target, $reverse = false)
     {
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
         $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
         
-        $columns = $this->getV_target_columns($target, false);
-        $keys = $this->getV_source_columns($source);
+        $target->setPagination(false); // 被关联的数据集不分页
+        
+        if($reverse){
+            $target = clone $target;
+            $columns = $this->getV_source_columns($source, false);
+            $keys = $this->getV_target_columns($target);
+            
+            // 反向需要关闭事件处理
+            $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'prepareSets']);
+        }else{
+            $columns = $this->getV_target_columns($target, false);
+            $keys = $this->getV_source_columns($source);
+        }
         
         $values = [];
-        $list = $source->getModels();
+        $list = $reverse ? $target->getModels() : $source->getModels();
         foreach($list as $item){
             if(is_array($keys)){
                 $data = [];
@@ -229,15 +241,13 @@ class DcSetsRelation extends \webadmin\ModelCAR
                 $values[] = $data;
             }
         }
-
+        
         // 写入条件
         if($values){
-            $target->where($columns, $values);
+            $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
         }else{
-            $target->where($columns, []);
+            $reverse ? $source->where($columns, []) : $target->where($columns, []);
         }
-        
-        $target->setPagination(false); // 被关联的数据集不分页
         
         return $this;
     }

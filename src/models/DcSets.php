@@ -20,7 +20,7 @@ namespace datacenter\models;
 
 use Yii;
 
-class DcSets extends \webadmin\ModelCAR
+class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterface
 {
     use ReportDataTrait;
     use ReportOrmTrait;
@@ -260,7 +260,6 @@ class DcSets extends \webadmin\ModelCAR
     public function joinSets(&$sets=[])
     {
         if(isset($sets[$this->id])) unset($sets[$this->id]);
-        
         $relations = \yii\helpers\ArrayHelper::map($this->sourceRelation, 'target_sets', 'v_self');
         $joinSets = [];
         foreach($sets as $k=>$set){
@@ -272,25 +271,40 @@ class DcSets extends \webadmin\ModelCAR
                 $set->_relation_target[$this['id']] = [$relations[$set['id']], $this];
                 $set->off(self::$EVENT_AFTER_MODEL, [$set, 'prepareSets']);
                 $set->on(self::$EVENT_AFTER_MODEL, [$set, 'prepareSets']);
-                $relations[$set['id']]->joinWhere($this, $set);
                 $joinSets[$set['id']] = $set;
                 unset($sets[$k]);
             }
         }
         
         if($joinSets){
-            foreach($joinSets as $set){
-                $set->getModels();
-                if(!empty($sets)){
-                    $set->joinSets($sets);
+            if(!empty($sets)){
+                foreach($joinSets as $set){
+                    if(!empty($sets)){
+                        $set->joinSets($sets);
+                    }
                 }
             }
+            $this->off(self::$EVENT_AFTER_MODEL, [$this, 'afterFindModels']);
+            $this->on(self::$EVENT_AFTER_MODEL, [$this, 'afterFindModels']);
         }
         
         return $this;
     }
     
-    // 数据集合匹配
+    // 同时匹配查询关联数据集合
+    public function afterFindModels()
+    {
+        if($this->_relation_source){
+            foreach($this->_relation_source as $key=>$item){
+                list($relation, $target) = $item;
+                $relation->joinWhere($this, $target);
+                $target->getModels();
+            }
+        }
+        return $this;
+    }
+    
+    // 数据结果集合匹配
     public function prepareSets()
     {
         if($this->_relation_target){
@@ -318,6 +332,23 @@ class DcSets extends \webadmin\ModelCAR
                 $source->setModels($sourceList);
             }
         }
+        return $this;
+    }
+    
+    // 目标数据集写入到源数据集查询条件
+    public function filterSourceSearch($mainSet, $num=1)
+    {
+        if($this->_relation_target){
+            foreach($this->_relation_target as $key=>$item){
+                list($relation, $source) = $item;
+                $relation->joinWhere($source, $this, true);
+                
+                if($mainSet['id']!=$source['id'] && $num<10){
+                    $source->filterSourceSearch($mainSet, ($num+1));
+                }
+            }
+        }
+        return $this;
     }
     
     // 数据集关联条件过滤，参数：查询字段，查询值

@@ -111,7 +111,10 @@ trait ReportOrmTrait
                     if(isset($setSearchParams[$set['id']]) && is_array($setSearchParams[$set['id']])){
                         $set->setSearchModels($setSearchParams[$set['id']]);
                         
-                        // 非主数据集的匹配提取数据
+                        // 非主数据集的,查询出结果数据并入到主数据集条件
+                        if($mainSet['id'] != $set['id']){
+                            $set->filterSourceSearch($mainSet);
+                        }
                     }
                 }
             }elseif($this instanceof DcSets){
