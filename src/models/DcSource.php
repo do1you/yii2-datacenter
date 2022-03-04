@@ -161,7 +161,7 @@ class DcSource extends \webadmin\ModelCAR
     // 返回动态库键名选择
     public function getV_sessionName()
     {
-        return ($this['dcsession'] ? $this($record['dcsession']) : '_curr_set_'.$this['id']);
+        return ($this['dcsession'] ? $this['dcsession'] : '_curr_set_'.$this['id']);
     }
     
     // 返回数据库连接
