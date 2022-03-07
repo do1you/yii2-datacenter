@@ -26,6 +26,8 @@ use webadmin\widgets\ActiveForm;
 				<?= $form->field($model, 'source_sets')->searchInput()->selectajax(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
 
 				<?= $form->field($model, 'target_sets')->searchInput()->selectajax(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
+				
+				<?= $form->field($model, 'rel_type')->searchInput()->dropDownList($model->getV_rel_type(false),['prompt'=>'请选择']) ?>
 
                 <div class="form-group">
                     <?= Html::submitButton(Yii::t('common','查询'), ['class' => 'btn btn-primary', 'id'=>'search_btn']) ?>
