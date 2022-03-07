@@ -65,6 +65,11 @@ use yii\helpers\Url;
                 	         'value' => 'v_rel_type',
                 	         'filter' => false,
                 	     ],
+                	     [
+                	         'attribute' => 'group_label',
+                	         'value' => 'groupLabel.v_name',
+                	         'filter' => false,
+                	     ],
 
                         [
                         	'class' => '\yii\grid\ActionColumn',

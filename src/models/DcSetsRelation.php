@@ -36,9 +36,12 @@ class DcSetsRelation extends \webadmin\ModelCAR
     {
         return [
             [['source_sets', 'target_sets'], 'integer'],
-            [['source_col', 'target_col', 'rel_type', 'is_reverse_save'], 'safe'],
+            [['source_col', 'target_col', 'rel_type', 'is_reverse_save', 'group_col', 'group_label'], 'safe'],
             [['rel_type'], 'string', 'max' => 30],
             [['source_sets', 'target_sets'], 'required'],
+            [['group_col', 'group_label'], 'required', 'when' => function ($model) {
+                return ($model->rel_type=='group');
+            }],
         ];
     }
 
@@ -54,6 +57,8 @@ class DcSetsRelation extends \webadmin\ModelCAR
             'target_sets' => Yii::t('datacenter', '目标数据集'),
             'target_col' => Yii::t('datacenter', '目标属性'),
             'rel_type' => Yii::t('datacenter', '关系类型'),
+            'group_col' => Yii::t('datacenter', '分组字段'),
+            'group_label' => Yii::t('datacenter', '分组标签'),            
             'is_reverse_save' => Yii::t('datacenter', '同步反向关系'),
         ];
     }
@@ -68,9 +73,29 @@ class DcSetsRelation extends \webadmin\ModelCAR
         return $this->hasOne(DcSets::className(), ['id'=>'target_sets']);
     }
     
+    // 获取分组标签关系
+    public function getGroupLabel(){
+        return $this->hasOne(DcSetsColumns::className(), ['id'=>'group_label']);
+    }
+    
+    // 获取分组字段关系
+    public function getGroupCol()
+    {
+        $cols = $this->getV_group_col();
+        return ( $cols ? DcSetsColumns::findAll(['id'=>$cols,'set_id'=>$this->target_sets]) : []);
+    }
+    
     // 返回关联关系类型
-    public function getV_rel_type($val=null){
+    public function getV_rel_type($val=null)
+    {
         return \webadmin\modules\config\models\SysLdItem::dd('dc_rel_type', ($val !== null ? $val : $this->rel_type));
+    }
+    
+    // 返回分组字段
+    public function getV_group_col()
+    {
+        $group_col = is_array($this->group_col) ? $this->group_col : ($this->group_col ? explode(',',$this->group_col) : []);
+        return $group_col;
     }
     
     // 返回属性关系数据字段集合
@@ -78,6 +103,12 @@ class DcSetsRelation extends \webadmin\ModelCAR
     {
         $source_col = $this->getV_source_col();
         $ids = array_merge(array_keys($source_col), array_values($source_col));
+        if($this->group_label){
+            $ids[] = $this->group_label;
+        }
+        if($this->group_col){
+            $ids = array_merge($ids, $this->getV_group_col());
+        }
         $cModels = $ids ? DcSetsColumns::find()->where(['id'=>$ids])->with(['sets'])->all() : [];
         return \yii\helpers\ArrayHelper::map($cModels, 'id', 'v_self');
     }
@@ -120,7 +151,10 @@ class DcSetsRelation extends \webadmin\ModelCAR
     public function arrangement_col()
     {
         // 格式化字段关系
-        if(is_array($this->source_col) && is_array($this->target_col)){
+        if(is_array($this->source_col) || is_array($this->target_col)){
+            if(!is_array($this->source_col) || !is_array($this->target_col) || count($this->source_col)!=count($this->target_col)){
+                throw new \yii\web\HttpException(200, Yii::t('datacenter','源属性和目标属性必须一一对应！'));
+            }
             $params = $params1 = [];
             foreach($this->source_col as $k=>$v){
                 if($v && !empty($this->target_col[$k])){
@@ -178,6 +212,10 @@ class DcSetsRelation extends \webadmin\ModelCAR
     {
         $this->arrangement_col();
         
+        if(is_array($this->group_col)){
+            $this->group_col = implode(',', $this->group_col);
+        }
+        
         return parent::beforeSave($insert);
     }
     
@@ -196,7 +234,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
                 'target_sets' => $this->source_sets,
                 'source_col' => $this->target_col,
                 'target_col' => $this->source_col,
-                'rel_type' => ($model['rel_type'] ? $model['rel_type'] : $this->rel_type),
+                'rel_type' => ($model['rel_type'] ? $model['rel_type'] : 'one'),
             ],'');
             $model->is_reverse_save = false;
             $model->save(false);

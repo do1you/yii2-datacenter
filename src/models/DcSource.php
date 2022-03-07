@@ -107,16 +107,9 @@ class DcSource extends \webadmin\ModelCAR
         try{
             $model = $this;
             if($isParent===false && $model['is_dynamic']=='1'){ // 动态库
-                $dynamicInfos = $this->getDynamicList($f5);
-                $currIdent = Yii::$app->session[$model['v_sessionName']];
+                $dynamicInfo = $this->getDynamicInfo($f5);
                 
-                // 未匹配到权限数据，取第一个
-                if(!$currIdent || !isset($dynamicInfos[$currIdent])){
-                    $keys = array_keys($dynamicInfos);
-                    $currIdent = reset($keys);
-                }
-                
-                $db = isset($dynamicInfos[$currIdent]) ? $model->getDbConnection($dynamicInfos[$currIdent], $f5) : null;
+                $db = $dynamicInfo? $model->getDbConnection($dynamicInfo, $f5) : null;
             }else{
                 $db = $model->getDbConnection(null, $f5);
             }
@@ -136,7 +129,7 @@ class DcSource extends \webadmin\ModelCAR
         $cacheKey = 'datacenter/dynamicdb/'.($model['id'] ? $model['id'] : md5(serialize($model->attributes)));
         
         if(($list = Yii::$app->cache->get($cacheKey))===false || $f5){
-            $sql = "select * from {$model['dctable']}".($model['dcwhere'] ? " where {$model['dcwhere']} " : "")." order by {$model['dcname']}";
+            $sql = "select * from {$model['dctable']}".($model['dcwhere'] ? " where {$model['dcwhere']} " : "")." order by ".($model['dcselect'] ? $model['dcselect'] : $model['dcname']);
             $rows = $this->getSourceDb(false, true)->createCommand($sql)->queryAll();
             $list = [];
             foreach($rows as $row){
@@ -156,6 +149,32 @@ class DcSource extends \webadmin\ModelCAR
         }
         
         return $list;
+    }
+    
+    // 获取动态度选中的数据库信息
+    public function getDynamicInfo($f5=false)
+    {
+        $dynamicInfos = $this->getDynamicList($f5);
+        $currIdent = Yii::$app->session[$this['v_sessionName']];
+        
+        // 未匹配到权限数据，取第一个
+        if(!$currIdent || !isset($dynamicInfos[$currIdent])){
+            $keys = array_keys($dynamicInfos);
+            $currIdent = reset($keys);
+        }
+        
+        return (isset($dynamicInfos[$currIdent]) ? $dynamicInfos[$currIdent] : null);
+    }
+    
+    // 返回数据库名
+    public function getV_dbname()
+    {
+        if($this->is_dynamic=='1'){
+            $dynamicInfo = $this->getDynamicInfo();
+            return $dynamicInfo['dbname'];
+        }else{
+            return $this->dbname;
+        }
     }
     
     // 返回动态库键名选择

@@ -74,8 +74,13 @@ class DcRelation extends \webadmin\ModelCAR
     }
     
     // 返回关联类型
-    public function getV_rel_type($val=null){
-        return \webadmin\modules\config\models\SysLdItem::dd('dc_rel_type', ($val !== null ? $val : $this->rel_type));
+    public function getV_rel_type($val=null)
+    {
+        $list = \webadmin\modules\config\models\SysLdItem::dd('dc_rel_type', ($val !== null ? $val : $this->rel_type));
+        if($val===false && is_array($list)){
+            unset($list['group'], $list['union']); // 数据集所特有的
+        }
+        return $list;
     }
     
     // 返回源属性关系
@@ -151,7 +156,11 @@ class DcRelation extends \webadmin\ModelCAR
     public function arrangement_col()
     {
         // 格式化字段关系
-        if(is_array($this->source_col) && is_array($this->target_col)){
+        if(is_array($this->source_col) || is_array($this->target_col)){
+            if(!is_array($this->source_col) || !is_array($this->target_col) || count($this->source_col)!=count($this->target_col)){
+                throw new \yii\web\HttpException(200, Yii::t('datacenter','源属性和目标属性必须一一对应！'));
+            }
+            
             $params = $params1 = [];
             foreach($this->source_col as $k=>$v){
                 if($v && !empty($this->target_col[$k])){

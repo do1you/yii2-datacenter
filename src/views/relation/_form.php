@@ -40,8 +40,6 @@ $source_col = array_merge([''=>''],$model['v_source_col']);
             <?= $form->field($model, 'rel_type')->textInput()->select2($model->getV_rel_type(false), []) ?>
             
             <?= $form->field($model, 'rel_where')->textInput(['maxlength' => true]) ?>
-            <?php $model->is_reverse_save = '1';?>
-            <?= $form->field($model, 'is_reverse_save')->textInput(['maxlength' => true])->switchs() ?>
             
             <div class="form-group required">
                 <label class="col-sm-2 control-label no-padding-right" for="dcrelation-source_col">关联关系</label>
@@ -73,6 +71,9 @@ $source_col = array_merge([''=>''],$model['v_source_col']);
                 	<?= Html::buttonInput(Yii::t('datacenter','移除'), ['class' => 'btn btn-primary', 'id'=>'remove_relation_btn']) ?>
                 </div>
             </div>
+            
+            <?php $model->is_reverse_save = '1';?>
+            <?= $form->field($model, 'is_reverse_save')->textInput(['maxlength' => true])->switchs() ?>
             
             <?php if(Yii::$app->controller->action->id!='view'):?>
                 <div class="form-group">
