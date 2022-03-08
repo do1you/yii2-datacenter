@@ -148,6 +148,18 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return "{{$this->v_label}}";
     }
     
+    // 返回字段默认值
+    public function getV_default_value()
+    {
+        if($this->formula){
+            return '0';
+        }elseif($this->column){
+            return $this->column['v_default_value'];
+        }else{
+            return '';
+        }
+    }
+    
     // 配置参数数组
     public function getV_search_params()
     {

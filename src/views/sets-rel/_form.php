@@ -8,7 +8,7 @@ use webadmin\widgets\ActiveForm;
 $source_col = [''=>''] + $model['v_source_col'];
 $colModels = $model['v_col_models'];
 $groupColList = [];
-$group_col = $model['v_group_col'];
+$model['group_col'] = $group_col = $model['v_group_col'];
 if($group_col && is_array($group_col)){
     foreach($group_col as $k){
         $groupColList[$k] = isset($colModels[$k]) ? $colModels[$k]['v_name'] : $k;

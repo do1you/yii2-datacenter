@@ -1,4 +1,4 @@
-<div id="report_tree" class="tree tree-solid-line tree-unselectable">
+<div id="report_tree" class="tree tree-solid-line tree-unselectable" style="overflow-y:auto;">
     <div class="tree-folder" style="display: none;">
         <div class="tree-folder-header">
             <i class="fa fa-folder"></i>
@@ -272,6 +272,8 @@ $(document).contextmenu({
     }
 });
 
+// 树最大高度
+$('#report_tree').css({'max-height':($(window).height()-160)});
 ");
 
 

@@ -22,15 +22,15 @@
 <?php
 // 组装字段
 $colModel = [];
-if($model['columns']){
-    foreach($model['columns'] as $colItem){
+if($model['v_columns']){
+    foreach($model['v_columns'] as $col){
         $colModel[] = [
-            'colnmnId' => $colItem['id'],
-            'data' => $colItem['v_alias'],
-            'name' => $colItem['v_label'],
-            'bSortable' => $colItem['v_order'],
+            'colnmnId' => $col['id'],
+            'data' => $col['name'],
+            'name' => $col['label'],
+            'bSortable' => $col['order'],
             //'defValue' => '',
-            'title' => $colItem['v_label'],
+            'title' => $col['label'],
             'sClass' => 'left'
         ];
     }

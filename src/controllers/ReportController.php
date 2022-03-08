@@ -29,6 +29,9 @@ class ReportController extends \webadmin\BController
     public function actions()
     {
         $mId = Yii::$app->request->post('mId',Yii::$app->request->get('mId'));
+        if($mId){
+            $_GET['per-page'] = 2000; // 树菜单的时候，最大记录数
+        }
         return [
             // 系统用户
             'user' => [

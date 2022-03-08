@@ -99,6 +99,18 @@ class DcReportColumns extends \webadmin\ModelCAR
         return "{{$this->v_label}}";
     }
     
+    // 返回字段默认值
+    public function getV_default_value()
+    {
+        if($this->formula){
+            return '0';
+        }elseif($this->setsCol){
+            return $this->setsCol['v_default_value'];
+        }else{
+            return '';
+        }
+    }
+    
     // 增加排序索引
     public function orderColumn(\yii\data\Sort $sort)
     {

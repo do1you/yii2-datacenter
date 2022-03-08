@@ -146,6 +146,31 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         return "{$this->title}[{$this->id}]";
     }
     
+    // 获取格式化字段
+    public function getV_columns($columns, &$values = null){
+        $colModels = \yii\helpers\ArrayHelper::map($this['columns'], 'id', 'v_self');
+        if(is_array($columns)){
+            foreach($columns as $k=>$col){
+                if(isset($colModels[$col])){
+                    $columns[$k] = $colModels[$col]['v_column'];
+                }
+            }
+            if($values && is_array($values)){
+                foreach($values as $k=>$value){
+                    if(is_array($value)){
+                        $values[$k] = array_combine($columns, $value);
+                    }
+                }
+            }
+        }else{
+            if(isset($colModels[$columns])){
+                $columns = $colModels[$columns]['v_column'];
+            }
+        }
+        
+        return $columns;
+    }
+    
     // 获取模型匹配关系
     public function getV_relation_models()
     {
@@ -183,6 +208,49 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 return ($this->cat ? $this->cat['name'] : '');
             }
         }
+    }
+    
+    // 返回API请求地址
+    public function getV_apiurl($cache='1')
+    {
+        $params = Yii::$app->request->get("SysConfig",[]);
+        $arr = [
+            'report-api/set-data',
+            'cache'=>$cache,
+            'id'=>$this['id'],
+            'access-token'=>Yii::$app->user->identity['access_token'],
+        ];
+        $params && ($arr['SysConfig'] = $params);
+        return \yii\helpers\Url::to($arr);
+    }
+    
+    // 返回数据集关联关系
+    public function getV_relation()
+    {
+        if($this->_relation_target && is_array($this->_relation_target)){
+            foreach($this->_relation_target as $key=>$item){
+                list($relation, $source) = $item;
+                return $relation;
+            }
+        }
+        
+        return null;
+    }
+    
+    // 预处理数据
+    public function findModel($condition, $muli = false)
+    {
+        $query = parent::findByCondition($condition)->with([
+            'columns.column',
+            'columns.model.sourceRelation.sourceModel',
+            'columns.model.sourceRelation.targetModel',
+            'columns.model.columns.model',
+            'mainModel.source',
+            'mainModel.sourceRelation.sourceModel',
+            'mainModel.sourceRelation.targetModel',
+        ]);
+        
+        return ($muli ? $query->all() : $query->one());
     }
     
     // 格式化SQL字符串
@@ -269,8 +337,8 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             if(isset($relations[$set['id']])){
                 $this->_relation_source[$set['id']] = [$relations[$set['id']], $set];
                 $set->_relation_target[$this['id']] = [$relations[$set['id']], $this];
-                $set->off(self::$EVENT_AFTER_MODEL, [$set, 'prepareSets']);
-                $set->on(self::$EVENT_AFTER_MODEL, [$set, 'prepareSets']);
+                $set->off(self::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
+                $set->on(self::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
                 $joinSets[$set['id']] = $set;
                 unset($sets[$k]);
             }
@@ -284,15 +352,15 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                     }
                 }
             }
-            $this->off(self::$EVENT_AFTER_MODEL, [$this, 'afterFindModels']);
-            $this->on(self::$EVENT_AFTER_MODEL, [$this, 'afterFindModels']);
+            $this->off(self::$EVENT_AFTER_MODEL, [$this, 'sourceAfterFindModels']);
+            $this->on(self::$EVENT_AFTER_MODEL, [$this, 'sourceAfterFindModels']);
         }
         
         return $this;
     }
     
     // 同时匹配查询关联数据集合
-    public function afterFindModels()
+    public function sourceAfterFindModels()
     {
         if($this->_relation_source){
             foreach($this->_relation_source as $key=>$item){
@@ -305,7 +373,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     }
     
     // 数据结果集合匹配
-    public function prepareSets()
+    public function targetAfterFindModels()
     {
         if($this->_relation_target){
             $target = $this;
@@ -316,9 +384,17 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 // 目标数据集合
                 $targetList = $target->getModels();
                 $columns = $relation->getV_target_columns($target);
+                if($relation['rel_type']=='group'){
+                    $groupCols = $relation->getV_source_columns($target, true, $relation['group_label']);
+                }
                 foreach($targetList as $model){
                     $k = $this->getModelKey($model, $columns);
-                    $buckets[$k] = $model;
+                    if($relation['rel_type']=='group' && $groupCols){
+                        $gk = $this->getModelKey($model, $groupCols);
+                        $buckets[$k][$gk] = $model;
+                    }else{
+                        $buckets[$k] = $model;
+                    }
                 }
                 
                 // 源数据集合
@@ -351,10 +427,9 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         return $this;
     }
     
-    // 数据集关联条件过滤，参数：查询字段，查询值
-    public function where($columns, $values, $op = false)
+    // 数据集分组
+    public function group($columns)
     {
-        $colModels = \yii\helpers\ArrayHelper::map($this['columns'], 'id', 'v_self');
         $dataProvider = $this->getDataProvider();
         switch($this->set_type){
             case 'sql': // SQL
@@ -364,22 +439,29 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             case 'script': // 脚本
                 break;
             case 'model': // 数据库模型
-                if(is_array($columns)){
-                    foreach($columns as $k=>$col){
-                        if(isset($colModels[$col])){
-                            $columns[$k] = $colModels[$col]['v_column'];
-                        }
-                    }
-                    foreach($values as $k=>$value){
-                        if(is_array($value)){
-                            $values[$k] = array_combine($columns, $value);
-                        }
-                    }
-                }else{
-                    if(isset($colModels[$columns])){
-                        $columns = $colModels[$columns]['v_column'];
-                    }
-                }
+                $columns = $this->getV_columns($columns);
+                $columns && $dataProvider->query->addGroupBy($columns);
+                break;
+            default: // 未知
+                throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
+                break;
+        }
+        return $this;
+    }
+    
+    // 数据集关联条件过滤，参数：查询字段，查询值
+    public function where($columns, $values, $op = false)
+    {
+        $dataProvider = $this->getDataProvider();
+        switch($this->set_type){
+            case 'sql': // SQL
+                break;
+            case 'excel': // EXCEL文档
+                break;
+            case 'script': // 脚本
+                break;
+            case 'model': // 数据库模型
+                $columns = $this->getV_columns($columns, $values);
                 
                 if($op && !is_array($columns) && !is_array($values)){
                     if($op=='like'){
@@ -400,42 +482,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
                 break;
         }
-    }
-    
-    // 预处理数据
-    public function findModel($condition, $muli = false)
-    {
-        $query = parent::findByCondition($condition)->with([
-            'columns.column',
-            'columns.model.sourceRelation.sourceModel',
-            'columns.model.sourceRelation.targetModel',
-            'columns.model.columns.model',
-            'mainModel.source',
-            'mainModel.sourceRelation.sourceModel',
-            'mainModel.sourceRelation.targetModel',
-        ]);
-        
-        return ($muli ? $query->all() : $query->one());
-    }
-    
-    // 返回API请求地址
-    public function getV_apiurl($cache='1')
-    {
-        $params = Yii::$app->request->get("SysConfig",[]);
-        $arr = [
-            'report-api/set-data',
-            'cache'=>$cache,
-            'id'=>$this['id'],
-            'access-token'=>Yii::$app->user->identity['access_token'],
-        ];
-        $params && ($arr['SysConfig'] = $params);
-        return \yii\helpers\Url::to($arr);
-    }
-    
-    // 返回汇总字段（预留）
-    public function getV_summary()
-    {
-        return [];
+        return $this;
     }
     
     // 组装数据集数据

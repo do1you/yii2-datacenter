@@ -5,6 +5,7 @@
 namespace datacenter\widgets;
 
 use Yii;
+use datacenter\models\DcReport;
 
 class Widget extends \yii\base\Widget
 {

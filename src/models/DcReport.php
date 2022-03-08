@@ -30,6 +30,11 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
      * 关联的主数据集
      */
     private $_mainSet;
+    
+    /**
+     * 数据集关联状态
+     */
+    private $_joinSetState;
      
     /**
      * 返回数据库表名称
@@ -188,7 +193,7 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
                 foreach($sets as $set){
                     if($set['sourceRelation']){
                         foreach($set['sourceRelation'] as $rel){
-                            if($rel['rel_type'] == 'multiple' && in_array($rel['target_sets'], $setIds)){
+                            if(in_array($rel['rel_type'],['multiple','group']) && in_array($rel['target_sets'], $setIds)){
                                 $this->_mainSet = $set;
                                 break 2;
                             }
@@ -217,6 +222,7 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
             'columns.sets.sourceRelation',
             'columns.sets.columns.model.sourceRelation.sourceModel',
             'columns.sets.columns.model.sourceRelation.targetModel',
+            'columns.sets.columns.model.sourceRelation.groupLabel.model',
             'columns.sets.columns.model.columns.model',
             'columns.sets.mainModel.source',
             'columns.sets.mainModel.sourceRelation.sourceModel',
@@ -242,25 +248,34 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
         return \yii\helpers\Url::to($arr);
     }
     
-    // 返回汇总字段（预留）
-    public function getV_summary()
+    // 初始化数据集关联
+    public function initJoinSet($isExit = true)
     {
-        return [];
+        if($this->_joinSetState === null){
+            // 关联数据集
+            $this->orderColumns($this->getSort());
+            $mainSet = $this->getV_mainSet();
+            $allSets = $setLists = $this->v_sets;
+            
+            $mainSet && $mainSet->joinSets($setLists);
+            if($setLists){
+                $this->_joinSetState = false;
+                if($isExit){
+                    $set = reset($setLists);
+                    throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的数据集')."{$set['title']}({$set['id']})");
+                }
+            }else{
+                $this->_joinSetState = true;
+            }
+        }
+        
+        return $this->_joinSetState;
     }
-     
+    
     // 组装报表数据
     protected function prepareModels()
     {
-        // 关联数据集
-        $this->orderColumns($this->getSort());
-        $mainSet = $this->getV_mainSet();
-        $allSets = $setLists = $this->v_sets;
-        
-        $mainSet && $mainSet->joinSets($setLists);
-        if($setLists){
-            $set = reset($setLists);
-            throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的数据集')."{$set['title']}({$set['id']})");
-        }
+        $this->initJoinSet();
         
         // 应用过滤条件
         $this->setSearchModels(false);
@@ -279,8 +294,28 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
     private function filterColumns($values)
     {
         $data = [];
+        $setLists = $this->v_sets;
         foreach($this->columns as $col){
-            $data[$col['v_alias']] = isset($values[$col['setsCol']['v_alias']]) ? $values[$col['setsCol']['v_alias']] : (isset($values['_'][$col['set_id']][$col['setsCol']['v_alias']]) ? $values['_'][$col['set_id']][$col['setsCol']['v_alias']] : '');
+            $set = isset($setLists[$col['set_id']]) ? $setLists[$col['set_id']] : null;
+            $relation = $set ? $set['v_relation'] : null;
+            if($set && $relation && $relation['rel_type']=='group'){
+                $groupCols = $relation->getV_group_list();
+                if($groupCols && is_array($groupCols)){
+                    foreach($groupCols as $k=>$v){
+                        $data[$col['v_alias'].'_'.$k] = isset($values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']])
+                        ? $values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']]
+                        : $col['v_default_value'];
+                    }
+                }
+            }else{
+                $data[$col['v_alias']] = isset($values[$col['setsCol']['v_alias']]) 
+                    ? $values[$col['setsCol']['v_alias']] 
+                    : (
+                        isset($values['_'][$col['set_id']][$col['setsCol']['v_alias']]) 
+                        ? $values['_'][$col['set_id']][$col['setsCol']['v_alias']] 
+                        : $col['v_default_value']
+                    );
+            }
         }
         
         return $data;

@@ -110,6 +110,16 @@ class DcAttribute extends \webadmin\ModelCAR
         return $this->name;
     }
     
+    // 返回字段默认值
+    public function getV_default_value()
+    {
+        if(strlen($this->default)){
+            return $this->default;
+        }else{
+            return '';
+        }
+    }
+    
     // 查询器增加查询字段
     public function selectColumn(\yii\db\Query $query)
     {

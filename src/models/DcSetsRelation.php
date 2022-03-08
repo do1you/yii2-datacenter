@@ -22,6 +22,11 @@ class DcSetsRelation extends \webadmin\ModelCAR
     public $is_reverse_save;
     
     /**
+     * 分组的数据列缓存
+     */
+    private $_cache_group_columns;
+    
+    /**
      * 返回数据库表名称
      */
     public static function tableName()
@@ -81,8 +86,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
     // 获取分组字段关系
     public function getGroupCol()
     {
-        $cols = $this->getV_group_col();
-        return ( $cols ? DcSetsColumns::findAll(['id'=>$cols,'set_id'=>$this->target_sets]) : []);
+        return (($cols = $this->getV_group_col()) ? DcSetsColumns::findAll(['id'=>$cols,'set_id'=>$this->target_sets]) : []);
     }
     
     // 返回关联关系类型
@@ -94,11 +98,10 @@ class DcSetsRelation extends \webadmin\ModelCAR
     // 返回分组字段
     public function getV_group_col()
     {
-        $group_col = is_array($this->group_col) ? $this->group_col : ($this->group_col ? explode(',',$this->group_col) : []);
-        return $group_col;
+        return (is_array($this->group_col) ? $this->group_col : ($this->group_col ? explode(',',$this->group_col) : []));
     }
     
-    // 返回属性关系数据字段集合
+    // 返回属性关系数据所有字段集合
     public function getV_col_models()
     {
         $source_col = $this->getV_source_col();
@@ -172,15 +175,19 @@ class DcSetsRelation extends \webadmin\ModelCAR
     public function getV_source_columns($source = null, $isAlias = true, $isTarget = false)
     {
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
-        $rels = $this->getV_source_col();
-        if(count($rels)>1){
-            foreach($rels as $k=>$v){
-                $columns[] = $isTarget ? $v : $k;
-            }
-        }elseif(count($rels) === 1){
-            $columns = $isTarget ? reset($rels) : array_key_first($rels);
+        if(is_array($isTarget) || is_int($isTarget)){
+            $columns = $isTarget;
         }else{
-            throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的源数据集合')."{$source['title']}({$source['id']})");
+            $rels = $this->getV_source_col();
+            if(count($rels)>1){
+                foreach($rels as $k=>$v){
+                    $columns[] = $isTarget ? $v : $k;
+                }
+            }elseif(count($rels) === 1){
+                $columns = $isTarget ? reset($rels) : array_key_first($rels);
+            }else{
+                throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的源数据集合')."{$source['title']}({$source['id']})");
+            }
         }
         
         if($isAlias){
@@ -205,6 +212,27 @@ class DcSetsRelation extends \webadmin\ModelCAR
     public function getV_target_columns($target = null, $isAlias = true)
     {
         return $this->getV_source_columns($target, $isAlias, true);
+    }
+    
+    // 返回被分组字段的全部属性
+    public function getV_group_list($target = null)
+    {
+        if($this->_cache_group_columns === null){
+            $this->_cache_group_columns = [];
+            if($this->rel_type=='group' && $this->group_label && $this->groupLabel['v_alias']){
+                $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
+                $target->group($this->group_label)->setPagination(false);
+                $query = $target->getDataProvider()->query;
+                $query->select([]);
+                $this->groupLabel->selectColumn($query);
+                $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
+                $list = $target->getModels(true);
+                $list = \yii\helpers\ArrayHelper::map($list, $this->groupLabel['v_alias'], $this->groupLabel['v_alias']);
+                $this->_cache_group_columns = $list;
+            }
+        }
+        
+        return $this->_cache_group_columns;
     }
     
     // 保存前动作
@@ -257,7 +285,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
             $keys = $this->getV_target_columns($target);
             
             // 反向需要关闭事件处理
-            $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'prepareSets']);
+            $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']);
         }else{
             $columns = $this->getV_target_columns($target, false);
             $keys = $this->getV_source_columns($source);
@@ -285,6 +313,12 @@ class DcSetsRelation extends \webadmin\ModelCAR
             $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
         }else{
             $reverse ? $source->where($columns, []) : $target->where($columns, []);
+        }
+        
+        // 分组写入
+        if($this['rel_type']=='group'){
+            $groupCols = $this->getV_source_columns($target, false, $this['v_group_col']);
+            $groupCols && $target->group($groupCols);
         }
         
         return $this;

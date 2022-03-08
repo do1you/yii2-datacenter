@@ -78,9 +78,9 @@ trait ReportDataTrait
     }
     
     // 返回数据模型
-    public function getModels()
+    public function getModels($forcePrepare = false)
     {
-        return $this->prepare();
+        return $this->prepare($forcePrepare);
     }
     
     // 设置数据模型
@@ -129,6 +129,12 @@ trait ReportDataTrait
     public function setSort($value)
     {
         return $this->getDataProvider()->setSort($value);
+    }
+    
+    // 返回汇总字段（预留）
+    public function getV_summary()
+    {
+        return [];
     }
 }
     

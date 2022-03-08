@@ -23,7 +23,42 @@ trait ReportOrmTrait
     public function getV_columns()
     {
         if($this->_setColumns===null){
-            $this->_setColumns = \yii\helpers\ArrayHelper::map($this->columns, 'v_alias', 'v_label');
+            if($this instanceof DcReport){ // 报表
+                $this->initJoinSet();
+                $setLists = $this->getV_sets();
+            }
+            $skipIds = $list = [];
+            foreach($this->columns as $col){
+                $set = (($this instanceof DcReport) && isset($setLists[$col['set_id']])) ? $setLists[$col['set_id']] : null;
+                $relation = $set ? $set['v_relation'] : null;
+                if($set && $relation && $relation['rel_type']=='group'){
+                    $groupCols = $relation->getV_group_list($set);
+                    if($groupCols && is_array($groupCols)){
+                        foreach($groupCols as $k=>$v){
+                            // 同一数据集的其他字段一并拉取
+                            foreach($this->columns as $c){
+                                if($c['set_id'] == $col['set_id']){
+                                    $list[] = [
+                                        'id' => $c['id'],
+                                        'name' => $c['v_alias'].'_'.$k,
+                                        'label' => $v.$c['v_label'],
+                                        'order' => false,
+                                    ];
+                                    $skipIds[] = $c['id'];
+                                }
+                            }
+                        }
+                    }
+                }elseif(!in_array($col['id'], $skipIds)){
+                    $list[] = [
+                        'id' => $col['id'],
+                        'name' => $col['v_alias'],
+                        'label' => $col['v_label'],
+                        'order' => $col['v_order'],
+                    ];
+                }
+            }
+            $this->_setColumns = $list;
         }
         
         return $this->_setColumns;
