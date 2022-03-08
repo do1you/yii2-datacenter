@@ -41,7 +41,7 @@ trait ReportOrmTrait
                                     $list[] = [
                                         'id' => $c['id'],
                                         'name' => $c['v_alias'].'_'.$k,
-                                        'label' => $v.$c['v_label'],
+                                        'label' => "[{$v}]{$c['v_label']}",
                                         'order' => false,
                                     ];
                                     $skipIds[] = $c['id'];
