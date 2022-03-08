@@ -220,12 +220,12 @@ class DcSetsRelation extends \webadmin\ModelCAR
         if($this->_cache_group_columns === null){
             $this->_cache_group_columns = [];
             if($this->rel_type=='group' && $this->group_label && $this->groupLabel['v_alias']){
-                $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
+                $target = ($target && ($target instanceof DcSets) )? (clone $target) : $this->targetSets;
+                $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
                 $target->group($this->group_label)->setPagination(false);
                 $query = $target->getDataProvider()->query;
                 $query->select([]);
                 $this->groupLabel->selectColumn($query);
-                $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
                 $list = $target->getModels(true);
                 $list = \yii\helpers\ArrayHelper::map($list, $this->groupLabel['v_alias'], $this->groupLabel['v_alias']);
                 $this->_cache_group_columns = $list;

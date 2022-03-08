@@ -222,7 +222,7 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
             'columns.sets.sourceRelation',
             'columns.sets.columns.model.sourceRelation.sourceModel',
             'columns.sets.columns.model.sourceRelation.targetModel',
-            'columns.sets.columns.model.sourceRelation.groupLabel.model',
+            'columns.sets.sourceRelation.groupLabel.model',
             'columns.sets.columns.model.columns.model',
             'columns.sets.mainModel.source',
             'columns.sets.mainModel.sourceRelation.sourceModel',
@@ -280,6 +280,15 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
         // 应用过滤条件
         $this->setSearchModels(false);
         
+        // 分组字段优先提取
+        $setLists = $this->getV_sets();
+        foreach($setLists as $set){
+            $relation = $set ? $set['v_relation'] : null;
+            if($set && $relation && $relation['rel_type']=='group'){
+                $relation->getV_group_list($set);
+            }
+        }
+        
         // 提取数据集数据
         $mainSet = $this->getV_mainSet();
         $callModel = new DcSets();
@@ -299,7 +308,7 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
             $set = isset($setLists[$col['set_id']]) ? $setLists[$col['set_id']] : null;
             $relation = $set ? $set['v_relation'] : null;
             if($set && $relation && $relation['rel_type']=='group'){
-                $groupCols = $relation->getV_group_list();
+                $groupCols = $relation->getV_group_list($set);
                 if($groupCols && is_array($groupCols)){
                     foreach($groupCols as $k=>$v){
                         $data[$col['v_alias'].'_'.$k] = isset($values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']])

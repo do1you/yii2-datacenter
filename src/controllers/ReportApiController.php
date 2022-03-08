@@ -9,7 +9,7 @@ use datacenter\models\DcReport;
 use yii\data\ActiveDataProvider;
 use datacenter\models\DcSets;
 
-class ReportApiController extends \webadmin\restful\AController
+class ReportApiController extends \webadmin\restful\AController // \webadmin\BController
 {
     /**
      * 当前授制器是否需要认证口令
@@ -57,7 +57,10 @@ class ReportApiController extends \webadmin\restful\AController
     public function actionData($id,$cache='1')
     {
         $model = $this->findModel($id,$cache);
-        return $model;        
+        return $model;
+        /*return $this->render('/report-view/api', [
+            'dataProvider' => $model,
+        ]); */
     }
     
     /**

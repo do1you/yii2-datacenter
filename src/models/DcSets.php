@@ -492,6 +492,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         
         // 应用过滤条件
         $this->setSearchModels(false);
+        $dataProvider->prepare(true);
         $data = $dataProvider->getModels();
         foreach($data as $k=>$v){
             $data[$k] = $this->formatValue($v, $this->columns);
