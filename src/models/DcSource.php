@@ -161,6 +161,7 @@ class DcSource extends \webadmin\ModelCAR
         if(!$currIdent || !isset($dynamicInfos[$currIdent])){
             $keys = array_keys($dynamicInfos);
             $currIdent = reset($keys);
+            Yii::$app->session[$this['v_sessionName']] = $currIdent;
         }
         
         return (isset($dynamicInfos[$currIdent]) ? $dynamicInfos[$currIdent] : null);

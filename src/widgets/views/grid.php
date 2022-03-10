@@ -39,12 +39,12 @@ $colModel = json_encode($colModel);
 $pageSize = $model->getPagination()->getPageSize();
 $pageStart = $model->getPagination()->getPage();
 $fixedScript = $model['v_frozen']>0 ? 'new $.fn.dataTable.FixedColumns(table,{"iLeftColumns":'.$model['v_frozen'].'});' : '';
-$reorderState = $this->context && $this->context->isCache===false ? 'true' : 'false';
+$reorderState = $this->context && $this->context->isCache===false ? 'true' : 'false'; // 'table-tool-cus'
 $script = <<<eot
 (function(){
 var colModel = {$colModel};
 var draw,table = $("#{$id}").dataTable({
-	"sDom": "<'table-tool-cus'B>t<'row'<'col-xs-12 col-md-5 margin-top-10'<'pull-left'l><'pull-left margin-pageing'i>><'col-xs-12 col-md-7 margin-top-10'p>>",
+	"sDom": "<B>t<'row'<'col-xs-12 col-md-5 margin-top-10'<'pull-left'l><'pull-left margin-pageing'i>><'col-xs-12 col-md-7 margin-top-10'p>>",
     "buttons": ['colvis'],
     "processing" : true,
 	"searching" : false,

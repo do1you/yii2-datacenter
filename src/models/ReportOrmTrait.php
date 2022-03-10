@@ -19,6 +19,42 @@ trait ReportOrmTrait
      */
     private $_frozen_num;
     
+    /**
+     * 数据源信息
+     */
+    private $_cache_source;
+    
+    /**
+     * 数据选择
+     */
+    public $set_source;
+    
+    // 返回包含的数据源
+    public function getV_source()
+    {
+        if($this->_cache_source === null){
+            if($this instanceof DcReport){ // 报表
+                $this->initJoinSet();
+                $setLists = $this->getV_sets();
+            }else{
+                $setLists = [$this];
+            }
+            
+            $this->_cache_source = [];
+            foreach($setLists as $set){
+                if($set['columns'] && is_array($set['columns'])){
+                    foreach($set['columns'] as $col){
+                        if($col['model'] && $col['model']['source']){
+                            $this->_cache_source[$col['model']['source']['id']] = $col['model']['source'];
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $this->_cache_source;
+    }
+    
     // 返回格式化所有字段
     public function getV_columns()
     {

@@ -19,6 +19,21 @@ class ReportViewController extends \webadmin\BController
         return parent::beforeAction($action);
     }
     
+    // 设置数据源
+    public function actionSetSource($id, $sid)
+    {
+        $source = $sid ? \datacenter\models\DcSource::findOne($sid) : null;
+        if($source && $id){
+            Yii::$app->session[$source['v_sessionName']] = $id;
+        }
+        
+        if(!empty($_SERVER['HTTP_REFERER'])){
+            $this->redirect($_SERVER['HTTP_REFERER']);
+        }else{
+            $this->redirect(['index']);
+        }
+    }
+    
     /**
      * 报表首页
      */
