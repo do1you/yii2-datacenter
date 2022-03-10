@@ -80,13 +80,14 @@ var hasTouch = 'ontouchstart' in document,
         var target = $(e.target).closest('.tree-item,.tree-folder-header');
         isFolder = target.is('.tree-folder-header');
         itemData = target.data();
-        if(target && target.length && (!isFolder || target.find('.set-folder').length) && itemData && itemData.id){
+        if(target && target.length && !$(e.target).is('.set-folder') && (!isFolder || target.find('.set-folder').length) && itemData && itemData.id){
             moveStatus = target;
             moveEl = target.clone();
             startX = getx(e);
             startY = gety(e);
             offset = moveStatus.offset();
             $('body').append(moveEl);
+            onMoveEvent(e);
             return false;
         }
     },
