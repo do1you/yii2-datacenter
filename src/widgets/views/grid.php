@@ -2,7 +2,7 @@
     <table class="table table-striped table-bordered table-hover table-nowrap notFix" id="<?php echo $id?>">
     	<?php 
     	if(!empty($model['v_columns'])){
-    	    echo '<thead><tr><th nowrap>'.implode("</th><th nowrap>",$model['v_columns']).'</th></tr></thead>';
+    	    echo '<thead><tr><th nowrap>'.implode("</th><th nowrap>",\yii\helpers\ArrayHelper::map($model['v_columns'],'name','label')).'</th></tr></thead>';
     	}
     	?>
     	<tbody>
@@ -10,8 +10,8 @@
     	<?php if(($totalRow = $model['v_summary']) && !empty($model['v_columns'])):?>
     	<tfoot>
     		<tr class="success">
-    		<?php foreach($model['v_columns'] as $key=>$title):?>
-    			<td><?php echo (isset($totalRow[$key]) ? $totalRow[$key] : '');?></td>
+    		<?php foreach($model['v_columns'] as $col):?>
+    			<td><?php echo (isset($totalRow[$col['name']]) ? $totalRow[$col['name']] : '');?></td>
     		<?php endforeach;?>
     		</tr>
     	</tfoot>

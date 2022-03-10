@@ -147,7 +147,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     }
     
     // 获取格式化字段
-    public function getV_columns($columns, &$values = null){
+    public function getFormatColumns($columns, &$values = null){
         $colModels = \yii\helpers\ArrayHelper::map($this['columns'], 'id', 'v_self');
         if(is_array($columns)){
             foreach($columns as $k=>$col){
@@ -439,7 +439,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             case 'script': // 脚本
                 break;
             case 'model': // 数据库模型
-                $columns = $this->getV_columns($columns);
+                $columns = $this->getFormatColumns($columns);
                 $columns && $dataProvider->query->addGroupBy($columns);
                 break;
             default: // 未知
@@ -461,7 +461,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             case 'script': // 脚本
                 break;
             case 'model': // 数据库模型
-                $columns = $this->getV_columns($columns, $values);
+                $columns = $this->getFormatColumns($columns, $values);
                 
                 if($op && !is_array($columns) && !is_array($values)){
                     if($op=='like'){
