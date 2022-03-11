@@ -101,17 +101,18 @@ class DcUserReport extends \webadmin\ModelCAR
     {
         $query = DcReport::find()->with(['cat.parent.parent.parent.parent','user'])->alias('t')->where(['t.state'=>'0'])->orderBy("t.paixu desc,t.id asc");
         
-        if($where){
-            $query->joinWith(['userReport as u']);
-            $query->andWhere($where);
-        }
-        
         if($userId!='1'){
             $query->joinWith(['userReport as u']);
             $query->andWhere(['or',
                 ['=','t.create_user',$userId],
                 ['=','u.user_id',$userId],
             ]);
+            $where && $query->andWhere($where);
+            
+            //取角色权限
+        }elseif($where){
+            $query->joinWith(['userReport as u']);
+            $query->andWhere($where);
         }
         
         $list = $query->all();

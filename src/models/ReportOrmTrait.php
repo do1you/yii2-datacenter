@@ -254,7 +254,7 @@ trait ReportOrmTrait
     /**
      * 返回树型的数据结构
      */
-    public static function treeData($selectCatIds=[],$selectIds=[],$catList=null,$list=null)
+    public static function treeData($selectCatIds=[],$selectIds=[],$catList=null,&$list=null,$level=1)
     {
         $catList = $catList === null ? \datacenter\models\DcCat::treeData("0",[],$selectCatIds) : $catList;
         $list = $list === null ? self::find()->where(['state'=>'0'])->all() : $list;
@@ -262,29 +262,47 @@ trait ReportOrmTrait
         if($catList && is_array($catList)){
             foreach($catList as $key=>$cat){
                 if(!empty($cat['children'])){
-                    $catList[$key]['children'] = self::treeData($selectCatIds,$selectIds,$cat['children'],$list);
+                    $catList[$key]['children'] = self::treeData($selectCatIds,$selectIds,$cat['children'],$list,($level+1));
                 }
                 
-                foreach($list as $k=>$item){
-                    if($item['cat_id']==$cat['id']){
-                        if(!isset($catList[$key]['children'])) $catList[$key]['children'] = [];
-                        
-                        $_ = [
-                            'id' => -$item['id'],
-                            'name' => $item['title'],
-                            'type' => 'item',
-                        ];
-                        if($selectIds && is_array($selectIds) && in_array($item['id'],$selectIds)){
-                            $_['selected'] = true;
-                        }
-                        
-                        $catList[$key]['children'][] = $_;
-                    }
-                }
+                self::_treeAppend($list,$catList,$key,$cat,$selectIds);
+            }
+            
+            if($level==1 && $list){
+                self::_treeAppend($list,$catList,null,null,$selectIds);
             }
         }
         
         return $catList;
+    }
+    
+    /**
+     * 报表数据并入树
+     */
+    private static function _treeAppend(&$list,&$catList,$key,$cat,$selectIds)
+    {
+        foreach($list as $k=>$item){
+            if($cat===null || $item['cat_id']==$cat['id']){
+                if($cat && !isset($catList[$key]['children'])) $catList[$key]['children'] = [];
+                
+                $_ = [
+                    'id' => -$item['id'],
+                    'name' => $item['title'],
+                    'type' => 'item',
+                ];
+                if($selectIds && is_array($selectIds) && in_array($item['id'],$selectIds)){
+                    $_['selected'] = true;
+                }
+                
+                if($cat){
+                    $catList[$key]['children'][] = $_;
+                }else{
+                    $catList[] = $_;
+                }
+                
+                unset($list[$k]);
+            }
+        }
     }
     
     
