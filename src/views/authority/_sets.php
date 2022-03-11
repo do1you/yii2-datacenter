@@ -1,0 +1,1 @@
+<?= $form->field($aModel, 'setsList')->treeList(\datacenter\models\DcSets::treeData($aModel->catList,$aModel->setsList),['title'=>Yii::t('authority','请给该角色分配需要操作的数据集')]) ?>

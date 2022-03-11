@@ -129,7 +129,7 @@ class DcSource extends \webadmin\ModelCAR
         $cacheKey = 'datacenter/dynamicdb/'.($model['id'] ? $model['id'] : md5(serialize($model->attributes)));
         
         if(($list = Yii::$app->cache->get($cacheKey))===false || $f5){
-            $sql = "select * from {$model['dctable']}".($model['dcwhere'] ? " where {$model['dcwhere']} " : "")." order by ".($model['dcselect'] ? $model['dcselect'] : $model['dcname']);
+            $sql = "select * from {$model['dctable']}".($model['dcwhere'] ? " where {$model['dcwhere']} " : "")." order by ".($model['dcselect'] ? $model['dcselect'] : ($model['dcname'] ? $model['dcname'] : '1'));
             $rows = $this->getSourceDb(false, true)->createCommand($sql)->queryAll();
             $list = [];
             foreach($rows as $row){

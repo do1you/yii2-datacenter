@@ -251,7 +251,41 @@ trait ReportOrmTrait
         return $this;
     }
     
-    
+    /**
+     * 返回树型的数据结构
+     */
+    public static function treeData($selectCatIds=[],$selectIds=[],$catList=null,$list=null)
+    {
+        $catList = $catList === null ? \datacenter\models\DcCat::treeData("0",[],$selectCatIds) : $catList;
+        $list = $list === null ? self::find()->where(['state'=>'0'])->all() : $list;
+        
+        if($catList && is_array($catList)){
+            foreach($catList as $key=>$cat){
+                if(!empty($cat['children'])){
+                    $catList[$key]['children'] = self::treeData($selectCatIds,$selectIds,$cat['children'],$list);
+                }
+                
+                foreach($list as $k=>$item){
+                    if($item['cat_id']==$cat['id']){
+                        if(!isset($catList[$key]['children'])) $catList[$key]['children'] = [];
+                        
+                        $_ = [
+                            'id' => -$item['id'],
+                            'name' => $item['title'],
+                            'type' => 'item',
+                        ];
+                        if($selectIds && is_array($selectIds) && in_array($item['id'],$selectIds)){
+                            $_['selected'] = true;
+                        }
+                        
+                        $catList[$key]['children'][] = $_;
+                    }
+                }
+            }
+        }
+        
+        return $catList;
+    }
     
     
     
