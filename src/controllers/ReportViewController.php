@@ -73,6 +73,7 @@ class ReportViewController extends \webadmin\BController
             if(empty($model) && $report['create_user']==Yii::$app->user->id){
                 $model = new DcUserReport;
                 $model->loadDefaultValues();
+                $model->grant_user = Yii::$app->user->id;
             }
             
             if($model){
