@@ -1,12 +1,7 @@
 <div class="table-scrollable-debug">
     <table class="table table-striped table-bordered table-hover table-nowrap notFix" id="<?php echo $id?>">
-    	<?php 
-    	if(!empty($model['v_columns'])){
-    	    echo '<thead><tr><th nowrap>'.implode("</th><th nowrap>",\yii\helpers\ArrayHelper::map($model['v_columns'],'name','label')).'</th></tr></thead>';
-    	}
-    	?>
-    	<tbody>
-    	</tbody>
+    	<thead></thead>
+    	<tbody></tbody>
     	<?php if(($totalRow = $model['v_summary']) && !empty($model['v_columns'])):?>
     	<tfoot>
     		<tr class="success">
@@ -50,7 +45,7 @@ var draw,table = $("#{$id}").dataTable({
 	"searching" : false,
 	"serverSide" : true,
 	"bPaginate" : true,
-	"bAutoWidth" : false,
+	"bAutoWidth" : true,
 	"colReorder" : ({$reorderState} ? {"iFixedColumnsLeft":1,"reorderCallback":function(){this.reportId = "{$model['id']}"; $(document).triggerHandler('dataTable.colReorder',this); }} : true),
     "stateSave": true,
     "sScrollX" : '100%',
