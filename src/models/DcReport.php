@@ -107,17 +107,17 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
     
     // 获取字段关系
     public function getColumns(){
-        return $this->hasMany(DcReportColumns::className(), ['report_id' => 'id'])->addOrderBy("is_frozen desc,paixu desc,id asc");
+        return $this->hasMany(DcReportColumns::className(), ['report_id' => 'id'])->addOrderBy("dc_report_columns.is_frozen desc,dc_report_columns.paixu desc,dc_report_columns.id asc");
     }
     
     // 获取用户报表关系
     public function getUserReport(){
-        return $this->hasMany(DcUserReport::className(), ['report_id' => 'id'])->addOrderBy("paixu desc,id asc");
+        return $this->hasMany(DcUserReport::className(), ['report_id' => 'id'])->addOrderBy("dc_user_report.paixu desc,dc_user_report.id asc");
     }
     
     // 获取角色报表关系
     public function getRoleReport(){
-        return $this->hasMany(DcRoleAuthority::className(), ['source_id' => 'id'])->onCondition("source_type=5");
+        return $this->hasMany(DcRoleAuthority::className(), ['source_id' => 'id'])->onCondition("dc_role_authority.source_type=5");
     }
     
     // 获取数据集类型
@@ -251,6 +251,29 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
         ];
         $params && ($arr['SysConfig'] = $params);
         return \yii\helpers\Url::to($arr);
+    }
+    
+    
+    // 返回报表权限条件Query
+    public static function authorityFind($userId='0', $query = null)
+    {
+        $query = $query ? $query : self::find();
+        
+        if($userId!='1'){
+            //取角色和用户包含的报表权限
+            $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>$userId]), 'role_id', 'role_id');
+            
+            $query->joinWith(['userReport','roleReport']);
+            $where = ['or',
+                ['=','dc_report.create_user',$userId],
+                ['=','dc_user_report.user_id',$userId],
+                ['in','dc_role_authority.role_id',$roleIds],
+            ];
+            $query->where($where);
+        }
+        
+        
+        return $query;
     }
     
     // 初始化数据集关联

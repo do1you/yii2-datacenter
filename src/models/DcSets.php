@@ -115,7 +115,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     
     // 获取字段关系
     public function getColumns(){
-        return $this->hasMany(DcSetsColumns::className(), ['set_id' => 'id'])->addOrderBy("is_frozen desc,paixu desc,id asc");
+        return $this->hasMany(DcSetsColumns::className(), ['set_id' => 'id'])->addOrderBy("dc_sets_columns.is_frozen desc,dc_sets_columns.paixu desc,dc_sets_columns.id asc");
     }
     
     // 获取源数据集关系

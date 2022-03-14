@@ -99,20 +99,11 @@ class DcUserReport extends \webadmin\ModelCAR
     // 获取用户包含权限的报表
     public function allReport($userId='0',$where=[],$group=false)
     {
-        $query = DcReport::find()->with(['cat.parent.parent.parent.parent','user'])->alias('t')->where(['t.state'=>'0'])->orderBy("t.paixu desc,t.id asc");
+        $query = DcReport::authorityFind($userId);
+        $query->with(['cat.parent.parent.parent.parent','user'])->andWhere(['dc_report.state'=>'0'])->orderBy("dc_report.paixu desc,dc_report.id asc");
         
-        if($userId!='1'){
-            //取角色和用户包含的报表权限
-            $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>$userId]), 'role_id', 'role_id');
-            $query->joinWith(['userReport as u','roleReport as r']);
-            $query->andWhere(['or',
-                ['=','t.create_user',$userId],
-                ['=','u.user_id',$userId],
-                ['in','r.role_id',$roleIds],
-            ]);
-            $where && $query->andWhere($where);
-        }elseif($where){
-            $query->joinWith(['userReport as u']);
+        if($where){
+            $query->joinWith(['userReport']);
             $query->andWhere($where);
         }
         

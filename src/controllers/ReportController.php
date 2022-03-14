@@ -288,7 +288,8 @@ class ReportController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcReport();
-        $dataProvider = $model->search(Yii::$app->request->queryParams,null,['columns.sets','user','cat']);
+        $dataProvider = $model->search(Yii::$app->request->queryParams,null,['columns.sets','user','cat']);        
+        $dataProvider->query = DcReport::authorityFind(Yii::$app->user->id, $dataProvider->query); // 加入权限命名空间
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 
