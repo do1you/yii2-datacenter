@@ -229,6 +229,7 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
             'columns.sets.columns.model.sourceRelation.targetModel',
             'columns.sets.sourceRelation.groupLabel.model',
             'columns.sets.columns.model.columns.model',
+            'columns.sets.columns.model.source',
             'columns.sets.mainModel.source',
             'columns.sets.mainModel.sourceRelation.sourceModel',
             'columns.sets.mainModel.sourceRelation.targetModel',
