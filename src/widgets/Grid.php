@@ -48,6 +48,7 @@ class Grid extends Widget
             'model' => $this->reportModel,
             'apiUrl' => $this->apiUrl,
             'id' => $this->getId(),
+            'cache' => $this->isCache,
         ]);
     }
 }

@@ -64,22 +64,23 @@ trait ReportOrmTrait
                 $setLists = $this->getV_sets();
             }
             $skipIds = $list = [];
+            $setColumns = \yii\helpers\ArrayHelper::map($this->columns, 'id', 'v_self', 'set_id');
             foreach($this->columns as $col){
                 $set = (($this instanceof DcReport) && isset($setLists[$col['set_id']])) ? $setLists[$col['set_id']] : null;
                 $relation = $set ? $set['v_relation'] : null;
-                if($set && $relation && $relation['rel_type']=='group'){
+                if(!in_array($col['id'], $skipIds) && $set && $relation && $relation['rel_type']=='group'){
                     $groupCols = $relation->getV_group_list($set);
                     if($groupCols && is_array($groupCols)){
                         foreach($groupCols as $k=>$v){
                             // 同一数据集的其他字段一并拉取
-                            foreach($this->columns as $c){
-                                if($c['set_id'] == $col['set_id']){
+                            if(isset($setColumns[$col['set_id']]) && is_array($setColumns[$col['set_id']])){
+                                foreach($setColumns[$col['set_id']] as $c){
                                     $list[] = [
                                         'id' => $c['id'],
                                         'name' => $c['v_alias'].'_'.$k,
                                         'label' => "[{$v}]{$c['v_label']}",
                                         'order' => false,
-                                    ];
+                                        ];
                                     $skipIds[] = $c['id'];
                                 }
                             }

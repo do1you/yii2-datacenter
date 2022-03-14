@@ -1,11 +1,18 @@
+<?php 
+if(isset($cache) && $cache){
+    $columns = $model->getCache('getV_columns');
+}else{
+    $columns = $model->getV_columns();
+}
+?>
 <div class="table-scrollable-debug">
     <table class="table table-striped table-bordered table-hover table-nowrap notFix" id="<?php echo $id?>">
     	<thead></thead>
     	<tbody></tbody>
-    	<?php if(($totalRow = $model['v_summary']) && !empty($model['v_columns'])):?>
+    	<?php if(($totalRow = $model['v_summary']) && !empty($columns)):?>
     	<tfoot>
     		<tr class="success">
-    		<?php foreach($model['v_columns'] as $col):?>
+    		<?php foreach($columns as $col):?>
     			<td><?php echo (isset($totalRow[$col['name']]) ? $totalRow[$col['name']] : '');?></td>
     		<?php endforeach;?>
     		</tr>
@@ -17,8 +24,8 @@
 <?php
 // 组装字段
 $colModel = [];
-if($model['v_columns']){
-    foreach($model['v_columns'] as $col){
+if($columns){
+    foreach($columns as $col){
         $colModel[] = [
             'colnmnId' => $col['id'],
             'data' => $col['name'],
