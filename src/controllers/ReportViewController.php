@@ -8,6 +8,7 @@ use Yii;
 use datacenter\models\DcReport;
 use datacenter\models\DcSets;
 use datacenter\models\DcUserReport;
+use datacenter\models\DcRoleAuthority;
 
 class ReportViewController extends \webadmin\BController
 {
@@ -40,6 +41,8 @@ class ReportViewController extends \webadmin\BController
     public function actionIndex()
     {
         $treeData = \datacenter\models\DcCat::treeData(); // 获取所有分类
+        //$reportList = \datacenter\models\DcUserReport::model()->allReport(Yii::$app->user->id,null,1);
+        //$myreportList = \datacenter\models\DcUserReport::model()->allReport(Yii::$app->user->id,['is_collection'=>'1']);
         $reportList = \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,null,1],7200);
         $myreportList = \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,['is_collection'=>'1']],7200);
         $haveCatIds = [];
@@ -70,10 +73,15 @@ class ReportViewController extends \webadmin\BController
         $model = DcUserReport::find()->where(['report_id'=>$id,'user_id'=>Yii::$app->user->id])->one();
         if(empty($show)){
             $report = DcReport::findOne($id);
-            if(empty($model) && $report['create_user']==Yii::$app->user->id){
-                $model = new DcUserReport;
-                $model->loadDefaultValues();
-                $model->grant_user = Yii::$app->user->id;
+            if(empty($model)){
+                if($report['create_user']==Yii::$app->user->id 
+                    || ($roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>Yii::$app->user->id]), 'role_id', 'role_id')
+                        && DcRoleAuthority::findOne(['source_type'=>'5','role_id'=>$roleIds,'source_id'=>$id]))
+                ){
+                    $model = new DcUserReport;
+                    $model->loadDefaultValues();
+                    $model->grant_user = Yii::$app->user->id;
+                }
             }
             
             if($model){

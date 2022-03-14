@@ -102,14 +102,15 @@ class DcUserReport extends \webadmin\ModelCAR
         $query = DcReport::find()->with(['cat.parent.parent.parent.parent','user'])->alias('t')->where(['t.state'=>'0'])->orderBy("t.paixu desc,t.id asc");
         
         if($userId!='1'){
-            $query->joinWith(['userReport as u']);
+            //取角色和用户包含的报表权限
+            $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>$userId]), 'role_id', 'role_id');
+            $query->joinWith(['userReport as u','roleReport as r']);
             $query->andWhere(['or',
                 ['=','t.create_user',$userId],
                 ['=','u.user_id',$userId],
+                ['in','r.role_id',$roleIds],
             ]);
             $where && $query->andWhere($where);
-            
-            //取角色权限
         }elseif($where){
             $query->joinWith(['userReport as u']);
             $query->andWhere($where);

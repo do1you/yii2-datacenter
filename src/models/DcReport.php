@@ -115,6 +115,11 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
         return $this->hasMany(DcUserReport::className(), ['report_id' => 'id'])->addOrderBy("paixu desc,id asc");
     }
     
+    // 获取角色报表关系
+    public function getRoleReport(){
+        return $this->hasMany(DcRoleAuthority::className(), ['source_id' => 'id'])->onCondition("source_type=5");
+    }
+    
     // 获取数据集类型
     public function getV_state($val = null)
     {
