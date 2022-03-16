@@ -111,6 +111,18 @@ class DcRoleAuthority extends \webadmin\ModelCAR
         return \webadmin\modules\config\models\SysLdItem::dd('dc_authority_type', ($val !== null ? $val : $this->source_type));
     }
     
+    // 返回包含的权限数组
+    public function getAuthorityIds($userId,$type)
+    {
+        $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>$userId]), 'role_id', 'role_id');
+        $ids = self::find()->where([
+            'role_id'=>$roleIds,
+            'source_type'=>$type,
+        ])->select('source_id')->asArray()->column();
+        $ids = $ids ? $ids : [];
+        return $ids;
+    }
+    
     // 保存角色权限
     public function saveAuthority($roleId)
     {

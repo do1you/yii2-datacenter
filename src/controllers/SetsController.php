@@ -6,6 +6,7 @@ namespace datacenter\controllers;
 
 use Yii;
 use datacenter\models\DcSets;
+use datacenter\models\DcRoleAuthority;
 use yii\data\ActiveDataProvider;
 
 class SetsController extends \webadmin\BController
@@ -44,6 +45,7 @@ class SetsController extends \webadmin\BController
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcSets();
         $dataProvider = $model->search(Yii::$app->request->queryParams,null,['cat','mainModel.source','columns.model.source']);
+        $dataProvider->query = DcSets::authorityFind(Yii::$app->user->id, $dataProvider->query); // 加入权限命名空间
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

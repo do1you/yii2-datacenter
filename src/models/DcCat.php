@@ -54,4 +54,30 @@ class DcCat extends \webadmin\ModelCAR
     {
         return 'folder';
     }
+    
+    // 返回权限数据
+    public static function authorityTreeData($userId, $parentId='0',$wheres=[],$selectIds=[],$reload=false)
+    {
+        if($userId!='1'){
+            $haveCatIds = DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'1']);
+            if($wheres){
+                $wheres = [
+                    'and',
+                    $wheres,
+                    ['in','id',$haveCatIds],
+                ];
+            }else{
+                $wheres = ['in','id',$haveCatIds];
+            }
+        }
+        
+        return self::treeData($parentId, $wheres, $selectIds, $reload);
+    }
+    
+    
+    
+    
+    
+    
+    
 }

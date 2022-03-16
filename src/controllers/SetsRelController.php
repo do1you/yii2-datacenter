@@ -6,6 +6,7 @@ namespace datacenter\controllers;
 
 use Yii;
 use datacenter\models\DcSetsRelation;
+use datacenter\models\DcRoleAuthority;
 use yii\data\ActiveDataProvider;
 
 class SetsRelController extends \webadmin\BController
@@ -41,7 +42,9 @@ class SetsRelController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
-                //'col_where' => [],
+                'col_where' => (Yii::$app->user->id=='1' ? [] : [
+                    'id'=>DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+                ]),
             ],
             // 数据集字段查询
             'column' => [
@@ -62,7 +65,13 @@ class SetsRelController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcSetsRelation();
-		$dataProvider = $model->search(Yii::$app->request->queryParams,null,['sourceSets','targetSets']);
+		$dataProvider = $model->search(Yii::$app->request->queryParams,(
+		    Yii::$app->user->id=='1' ? null : [
+		        'or',
+		        ['in', 'source_sets', DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+		        ['in', 'target_sets', DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+		    ]
+		    ),['sourceSets','targetSets']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

@@ -1,3 +1,6 @@
+<?php
+use datacenter\models\DcRoleAuthority;
+?>
 <div id="report_tree" class="tree tree-solid-line tree-unselectable" style="overflow-y:auto;">
     <div class="tree-folder" style="display: none;">
         <div class="tree-folder-header">
@@ -27,7 +30,8 @@
 </div>                               
                                     
 <?php 
-$treeData = \datacenter\models\DcCat::treeData();
+
+$treeData = \datacenter\models\DcCat::authorityTreeData(Yii::$app->user->id);
 $url = \yii\helpers\Url::to(['sets']);
 $url1 = \yii\helpers\Url::to(['column']);
 $url2 = \yii\helpers\Url::to(['save']);

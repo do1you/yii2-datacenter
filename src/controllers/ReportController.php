@@ -10,6 +10,7 @@ use yii\data\ActiveDataProvider;
 use datacenter\models\DcSets;
 use datacenter\models\DcSetsColumns;
 use datacenter\models\DcReportColumns;
+use datacenter\models\DcRoleAuthority;
 
 class ReportController extends \webadmin\BController
 {
@@ -58,7 +59,10 @@ class ReportController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
-                'col_where' => ["cat_id"=>$mId],
+                'col_where' => (Yii::$app->user->id=='1' ? ["cat_id"=>$mId] : [
+                    "cat_id"=>$mId,
+                    'id'=>DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+                ]),
             ],
             // 数据集字段查询
             'column' => [

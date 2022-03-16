@@ -40,9 +40,7 @@ class ReportViewController extends \webadmin\BController
      */
     public function actionIndex()
     {
-        $treeData = \datacenter\models\DcCat::treeData(); // 获取所有分类
-        //$reportList = \datacenter\models\DcUserReport::model()->allReport(Yii::$app->user->id,null,1);
-        //$myreportList = \datacenter\models\DcUserReport::model()->allReport(Yii::$app->user->id,['is_collection'=>'1']);
+        $treeData = \datacenter\models\DcCat::authorityTreeData(Yii::$app->user->id); // 获取所有分类
         $reportList = \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,null,1],7200);
         $myreportList = \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,['is_collection'=>'1']],7200);
         $haveCatIds = [];

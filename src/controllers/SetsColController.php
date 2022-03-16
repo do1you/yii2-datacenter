@@ -6,6 +6,7 @@ namespace datacenter\controllers;
 
 use Yii;
 use datacenter\models\DcSetsColumns;
+use datacenter\models\DcRoleAuthority;
 use yii\data\ActiveDataProvider;
 
 class SetsColController extends \webadmin\BController
@@ -40,7 +41,9 @@ class SetsColController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
-                //'col_where' => [],
+                'col_where' => (Yii::$app->user->id=='1' ? [] : [
+                    'id'=>DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+                ]),
             ],
         ];
     }
@@ -52,7 +55,11 @@ class SetsColController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcSetsColumns();
-        $dataProvider = $model->search(Yii::$app->request->queryParams,null,['sets','model.source']);
+        $dataProvider = $model->search(Yii::$app->request->queryParams,(
+            Yii::$app->user->id=='1' ? null : [
+                'set_id'=>DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+            ]
+        ),['sets','model.source']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

@@ -118,6 +118,11 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         return $this->hasMany(DcSetsColumns::className(), ['set_id' => 'id'])->addOrderBy("dc_sets_columns.is_frozen desc,dc_sets_columns.paixu desc,dc_sets_columns.id asc");
     }
     
+    // 获取角色数据集关系
+    public function getRoleSets(){
+        return $this->hasMany(DcRoleAuthority::className(), ['source_id' => 'id'])->onCondition("dc_role_authority.source_type=4");
+    }
+    
     // 获取源数据集关系
     public function getSourceRelation(){
         return $this->hasMany(DcSetsRelation::className(), ['source_sets' => 'id']);
@@ -483,6 +488,24 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 break;
         }
         return $this;
+    }
+    
+    // 返回报表权限条件Query
+    public static function authorityFind($userId='0', $query = null)
+    {
+        $query = $query ? $query : self::find();
+        
+        if($userId!='1'){
+            //取角色和用户包含的报表权限
+            $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>$userId]), 'role_id', 'role_id');
+            
+            $query->joinWith(['roleSets']);
+            $where = ['in','dc_role_authority.role_id',$roleIds];
+            $query->where($where);
+        }
+        
+        
+        return $query;
     }
     
     // 组装数据集数据
