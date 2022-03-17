@@ -107,8 +107,11 @@ class ReportViewController extends \webadmin\BController
      */
     public function actionView($id)
     {
+        $list = $this->findModel($id ? explode(',',$id) : []);
+        if(!empty(Yii::$app->request->get('is_export'))) return $this->exportExcel($list);
+        
         return $this->render('display', [
-            'list' => $this->findModel($id ? explode(',',$id) : []),
+            'list' => $list,
         ]);
     }
     
@@ -117,9 +120,41 @@ class ReportViewController extends \webadmin\BController
      */
     public function actionSetView($id)
     {
+        $list = $this->findSetModel($id ? explode(',',$id) : []);
+        if(!empty(Yii::$app->request->get('is_export'))) return $this->exportExcel($list);
+        
         return $this->render('display', [
-            'list' => $this->findSetModel($id ? explode(',',$id) : []),
+            'list' => $list,
         ]);
+    }
+    
+    /**
+     * 导出报表
+     */
+    public function exportExcel($list)
+    {
+        if($list && is_array($list)){
+            foreach($list as $key=>$item){
+                if($key==0){
+                    $dataProvider = $item;
+                    $titles= $item['v_excelData'];
+                    $filename = $item['title'];
+                    $options = ['title'=>$item['title']];
+                }else{
+                    $options['sheets'][$item['id']] = [
+                        'dataProvider' => $item,
+                        'titles' => $item['v_excelData'],
+                        'title' => $item['title'],
+                    ];
+                }
+            }
+        }
+        
+        if(empty($dataProvider) || empty($titles)){
+            throw new \yii\web\NotFoundHttpException(Yii::t('common','您查询的模型对象不存在'));
+        }
+
+        return \webadmin\ext\PhpExcel::export(null, $dataProvider, $titles, $filename, $options);
     }
     
     /**

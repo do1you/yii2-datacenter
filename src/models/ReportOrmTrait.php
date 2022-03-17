@@ -123,6 +123,22 @@ trait ReportOrmTrait
         return $this;
     }
     
+    // 返回EXCEL数据
+    public function getV_excelData()
+    {
+        $columns = $this->getV_columns();
+        if($columns && is_array($columns)){
+            foreach($columns as $key=>$item){
+                $columns[$key] = [
+                    'attribute' => $item['label'],
+                    'value' => $item['name'],
+                ];
+            }
+        }
+        
+        return $columns;
+    }
+    
     // 返回查询数据的模型
     public function getSearchModels()
     {

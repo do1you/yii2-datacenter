@@ -22,6 +22,9 @@ trait ReportDataTrait
     // 数据处理器
     private $_dataProvider;
     
+    // 模拟数据表模型
+    public $modelClass;
+    
     // 获取数据处理器
     public function getDataProvider()
     {
@@ -129,6 +132,18 @@ trait ReportDataTrait
     public function setSort($value)
     {
         return $this->getDataProvider()->setSort($value);
+    }
+    
+    // 返回query
+    public function getQuery()
+    {
+        return $this;
+    }
+    
+    // 返回批次数据
+    public function batch()
+    {
+        return [$this->getModels()];
     }
     
     // 返回汇总字段（预留）
