@@ -31,7 +31,9 @@ class ModelController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'name',
                 'col_v_text' => 'name',
-                //'col_where' => [],
+                /*'col_where' => (Yii::$app->user->id=='1' ? [] : [
+                    'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
+                ]),*/
             ],
             // 数据模型查询
             'model' => [
@@ -40,7 +42,9 @@ class ModelController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'tb_name',
                 'col_v_text' => 'v_tb_name',
-                //'col_where' => [],
+                /*'col_where' => (Yii::$app->user->id=='1' ? [] : [
+                    'source_db'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
+                ]),*/
             ],
             
         ];
@@ -53,7 +57,7 @@ class ModelController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcModel();
-		$dataProvider = $model->search(Yii::$app->request->queryParams,[],['source','cat']);
+		$dataProvider = $model->search(Yii::$app->request->queryParams,null,['source','cat']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

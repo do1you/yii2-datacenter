@@ -56,7 +56,7 @@ class DcCat extends \webadmin\ModelCAR
     }
     
     // 返回权限数据
-    public static function authorityTreeData($userId, $parentId='0',$wheres=[],$selectIds=[],$reload=false)
+    public static function authorityTreeData($userId,$parentId='0',$wheres=[],$selectIds=[],$reload=false)
     {
         if($userId!='1'){
             $haveCatIds = DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'1']);
@@ -72,6 +72,25 @@ class DcCat extends \webadmin\ModelCAR
         }
         
         return self::treeData($parentId, $wheres, $selectIds, $reload);
+    }
+    
+    // 返回权限数据
+    public static function authorityTreeOptions($userId,$parentId='0',$wheres=[],$level=0,$reload=false,$isKey=false)
+    {
+        if($userId!='1'){
+            $haveCatIds = DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'1']);
+            if($wheres){
+                $wheres = [
+                    'and',
+                    $wheres,
+                    ['in','id',$haveCatIds],
+                ];
+            }else{
+                $wheres = ['in','id',$haveCatIds];
+            }
+        }
+        
+        return self::treeOptions($parentId, $wheres, $level, $reload, $isKey);
     }
     
     

@@ -33,7 +33,9 @@ class SetsRelController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'tb_name',
                 'col_v_text' => 'v_tb_name',
-                //'col_where' => [],
+                'col_where' => (Yii::$app->user->id=='1' ? [] : [
+                    'source_db'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
+                ]),
             ],
             // 数据集查询
             'sets' => [
@@ -43,7 +45,7 @@ class SetsRelController extends \webadmin\BController
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
                 'col_where' => (Yii::$app->user->id=='1' ? [] : [
-                    'id'=>DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+                    'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
                 ]),
             ],
             // 数据集字段查询

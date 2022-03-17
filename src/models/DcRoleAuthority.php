@@ -120,6 +120,16 @@ class DcRoleAuthority extends \webadmin\ModelCAR
             'source_type'=>$type,
         ])->select('source_id')->asArray()->column();
         $ids = $ids ? $ids : [];
+        if($type=='3'){
+            $list = [];
+            foreach($ids as $id){
+                list($sid,$subId) = explode('_',$id);
+                if($sid && $subId){
+                    $list[$sid][$subId] = $subId;
+                }
+            }
+            return $list;
+        }
         return $ids;
     }
     

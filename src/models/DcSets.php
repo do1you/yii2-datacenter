@@ -204,7 +204,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     public function getV_cat_id($val = null)
     {
         if($val===false){
-            return DcCat::treeOptions();
+            return DcCat::authorityTreeOptions(Yii::$app->user->id);
         }else{
             if($val!== null){
                 $model = DcCat::findOne($val);

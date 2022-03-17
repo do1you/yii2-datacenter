@@ -1,9 +1,5 @@
 <?php 
-if(isset($cache) && $cache){
-    $columns = $model->getCache('getV_columns');
-}else{
-    $columns = $model->getV_columns();
-}
+$columns = $model->getV_columns();
 ?>
 <div class="table-scrollable-debug">
     <table class="table table-striped table-bordered table-hover table-nowrap notFix" id="<?php echo $id?>">

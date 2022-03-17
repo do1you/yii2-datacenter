@@ -151,10 +151,30 @@ class DcSource extends \webadmin\ModelCAR
         return $list;
     }
     
+    // 获取含权限的动态库数据库列表
+    public function getAuthorityDynamicList($userId,$f5=false)
+    {
+        $list = $this->getDynamicList($f5);
+        if($userId!='1'){
+            $ids = DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'3']);
+            if(!empty($ids[$this->id]) && is_array($ids[$this->id])){
+                foreach($list as $key=>$item){
+                    if(!in_array($item['id'],$ids[$this->id])){
+                        unset($list[$key]);
+                    }
+                }
+            }else{
+                $list = [];
+            }
+        }
+        
+        return $list;
+    }
+    
     // 获取动态度选中的数据库信息
     public function getDynamicInfo($f5=false)
     {
-        $dynamicInfos = $this->getDynamicList($f5);
+        $dynamicInfos = $this->getAuthorityDynamicList(Yii::$app->user->id,$f5);
         $currIdent = Yii::$app->session[$this['v_sessionName']];
         
         // 未匹配到权限数据，取第一个

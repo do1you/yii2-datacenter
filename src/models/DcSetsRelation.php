@@ -215,21 +215,28 @@ class DcSetsRelation extends \webadmin\ModelCAR
     }
     
     // 返回被分组字段的全部属性
-    public function getV_group_list($target = null)
+    public function getV_group_list($target = null, $f5 = false)
     {
         if($this->_cache_group_columns === null){
-            $this->_cache_group_columns = [];
-            if($this->rel_type=='group' && $this->group_label && $this->groupLabel['v_alias']){
-                $target = ($target && ($target instanceof DcSets) )? (clone $target) : $this->targetSets;
-                $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
-                $target->group($this->group_label)->setPagination(false);
-                $query = $target->getDataProvider()->query;
-                $query->select([]);
-                $this->groupLabel->selectColumn($query);
-                $list = $target->getModels(true);
-                $list = \yii\helpers\ArrayHelper::map($list, $this->groupLabel['v_alias'], $this->groupLabel['v_alias']);
-                $this->_cache_group_columns = $list;
+            $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
+            $cacheKey = "datacenter/dynamicGroupColumns/{$this->id}/".md5(serialize($target));
+            if(($list = Yii::$app->cache->get($cacheKey))===false || $f5){
+                $list = [];
+                if($this->rel_type=='group' && $this->group_label && $this->groupLabel['v_alias']){
+                    $target = clone $target;
+                    $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
+                    $target->group($this->group_label)->setPagination(false);
+                    $query = $target->getDataProvider()->query;
+                    $query->select([]);
+                    $this->groupLabel->selectColumn($query);
+                    $list = $target->getModels(true);
+                    $list = \yii\helpers\ArrayHelper::map($list, $this->groupLabel['v_alias'], $this->groupLabel['v_alias']);
+                }
+                
+                Yii::$app->cache->set($cacheKey, $list, 3600);
             }
+            
+            $this->_cache_group_columns = $list;
         }
         
         return $this->_cache_group_columns;

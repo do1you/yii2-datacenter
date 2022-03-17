@@ -32,7 +32,9 @@ class RelationController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'tb_name',
                 'col_v_text' => 'v_tb_name',
-                //'col_where' => [],
+                /*'col_where' => (Yii::$app->user->id=='1' ? [] : [
+                    'source_db'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
+                ]),*/
             ],
             // 数据字段查询
             'column' => [

@@ -153,7 +153,7 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
     public function getV_cat_id($val = null)
     {
         if($val===false){
-            return DcCat::treeOptions();
+            return DcCat::authorityTreeOptions(Yii::$app->user->id);
         }else{
             if($val!== null){
                 $model = DcCat::findOne($val);
