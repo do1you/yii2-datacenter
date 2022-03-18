@@ -49,7 +49,7 @@ use yii\helpers\Url;
                 	     'tb_label',
                 	     [
                 	         'attribute' => 'cat_id',
-                	         'value' => 'cat.name',
+                	         'value' => 'cat.v_parentName',
                 	         'filter' => false,
                 	     ],
                 	     [

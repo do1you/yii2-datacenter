@@ -47,7 +47,7 @@ use yii\helpers\Url;
                 	     'title',
                 	     [
                 	         'attribute' => 'cat_id',
-                	         'value' => 'cat.name',
+                	         'value' => 'cat.v_parentName',
                 	         'filter' => false,
                 	     ],
                 	     [

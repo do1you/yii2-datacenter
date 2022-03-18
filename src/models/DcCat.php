@@ -49,6 +49,12 @@ class DcCat extends \webadmin\ModelCAR
         ];
     }
     
+    // 返回包含上级的名称
+    public function getV_parentName()
+    {
+        return ($this->parent ? $this->parent['v_parentName'].'>' : '').$this->name;
+    }
+    
     // 返回节点都是目录分类
     public function getType()
     {

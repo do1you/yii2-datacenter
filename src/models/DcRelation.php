@@ -197,7 +197,7 @@ class DcRelation extends \webadmin\ModelCAR
                 'target_model' => $this->source_model,
                 'source_col' => $this->target_col,
                 'target_col' => $this->source_col,
-                'rel_type' => ($model['rel_type'] ? $model['rel_type'] : $this->rel_type),
+                'rel_type' => ($model['rel_type'] ? $model['rel_type'] : 'one'),
                 'rel_where' => ($model['rel_where'] ? $model['rel_where'] : $this->rel_where),
             ],'');
             $model->is_reverse_save = false;

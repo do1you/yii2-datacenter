@@ -146,7 +146,7 @@ class DcModel extends \webadmin\ModelCAR
     // 标签格式化
     public function getV_tb_name()
     {
-        return $this->source['v_dbname'].".{$this->tb_name}[{$this->id}]";
+        return $this->source['name'].$this->tb_label."[{$this->tb_name}-{$this->id}]";
     }
     
     // 返回表名格式化

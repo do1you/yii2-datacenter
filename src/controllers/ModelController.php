@@ -57,7 +57,7 @@ class ModelController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcModel();
-		$dataProvider = $model->search(Yii::$app->request->queryParams,null,['source','cat']);
+		$dataProvider = $model->search(Yii::$app->request->queryParams,null,['source','cat.parent.parent.parent']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 
