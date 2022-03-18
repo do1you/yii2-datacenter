@@ -240,6 +240,30 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
         return ($muli ? $query->all() : $query->one());
     }
     
+    // 删除判断
+    public function delete()
+    {
+        if($this->columns){
+            foreach($this->columns as $item){
+                $item->delete();
+            }
+        }
+        
+        if($this->userReport){
+            foreach($this->userReport as $item){
+                $item->delete();
+            }
+        }
+        
+        if($this->roleReport){
+            foreach($this->roleReport as $item){
+                $item->delete();
+            }
+        }
+        
+        return parent::delete();
+    }
+    
     // 返回API请求地址
     public function getV_apiurl($cache='1')
     {

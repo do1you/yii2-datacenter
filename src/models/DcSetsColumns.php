@@ -77,6 +77,11 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return $this->hasOne(DcAttribute::className(), ['model_id'=>'model_id', 'name'=>'name']);
     }
     
+    // 获取数据报表字段属性关系
+    public function getReportColumns(){
+        return $this->hasMany(DcReportColumns::className(), ['col_id' => 'id']);
+    }
+    
     // 获取数据集类型
     public function getV_type($val = null)
     {
@@ -188,6 +193,18 @@ class DcSetsColumns extends \webadmin\ModelCAR
         }else{
             return \yii\helpers\Url::to($search_params);
         }
+    }
+    
+    // 删除判断
+    public function delete()
+    {
+        if($this->reportColumns){
+            foreach($this->reportColumns as $item){
+                $item->delete();
+            }
+        }
+        
+        return parent::delete();
     }
     
     // 保存前动作

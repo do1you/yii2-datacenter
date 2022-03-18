@@ -133,6 +133,11 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         return $this->hasMany(DcSetsRelation::className(), ['target_sets' => 'id']);
     }
     
+    // 获取数据报表字段属性关系
+    public function getReportColumns(){
+        return $this->hasMany(DcReportColumns::className(), ['set_id' => 'id']);
+    }
+    
     // 获取数据集类型
     public function getV_set_type($val = null)
     {
@@ -240,6 +245,34 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         }
         
         return null;
+    }
+    
+    // 删除判断
+    public function delete()
+    {
+        if($this->getReportColumns()->count() > 0 ){
+            throw new \yii\web\HttpException(200, Yii::t('datacenter', '该数据集下存在数据报表，请先删除数据数据报表！'));
+        }
+        
+        if($this->columns){
+            foreach($this->columns as $item){
+                $item->delete();
+            }
+        }
+        
+        if($this->sourceRelation){
+            foreach($this->sourceRelation as $item){
+                $item->delete();
+            }
+        }
+        
+        if($this->targetRelation){
+            foreach($this->targetRelation as $item){
+                $item->delete();
+            }
+        }
+        
+        return parent::delete();
     }
     
     // 预处理数据

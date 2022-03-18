@@ -265,12 +265,22 @@ class DcSource extends \webadmin\ModelCAR
                     return \yii\helpers\ArrayHelper::map($db->createCommand($sql)->queryAll(), 'Name', 'Comment');
                     break;
                 default:
-                    new \yii\web\HttpException(500, Yii::t('datacenter', '暂未实现数据库类型！').$this->dbtype);
+                    throw new \yii\web\HttpException(500, Yii::t('datacenter', '暂未实现数据库类型！').$this->dbtype);
                     break;
             }
         }
         
         return [];
+    }
+    
+    // 删除判断
+    public function delete()
+    {
+        if($this->models){
+            throw new \yii\web\HttpException(200, Yii::t('datacenter', '该数据源下存在模型，请先删除模型！'));
+        }
+        
+        return parent::delete();
     }
     
     // 将表和字段进行保存为数据模型

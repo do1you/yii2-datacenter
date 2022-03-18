@@ -112,6 +112,16 @@ class DcModel extends \webadmin\ModelCAR
         return $this->hasMany(DcRelation::className(), ['target_model' => 'id']);
     }
     
+    // 获取主模型数据集关系
+    public function getMainModels(){
+        return $this->hasMany(DcSets::className(), ['main_model' => 'id']);
+    }
+    
+    // 获取数据集字段属性关系
+    public function getSetsColumns(){
+        return $this->hasMany(DcSetsColumns::className(), ['model_id' => 'id']);
+    }
+    
     // 获取是否可见
     public function getV_is_visible($val = null)
     {
@@ -150,6 +160,34 @@ class DcModel extends \webadmin\ModelCAR
     {
         return "mod_{$this->id}";
     } 
+    
+    // 删除判断
+    public function delete()
+    {
+        if($this->mainModels){
+            throw new \yii\web\HttpException(200, Yii::t('datacenter', '该数据模型下存在数据集，请先删除数据集！'));
+        }
+        
+        if($this->columns){
+            foreach($this->columns as $item){
+                $item->delete();
+            }
+        }
+        
+        if($this->sourceRelation){
+            foreach($this->sourceRelation as $item){
+                $item->delete();
+            }
+        }
+        
+        if($this->targetRelation){
+            foreach($this->targetRelation as $item){
+                $item->delete();
+            }
+        }
+        
+        return parent::delete();
+    }
     
     // 查询所有字段信息
     public function selectColumns(\yii\db\Query $query)
