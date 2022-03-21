@@ -195,7 +195,9 @@ class ModelController extends \webadmin\BController
     {
         $model = $this->findModel($id);
         
+        $transaction = DcModel::getDb()->beginTransaction(); // 使用事务关联
         if(($num = $model->copyModel())) {
+            $transaction->commit(); // 提交事务
             Yii::$app->session->setFlash('success',Yii::t('datacenter', '复制模型成功'));
         }else{
             Yii::$app->session->setFlash('error',Yii::t('datacenter', '复制模型失败'));

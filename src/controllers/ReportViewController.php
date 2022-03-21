@@ -16,6 +16,7 @@ class ReportViewController extends \webadmin\BController
     public function beforeAction($action){
         Yii::$app->controller->pageTitle = Yii::t('datacenter', '数据报表');
         Yii::$app->controller->currNav[] = Yii::$app->controller->pageTitle;
+        Yii::$app->controller->currUrl = $this->module->id.'/report-view/index';
         
         return parent::beforeAction($action);
     }

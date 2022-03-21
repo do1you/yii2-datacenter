@@ -264,6 +264,20 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
         return parent::delete();
     }
     
+    // 查询所有字段信息
+    public function selectColumns()
+    {
+        $columns = \yii\helpers\ArrayHelper::map($this->columns, 'col_id', 'col_id', 'set_id');
+        $setLists = $this->v_sets;
+        foreach($setLists as $set){
+            if(isset($columns[$set['id']])){
+                $set->filterSelect($columns[$set['id']]);
+            }
+        }
+        
+        return $this;
+    }
+    
     // 返回API请求地址
     public function getV_apiurl($cache='1')
     {
@@ -306,6 +320,7 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
     {
         if($this->_joinSetState === null){
             // 关联数据集
+            $this->selectColumns();
             $this->orderColumns($this->getSort());
             $mainSet = $this->getV_mainSet();
             $allSets = $setLists = $this->v_sets;

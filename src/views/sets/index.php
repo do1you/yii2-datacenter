@@ -78,7 +78,7 @@ use yii\helpers\Url;
                         	'class' => '\yii\grid\ActionColumn',
                         	'buttonOptions' => ['data-pjax'=>'0'],
                             'headerOptions'=>['width'=>'120'],
-                            'template' => '{show} {view} {update} {delete}',
+                            'template' => '{show} {copy} {view} {update} {delete}',
                             'buttons'=>[
                                 'show'=>function($url,$model){
                                     return Html::a('<span class="fa fa-navicon"></span>', \yii\helpers\Url::to([
@@ -88,6 +88,12 @@ use yii\helpers\Url;
                                         'target' => '_blank',
                                         'data-pjax'=>'0',
                                     ]);
+                    	         },
+                    	         'copy'=>function($url,$model){
+                        	         return Html::a('<span class="fa fa-copy"></span>', $url, [
+                        	             'title' => Yii::t('datacenter', '复制数据集'),
+                        	             'data-pjax'=>'0',
+                        	         ]);
                     	         },
                 	         ],
                         ],

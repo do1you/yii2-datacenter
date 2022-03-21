@@ -44,6 +44,11 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
      * 关联的目标数据集合
      */
     public $_relation_target = [];
+    
+    /**
+     * 需要查询字段的列表
+     */
+    public $filterSelectIds = null;
             
     /**
      * 返回数据库表名称
@@ -133,6 +138,11 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         return $this->hasMany(DcSetsRelation::className(), ['target_sets' => 'id']);
     }
     
+    // 获取数据报表字段属性关系
+    public function getReportColumns(){
+        return $this->hasMany(DcReportColumns::className(), ['set_id' => 'id']);
+    }
+    
     // 获取数据集类型
     public function getV_set_type($val = null)
     {
@@ -204,7 +214,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     public function getV_cat_id($val = null)
     {
         if($val===false){
-            return DcCat::treeOptions();
+            return DcCat::authorityTreeOptions(Yii::$app->user->id);
         }else{
             if($val!== null){
                 $model = DcCat::findOne($val);
@@ -254,9 +264,38 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 $model->source_type = '4';
                 $model->save(false);
             }
+            \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'], 86400, true);
         }
         
         return parent::afterSave($insert, $changedAttributes);
+    }
+    
+    // 删除判断
+    public function delete()
+    {
+        if($this->getReportColumns()->count() > 0 ){
+            throw new \yii\web\HttpException(200, Yii::t('datacenter', '该数据集下存在数据报表，请先删除数据数据报表！'));
+        }
+        
+        if($this->columns){
+            foreach($this->columns as $item){
+                $item->delete();
+            }
+        }
+        
+        if($this->sourceRelation){
+            foreach($this->sourceRelation as $item){
+                $item->delete();
+            }
+        }
+        
+        if($this->targetRelation){
+            foreach($this->targetRelation as $item){
+                $item->delete();
+            }
+        }
+        
+        return parent::delete();
     }
     
     // 预处理数据
@@ -331,20 +370,34 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             foreach($values as $key=>$v){
                 if(strlen($v)<=0){
                     $values[$key] = '&nbsp;';
-                }elseif(is_numeric($v)){
+                }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && substr($v,0,1)!='0'){
                     $values[$key] = floatval($v);
                 }
             }
         }
         
         return $values;
-    }   
+    }
+    
+    // 过滤查询字段
+    public function filterSelect($cIds = [])
+    {
+        if($cIds){
+            if($this->filterSelectIds === null){
+                $this->filterSelectIds = [];
+            }
+            $this->filterSelectIds = array_merge($this->filterSelectIds,$cIds);
+        }
+        return $this;
+    }
     
     // 查询所有字段信息
     public function selectColumns(\yii\db\Query $query)
     {
         foreach($this->columns as $col){
-            $col->selectColumn($query);
+            if($this->filterSelectIds===null || (is_array($this->filterSelectIds) && in_array($col['id'], $this->filterSelectIds))){
+                $col->selectColumn($query);
+            }
         }
         
         return $this;
@@ -527,6 +580,54 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         
         
         return $query;
+    }
+    
+    // 复制数据集
+    public function copySets()
+    {
+        $model = new DcSets();
+        $attributes = $this->attributes;
+        unset($attributes['id']);
+        if($model->load($attributes, '') && $model->save()){
+            if($this->columns){
+                // 复制字段
+                foreach($this->columns as $col){
+                    $attributes = $col->attributes;
+                    unset($attributes['id']);
+                    $attributes['set_id'] = $model['id'];
+                    $colModel = new DcSetsColumns();
+                    $colModel->load($attributes,'');
+                    $colModel->save(false);
+                }
+            }
+            
+            if($this->sourceRelation){
+                // 复制主动关系
+                foreach($this->sourceRelation as $item){
+                    $attributes = $item->attributes;
+                    unset($attributes['id']);
+                    $attributes['source_sets'] = $model['id'];
+                    $relModel = new DcSetsRelation();
+                    $relModel->load($attributes,'');
+                    $relModel->save(false);
+                }
+            }
+            
+            if($this->targetRelation){
+                // 复制被动关系
+                foreach($this->targetRelation as $item){
+                    $attributes = $item->attributes;
+                    unset($attributes['id']);
+                    $attributes['target_sets'] = $model['id'];
+                    $relModel = new DcSetsRelation();
+                    $relModel->load($attributes,'');
+                    $relModel->save(false);
+                }
+            }
+            return true;
+        }else{
+            return false;
+        }
     }
     
     // 组装数据集数据

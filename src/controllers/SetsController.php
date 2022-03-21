@@ -47,8 +47,9 @@ class SetsController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcSets();
-        $dataProvider = $model->search(Yii::$app->request->queryParams,null,['cat.parent.parent.parent','mainModel.source','columns.model.source']);
-        $dataProvider->query = DcSets::authorityFind(Yii::$app->user->id, $dataProvider->query); // 加入权限命名空间
+		$dataProvider = $model->search(Yii::$app->request->queryParams,(Yii::$app->user->id=='1' ? null : [
+		    'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+		]),['cat.parent.parent.parent','mainModel.source','columns.model.source']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 
@@ -143,6 +144,24 @@ class SetsController extends \webadmin\BController
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息删除成功'));
         }else{
         	Yii::$app->session->setFlash('error',Yii::t('common', '需要删除的对象信息不存在'));
+        }
+        
+        return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
+    }
+    
+    /**
+     * 复制数据集
+     */
+    public function actionCopy($id)
+    {
+        $model = $this->findModel($id);
+        
+        $transaction = DcSets::getDb()->beginTransaction(); // 使用事务关联
+        if(($num = $model->copySets())) {
+            $transaction->commit(); // 提交事务
+            Yii::$app->session->setFlash('success',Yii::t('datacenter', '复制数据集成功'));
+        }else{
+            Yii::$app->session->setFlash('error',Yii::t('datacenter', '复制数据集失败'));
         }
         
         return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
