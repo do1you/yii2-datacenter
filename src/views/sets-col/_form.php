@@ -42,7 +42,7 @@ use webadmin\widgets\ActiveForm;
             
         	<?php if($model['sets']['set_type']=='model' && $model['model']):?>
         		<?php 
-        		$list = \yii\helpers\ArrayHelper::map($model['model']['columns'], 'name', 'name');
+        		$list = \yii\helpers\ArrayHelper::map($model['model']['columns'], 'name', 'v_name');
         		$labels = \yii\helpers\ArrayHelper::map($model['model']['columns'], 'name', 'label');
         		$model->label = $model->label ? $model->label : $labels[$model['name']];
         		?>
@@ -59,6 +59,8 @@ use webadmin\widgets\ActiveForm;
         		
         		<?= $form->field($model, 'label')->textInput(['maxlength' => true]) ?>
         	<?php endif;?>
+        	
+        	<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true]) ?>
             
             <?= $form->field($model, 'formula')->textInput(['maxlength' => true])->hint('通过字段结果公式计算，以标签做主键计算，例：{微信}+{支付宝}+{银行卡}+{现金}') ?>
             
@@ -101,8 +103,10 @@ $('#dcsetscolumns-model_id').on('change',function(){
 });
 // 选择字段
 $('#dcsetscolumns-name').on('change',function(){
-    var value = $(this).val();
-    location.href = '{$url2}&cName=' + (value || '');
+    if($(this).is('select')){
+        var value = $(this).val();
+        location.href = '{$url2}&cName=' + (value || '');
+    }
 });
 // 选择是否可查
 $('#dcsetscolumns-is_search').on('change',function(){

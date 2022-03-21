@@ -36,7 +36,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             [['set_id', 'is_search', 'paixu'], 'integer'],
             [['name', 'label', 'type', 'model_id', 'formula', 'fun', 'is_frozen', 'search_params'], 'safe'],
             [['name', 'label', 'type', 'fun'], 'string', 'max' => 50],
-            [['formula'], 'string', 'max' => 150],
+            [['formula', 'sql_formula'], 'string', 'max' => 150],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
         ];
     }
@@ -56,6 +56,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'type' => Yii::t('datacenter', '查询类型'),
             'search_params' => Yii::t('datacenter', '查询参数'),
             'formula' => Yii::t('datacenter', '计算公式'),
+            'sql_formula' => Yii::t('datacenter', 'SQL公式'),
             'fun' => Yii::t('datacenter', '处理函数'),
             'paixu' => Yii::t('datacenter', '排序'),
             'is_frozen' => Yii::t('datacenter', '是否冻结'),
@@ -114,13 +115,18 @@ class DcSetsColumns extends \webadmin\ModelCAR
     // 返回字段格式化名称
     public function getV_column()
     {
-        return "{$this->model['v_alias']}.{$this->v_field}";
+        $column = $this->v_field;
+        if(preg_match("/[\+\-\*\/]/",$column)){
+            return "({$this->model['v_alias']}.{$column})";
+        }else{
+            return "{$this->model['v_alias']}.{$column}";
+        }
     }
     
     // 返回字段格式化别名
     public function getV_column_alias()
     {
-        return "{$this->model['v_alias']}.{$this->v_field} as {$this->v_alias}";
+        return "{$this->v_column} as {$this->v_alias}";
     }
     
     // 返回字段别名
@@ -132,7 +138,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     // 返回字段原名称
     public function getV_field()
     {
-        return $this->name;
+        return ($this->sql_formula ? $this->sql_formula : $this->name);
     }
     
     // 返回计算公式替换内容

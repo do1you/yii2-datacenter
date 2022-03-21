@@ -56,6 +56,7 @@ use yii\helpers\Url;
                 	     ],
                 	     'name',
                 	     'label',
+                	     'sql_formula',
                 	     [
                 	         'attribute' => 'is_search',
                 	         'value' => 'v_is_search',

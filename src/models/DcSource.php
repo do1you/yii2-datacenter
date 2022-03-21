@@ -312,7 +312,7 @@ class DcSource extends \webadmin\ModelCAR
                         'label' => ($cModel['label'] ? $cModel['label'] : $column->comment),
                         'type' => ($cModel['type'] ? $cModel['type'] : $column->type), // phpType
                         'length' => ($cModel['length'] ? $cModel['length'] : $column->size),
-                        'default' => ($cModel['default'] ? $cModel['default'] : $column->defaultValue),
+                        'default' => (strlen($cModel['default'])>0 ? $cModel['default'] : $column->defaultValue),
                     ],'') && $cModel->save(false)){
                         unset($columns[$col]);
                         $colNum++;

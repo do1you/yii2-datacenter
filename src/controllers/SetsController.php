@@ -30,11 +30,12 @@ class SetsController extends \webadmin\BController
                 'class' => '\webadmin\actions\Select2Action',
                 'className' => '\datacenter\models\DcModel',
                 'col_id' => 'id',
-                'col_text' => 'tb_name',
+                'col_text' => ['tb_name','tb_label'],
                 'col_v_text' => 'v_tb_name',
                 'col_where' => (Yii::$app->user->id=='1' ? [] : [
                     'source_db'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
                 ]),
+				'model_withs' => ['source'],
             ],
         ];
     }

@@ -100,7 +100,7 @@ class DcAttribute extends \webadmin\ModelCAR
     // 返回字段格式化别名
     public function getV_column_alias()
     {
-        return "{$this->model['v_alias']}.{$this->v_field} as {$this->v_alias}";
+        return "{$this->v_column} as {$this->v_alias}";
     }
     
     // 返回字段别名

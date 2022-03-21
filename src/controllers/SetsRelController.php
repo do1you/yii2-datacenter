@@ -31,11 +31,12 @@ class SetsRelController extends \webadmin\BController
                 'class' => '\webadmin\actions\Select2Action',
                 'className' => '\datacenter\models\DcModel',
                 'col_id' => 'id',
-                'col_text' => 'tb_name',
+                'col_text' => ['tb_name','tb_label'],
                 'col_v_text' => 'v_tb_name',
                 'col_where' => (Yii::$app->user->id=='1' ? [] : [
                     'source_db'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
                 ]),
+				'model_withs' => ['source'],
             ],
             // 数据集查询
             'sets' => [
@@ -53,9 +54,10 @@ class SetsRelController extends \webadmin\BController
                 'class' => '\webadmin\actions\Select2Action',
                 'className' => '\datacenter\models\DcSetsColumns',
                 'col_id' => 'id',
-                'col_text' => 'label',
+                'col_text' => ['name','label'],
                 'col_v_text' => 'v_name',
                 'col_where' => ["set_id"=>$mId],
+				'model_withs' => ['sets'],
             ],
         ];
     }

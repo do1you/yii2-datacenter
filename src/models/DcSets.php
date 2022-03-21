@@ -133,11 +133,6 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         return $this->hasMany(DcSetsRelation::className(), ['target_sets' => 'id']);
     }
     
-    // 获取数据报表字段属性关系
-    public function getReportColumns(){
-        return $this->hasMany(DcReportColumns::className(), ['set_id' => 'id']);
-    }
-    
     // 获取数据集类型
     public function getV_set_type($val = null)
     {
@@ -209,7 +204,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     public function getV_cat_id($val = null)
     {
         if($val===false){
-            return DcCat::authorityTreeOptions(Yii::$app->user->id);
+            return DcCat::treeOptions();
         }else{
             if($val!== null){
                 $model = DcCat::findOne($val);
@@ -247,32 +242,21 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         return null;
     }
     
-    // 删除判断
-    public function delete()
+    // 保存后动作
+    public function afterSave($insert, $changedAttributes)
     {
-        if($this->getReportColumns()->count() > 0 ){
-            throw new \yii\web\HttpException(200, Yii::t('datacenter', '该数据集下存在数据报表，请先删除数据数据报表！'));
-        }
-        
-        if($this->columns){
-            foreach($this->columns as $item){
-                $item->delete();
+        if($insert && Yii::$app instanceof \yii\web\Application){
+            $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>Yii::$app->user->id]), 'role_id', 'role_id');
+            foreach($roleIds as $roleId){
+                $model = new DcRoleAuthority;
+                $model->role_id = $roleId;
+                $model->source_id = $this->id;
+                $model->source_type = '4';
+                $model->save(false);
             }
         }
         
-        if($this->sourceRelation){
-            foreach($this->sourceRelation as $item){
-                $item->delete();
-            }
-        }
-        
-        if($this->targetRelation){
-            foreach($this->targetRelation as $item){
-                $item->delete();
-            }
-        }
-        
-        return parent::delete();
+        return parent::afterSave($insert, $changedAttributes);
     }
     
     // 预处理数据
@@ -345,7 +329,11 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             }
         }else{
             foreach($values as $key=>$v){
-                if(strlen($v)<=0) $values[$key] = '&nbsp;';
+                if(strlen($v)<=0){
+                    $values[$key] = '&nbsp;';
+                }elseif(is_numeric($v)){
+                    $values[$key] = floatval($v);
+                }
             }
         }
         
