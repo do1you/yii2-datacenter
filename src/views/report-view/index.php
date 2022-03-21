@@ -3,6 +3,9 @@ $colors = explode('|','inverse|blue|palegreen|danger|warning|info|success|darkor
 ?>
 <div class="row">
 	<div class="col-xs-12">
+		<?php if(empty($myreportList) && empty($reportList)):?>
+			<div class="col-xs-12 col-md-2">您暂时还没有任何报表可以查看...</div>
+		<?php endif;?>
 		<div class="reportview">
             <?php if($myreportList): // 我的报表?>
             <div class="reportitem">
@@ -59,8 +62,6 @@ $colors = explode('|','inverse|blue|palegreen|danger|warning|info|success|darkor
                     </div>
                 </div>
             <?php endforeach;endif;?>
-            <?php else:?>
-            	<div class="col-xs-12 col-md-2">您暂时还没有任何报表可以查看...</div>
             <?php endif;?>
         </div>
     </div>

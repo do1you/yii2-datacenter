@@ -119,7 +119,7 @@ class DcRoleAuthority extends \webadmin\ModelCAR
             'role_id'=>$roleIds,
             'source_type'=>$type,
         ])->select('source_id')->asArray()->column();
-        $ids = $ids ? $ids : [];
+        $ids = $ids ? $ids : ['-999'];
         if($type=='3'){
             $list = [];
             foreach($ids as $id){
