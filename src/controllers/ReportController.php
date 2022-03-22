@@ -83,21 +83,25 @@ class ReportController extends \webadmin\BController
     /**
      * 构建报表
      */
-    public function actionBuild()
+    public function actionBuild($id=null)
     {
         $this->is_open_nav = false; // 隐藏左侧菜单
         return $this->render('build', [
+            'id' => $id,
         ]);
     }
     
     // 异步加载报表
-    public function actionReport()
+    public function actionReport($id='',$act='')
     {
-        return $this->render('report', [
-            'reportList' => \datacenter\models\DcReport::find()->where([
+        $reportList = \datacenter\models\DcReport::model()->findModel((in_array($act,['copy','update'])
+            ? [ 'id' => ($id ? $id : '-999') ]
+            : [
                 'create_user' => Yii::$app->user->id,
                 'state' => '9',
-            ])->all(),
+            ]),true);
+        return $this->render('report', [
+            'reportList' => $reportList,
         ]);
     }
     
@@ -115,33 +119,33 @@ class ReportController extends \webadmin\BController
     /**
      * 保存报表
      */
-    public function actionSave($id='',$rid='',$type='',$nid='')
+    public function actionSave($id='',$rid='',$type='',$nid='',$act='')
     {
         $result = [];
         $model = $rid ? DcReport::findOne($rid) : null;
         switch($type){
             case '1': // 数据集
             case '2': // 数据集字段
-                $result = $this->_addReport($result,$model,$id,$rid,$type,$nid);
+                $result = $this->_addReport($result,$model,$id,$rid,$type,$nid,$act);
                 break;
             case '3': // 删除报表
                 $model && $model->delete();
                 $result['success'] = true;
                 break;
             case '4': // 保存报表
-                $result = $this->_saveReport($result,$model,$id,$rid,$type,$nid);
+                $result = $this->_saveReport($result,$model,$id,$rid,$type,$nid,$act);
                 break;
             case '5': // 字段顺序
-                $result = $this->_orderReport($result,$model,$id,$rid,$type,$nid);
+                $result = $this->_orderReport($result,$model,$id,$rid,$type,$nid,$act);
                 break;
             case '6': // 冻结/取消列
-                $result = $this->_frozenReport($result,$model,$id,$rid,$type,$nid);
+                $result = $this->_frozenReport($result,$model,$id,$rid,$type,$nid,$act);
                 break;
             case '7': // 删除列
-                $result = $this->_removeReport($result,$model,$id,$rid,$type,$nid);
+                $result = $this->_removeReport($result,$model,$id,$rid,$type,$nid,$act);
                 break;
             case '8': // 添加编辑列
-                $result = $this->_colReport($result,$model,$id,$rid,$type,$nid);
+                $result = $this->_colReport($result,$model,$id,$rid,$type,$nid,$act);
                 break;
             default:
                 $result['msg'] = "参数有误";
@@ -152,7 +156,7 @@ class ReportController extends \webadmin\BController
     }
     
     // 添加编辑列
-    private function _colReport($result,$model,$id,$rid,$type,$nid)
+    private function _colReport($result,$model,$id,$rid,$type,$nid,$act)
     {
         if($model && ($cModel = $id ? DcReportColumns::findOne($id) : (new DcReportColumns))){
             $cModel->report_id = $cModel->report_id ? $cModel->report_id : $rid;
@@ -168,7 +172,7 @@ class ReportController extends \webadmin\BController
     }
     
     // 删除数据表
-    private function _removeReport($result,$model,$id,$rid,$type,$nid)
+    private function _removeReport($result,$model,$id,$rid,$type,$nid,$act)
     {
         if($model && ($cModel = $id ? DcReportColumns::findOne($id) : null)){
             if(count($model['columns'])<=1){
@@ -184,7 +188,7 @@ class ReportController extends \webadmin\BController
     }
     
     // 冻结/取消数据表
-    private function _frozenReport($result,$model,$id,$rid,$type,$nid)
+    private function _frozenReport($result,$model,$id,$rid,$type,$nid,$act)
     {
         if($model && ($cModel = $id ? DcReportColumns::findOne($id) : null)){
             $result['success'] = true;
@@ -197,7 +201,7 @@ class ReportController extends \webadmin\BController
     }
     
     // 保存数据表
-    private function _saveReport($result,$model,$id,$rid,$type,$nid)
+    private function _saveReport($result,$model,$id,$rid,$type,$nid,$act)
     {
         if($model){
             $model->state = '0';
@@ -213,7 +217,7 @@ class ReportController extends \webadmin\BController
     }
     
     // 排序数据表
-    private function _orderReport($result,$model,$id,$rid,$type,$nid)
+    private function _orderReport($result,$model,$id,$rid,$type,$nid,$act)
     {
         if($model && ($cModel = $id ? DcReportColumns::findOne($id) : null)){
             // 匹配出需要调整顺序的字段
@@ -249,7 +253,7 @@ class ReportController extends \webadmin\BController
     }
     
     // 新增数据表
-    private function _addReport($result,$model,$id,$rid,$type,$nid)
+    private function _addReport($result,$model,$id,$rid,$type,$nid,$act)
     {
         if(empty($id) || !($cModel = $type=='1' ? DcSets::find()->where(['id'=>$id])->with(['columns.sets'])->one() : DcSetsColumns::findOne($id))){
             $result['msg'] = "数据集信息不存在！";
@@ -264,6 +268,10 @@ class ReportController extends \webadmin\BController
         $mainSet = $model&&$model['v_sets'] ? $model['v_mainSet'] : null;
         $mainSet && $mainSet->joinSets($setLists);
         if((!$model || $setLists) && $columns){
+            if(in_array($act,['copy','update'])){
+                $result['msg'] = "当前正在编辑数据报表，无法创建新数据表！";
+                return $result;
+            }
             $model = new DcReport;
             $model->state = 9;
             $model->title = "新报表".date('YmdHis');
@@ -361,21 +369,22 @@ class ReportController extends \webadmin\BController
     }*/
 
     /**
-     * 修改模型
+     * 修改报表
      */
-    /*public function actionUpdate($id)
+    public function actionUpdate($id)
+    {
+        return $this->actionBuild($id);
+    }
+    
+    /**
+     * 复制报表
+     */
+    public function actionCopy($id)
     {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
-        	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息修改成功'));
-            return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
-        }
-
-        return $this->render('update', [
-            'model' => $model,
-        ]);
-    }*/
+        $newModel = $model->copyReport();
+        return $this->actionBuild($newModel['id']);
+    }
 
     /**
      * 删除模型，支持批量删除

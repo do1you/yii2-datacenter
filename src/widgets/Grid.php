@@ -17,7 +17,7 @@ class Grid extends Widget
             'css/datatables.bootstrap.css',
             'js/datatable/buttons/css/buttons.dataTables.min.css',
             'js/datatable/buttons/css/buttons.bootstrap.min.css',
-            'js/datatable/jquery.datatables.js',
+            'js/datatable/jquery.dataTables.js',
             'js/datatable/datatables.bootstrap.min.js',
             'js/datatable/buttons/js/dataTables.buttons.min.js',
             'js/datatable/buttons/js/buttons.bootstrap.min.js',

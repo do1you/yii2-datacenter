@@ -1,8 +1,5 @@
 <?php $content = $this->render('_reports', [
-    'reportList' => \datacenter\models\DcReport::model()->findModel([
-        'create_user' => Yii::$app->user->id,
-        'state' => '9',
-    ],true),
+    'reportList' => $reportList,
 ]);?>
 <?php $this->head() ?>
 <?php $this->beginPage() ?>

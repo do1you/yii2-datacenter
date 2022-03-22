@@ -340,6 +340,30 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
         return $this->_joinSetState;
     }
     
+    // 复制报表
+    public function copyReport()
+    {
+        $model = new DcReport();
+        $attributes = $this->attributes;
+        unset($attributes['id']);
+        if($model->load($attributes, '') && $model->save()){
+            if($this->columns){
+                // 复制字段
+                foreach($this->columns as $col){
+                    $attributes = $col->attributes;
+                    unset($attributes['id']);
+                    $attributes['report_id'] = $model['id'];
+                    $colModel = new DcReportColumns();
+                    $colModel->load($attributes,'');
+                    $colModel->save(false);
+                }
+            }
+            return $model;
+        }else{
+            return false;
+        }
+    }
+    
     // 组装报表数据
     protected function prepareModels()
     {

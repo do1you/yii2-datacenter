@@ -80,14 +80,20 @@ use yii\helpers\Url;
                 	         'class' => '\yii\grid\ActionColumn',
                 	         'buttonOptions' => ['data-pjax'=>'0'],
                     	     'headerOptions'=>['width'=>'120'],
-                    	     'template' => '{show} {delete}',
+                    	     'template' => '{show} {copy} {update} {delete}',
                     	     'buttons'=>[
                     	         'show'=>function($url,$model){
-                    	         return Html::a('<span class="fa fa-navicon"></span>', ['report-view/view', 'id' => $model->id], [
+                    	             return Html::a('<span class="fa fa-navicon"></span>', ['report-view/view', 'id' => $model->id], [
                         	             'title' => Yii::t('datacenter', '查看报表'),
                         	             'target' => '_blank',
                         	             'data-pjax'=>'0',
                         	         ]);
+                        	     },
+                        	     'copy'=>function($url,$model){
+                            	     return Html::a('<span class="fa fa-copy"></span>', $url, [
+                            	         'title' => Yii::t('datacenter', '复制报表'),
+                            	         'data-pjax'=>'0',
+                            	     ]);
                         	     },
                     	     ],
                 	     ],
