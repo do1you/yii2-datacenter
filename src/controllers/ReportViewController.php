@@ -18,7 +18,36 @@ class ReportViewController extends \webadmin\BController
         Yii::$app->controller->currNav[] = Yii::$app->controller->pageTitle;
         Yii::$app->controller->currUrl = $this->module->id.'/report-view/index';
         
+        // 选择动态数据源
+        if(($source = Yii::$app->request->get('source')) && is_array($source)){
+            $sIds = array_keys($source);
+            $models = $sIds ? \datacenter\models\DcSource::findAll($sIds) : [];
+            $models = \yii\helpers\ArrayHelper::map($models, 'id', 'v_self');
+            foreach($source as $sid=>$id){
+                if(isset($models[$sid]) && $id){
+                    Yii::$app->session[$models[$sid]['v_sessionName']] = $id;
+                }
+            }
+        }
+        
         return parent::beforeAction($action);
+    }
+    
+    // 设置场所过滤器
+    public function behaviors()
+    {
+        // 通过token直接登录
+        $behaviors = [
+            'authenticator' => [
+                'class' => \yii\filters\auth\CompositeAuth::className(),
+                'authMethods' => [
+                    \yii\filters\auth\HttpBearerAuth::className(),
+                    \yii\filters\auth\QueryParamAuth::className(),
+                ],
+                'optional' => ['token'],
+            ],            
+        ] + parent::behaviors();
+        return $behaviors;
     }
     
     // 设置数据源

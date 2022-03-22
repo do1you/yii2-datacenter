@@ -14,11 +14,11 @@ $sourceList = $model ? $model['v_source'] : [];
                         $model->set_source = Yii::$app->session[$source['v_sessionName']];
                         echo '<div class="btn-group"><div class="tooltip-primary" data-toggle="tooltip" data-placement="top" data-original-title="'.$source['name'].'">';
                         echo $form->field($model, 'set_source', ['template'=>'{input}','options'=>['class' => '']])
-                        ->select2(\yii\helpers\ArrayHelper::map($source->getAuthorityDynamicList(Yii::$app->user->id), 'id', 'name'),[
+                        ->select2(\yii\helpers\ArrayHelper::map($source->getAuthorityDynamicList(Yii::$app->user->id), 'id', 'name'),array_merge([
                             'class'=>'form-control select-dynamic-source',
                             'source_id'=>$source['id'],
                             'id'=>'select-dynamic-source-'.$source['id'],
-                        ]);
+                        ],(Yii::$app->request->get('source') ? ['readonly'=>'readonly','disabled'=>'disabled'] : [])));
                         echo '</div></div>';
                     }
                 }

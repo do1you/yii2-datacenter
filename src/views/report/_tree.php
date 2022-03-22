@@ -176,7 +176,7 @@ $('#report_div').on('click', '[data-toggle=save]', function(){
                     callback: function(e){
                         var params = box.find('form').serializeJson();
                         $.ajax({
-                            url: '{$url2}?rid='+rid+'&type=4', 
+                            url: '{$url2}&rid='+rid+'&type=4', 
                             type: 'POST',
                             data: params, 
                             dataType: 'json',
@@ -245,7 +245,7 @@ $(document).contextmenu({
                                 callback: function(e){
                                     var params = box.find('form').serializeJson();
                                     $.ajax({
-                                        url: '{$url2}?id='+colnmnId+'&rid='+reportId+'&type=8', 
+                                        url: '{$url2}&id='+colnmnId+'&rid='+reportId+'&type=8', 
                                         type: 'POST',
                                         data: params, 
                                         dataType: 'json',
