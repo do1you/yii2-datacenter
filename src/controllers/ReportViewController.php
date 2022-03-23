@@ -61,6 +61,11 @@ class ReportViewController extends \webadmin\BController
     // 设置场所过滤器
     public function behaviors()
     {
+        // 已登录用户免判断
+        if(!Yii::$app->user->isGuest){
+            return parent::behaviors();
+        }
+        
         // 通过token直接登录
         $behaviors = [
             'authenticator' => [

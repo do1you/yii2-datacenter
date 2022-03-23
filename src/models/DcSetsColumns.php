@@ -116,7 +116,10 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function getV_column()
     {
         $column = $this->v_field;
-        if(preg_match("/[\+\-\*\/]/",$column)){
+        if(strpos($column, '.')!==false){
+            $column = $this->sets ? $this->sets->formatSql($column) : $column;
+            return "({$column})";
+        }elseif(preg_match("/[\+\-\*\/]/",$column)){
             return "({$this->model['v_alias']}.{$column})";
         }else{
             return "{$this->model['v_alias']}.{$column}";
