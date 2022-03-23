@@ -12,6 +12,31 @@ use datacenter\models\DcRoleAuthority;
 
 class ReportViewController extends \webadmin\BController
 {
+    // 初始化
+    public function init()
+    {
+        parent::init();
+        
+        // 签名效验
+        if(Yii::$app->user->isGuest){
+            $token = Yii::$app->request->get('access-token');
+            $params = Yii::$app->request->get();
+            $sign = isset($params['sign']) ? $params['sign'] : '';
+            $dev = isset($params['dev']) ? $params['dev'] : '';
+            unset($params['sign'],$params['dev']);
+            $user = $token ? \webadmin\modules\authority\models\AuthUser::findOne(['access_token' => $token, 'state' => '0']) : null;
+
+            if(($token || $sign) && $this->signKey($params, $user['password']) != $sign) { //  && !YII_DEBUG
+                if(!empty($dev) && $dev=='ylltdev') { // 调试模式输出串码
+                    print_r($this->signKey($params, $user['password'], true));
+                    exit;
+                } else {
+                    throw new \yii\web\HttpException(200, Yii::t('datacenter','签名效验失败'));
+                }
+            }
+        }
+    }
+    
     // 执行前
     public function beforeAction($action){
         Yii::$app->controller->pageTitle = Yii::t('datacenter', '数据报表');
@@ -217,5 +242,21 @@ class ReportViewController extends \webadmin\BController
         }
         
         throw new \yii\web\NotFoundHttpException(Yii::t('common','您查询的模型对象不存在'));
+    }
+    
+    // 生成签名
+    private function signKey($params = [], $signKey = 'test', $return = false)
+    {
+        ksort($params);
+        $signStr = http_build_query($params, '', '|');
+        $sign = hash("sha256", ($signStr . $signKey));
+        if($return) {
+            return [
+                'sign' => $sign,
+                'signStr' => $signStr . '{私钥}',
+            ];
+        }else{
+            return $sign;
+        }
     }
 }

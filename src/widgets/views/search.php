@@ -3,6 +3,13 @@ use yii\helpers\Html;
 use webadmin\widgets\ActiveForm;
 
 $searchList = $model->getSearchModels();
+$params = Yii::$app->request->get();
+$params[0] = Yii::$app->controller->action->id;
+$pagination = $model['pagination'];
+unset($params['SysConfig'],$params['is_export'],$params['_'],$params['t'],$params['sign']);
+if($pagination){
+    unset($params[$pagination->pageSizeParam],$params[$pagination->pageParam]);
+}
 ?>
 <?php if(!empty($searchList)):?>
     <div class="row dataconter-search">
@@ -10,7 +17,7 @@ $searchList = $model->getSearchModels();
     		<div class="widget margin-bottom-20">
     			<div class="widget-body bordered-left bordered-themeprimary">
                     <?php $form = ActiveForm::begin([
-                        'action' => [Yii::$app->controller->action->id,'id'=>Yii::$app->request->get('id'),],
+                        'action' => $params,
                         'method' => 'get',
                         'enableClientScript' => false,
                         'enableClientValidation' => false,
