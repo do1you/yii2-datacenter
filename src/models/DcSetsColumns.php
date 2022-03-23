@@ -19,6 +19,11 @@ use Yii;
 class DcSetsColumns extends \webadmin\ModelCAR
 {
     /**
+     * 查询参数缓存
+     */
+    private $v_search_params_cache;
+    
+    /**
      * 返回数据库表名称
      */
     public static function tableName()
@@ -35,7 +40,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             [['name', 'label', 'set_id'], 'required'],
             [['set_id', 'is_search', 'paixu'], 'integer'],
             [['name', 'label', 'type', 'model_id', 'formula', 'fun', 'is_frozen', 'search_params'], 'safe'],
-            [['name', 'label', 'type', 'fun'], 'string', 'max' => 50],
+            [['name', 'label', 'type', 'fun', 'search_value'], 'string', 'max' => 50],
             [['formula', 'sql_formula'], 'string', 'max' => 150],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
         ];
@@ -55,6 +60,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'is_search' => Yii::t('datacenter', '是否可查'),
             'type' => Yii::t('datacenter', '查询类型'),
             'search_params' => Yii::t('datacenter', '查询参数'),
+            'search_value' => Yii::t('datacenter', '条件默认值'),
             'formula' => Yii::t('datacenter', '计算公式'),
             'sql_formula' => Yii::t('datacenter', 'SQL公式'),
             'fun' => Yii::t('datacenter', '处理函数'),
@@ -177,20 +183,24 @@ class DcSetsColumns extends \webadmin\ModelCAR
     // 配置参数数组
     public function getV_search_params()
     {
-        $search_params = $this->search_params ? $this->search_params : "";
-        $result = [];
-        $list = explode("\n", $search_params);
-        if($list){
-            foreach($list as $val){
-                if(stripos($val,'|')===false){
-                    $result[$val] = $val;
-                }else{
-                    list($k,$v) = explode('|',$val);
-                    $result[$k] = $v;
+        if($this->v_search_params_cache === null){
+            $search_params = $this->search_params ? $this->search_params : "";
+            $result = [];
+            $list = explode("\n", $search_params);
+            if($list){
+                foreach($list as $val){
+                    if(stripos($val,'|')===false){
+                        $result[$val] = $val;
+                    }else{
+                        list($k,$v) = explode('|',$val);
+                        $result[$k] = $v;
+                    }
                 }
             }
+            $this->v_search_params_cache = $result;
         }
-        return $result;
+        
+        return $this->v_search_params_cache;
     }
     
     // 配置参数网络
@@ -202,6 +212,67 @@ class DcSetsColumns extends \webadmin\ModelCAR
         }else{
             return \yii\helpers\Url::to($search_params);
         }
+    }
+    
+    // 返回默认值
+    public function getV_search_value()
+    {
+        $finance_sec = 36000; // 定义营业日自然时间误差10个小时
+        $defaultValue = $this->search_value;
+        switch($defaultValue){
+            case 'doyesterday': // 昨天营业日
+                $currTime = $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d')) - 3600 * 24 + $finance_sec));
+                $endTime = date('Y-m-d H:i:s', (strtotime($startTime) + 3600 * 24 - 1));
+                break;
+            case 'yesterday': // 昨天自然日
+                $currTime = $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d')) - 3600 * 24));
+                $endTime = date('Y-m-d H:i:s', (strtotime($startTime) + 3600 * 24 - 1));
+                break;
+            case 'dotoday': // 当天营业日
+                $currTime = $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d')) + $finance_sec));
+                $endTime = date('Y-m-d H:i:s', (strtotime($startTime) + 3600 * 24 - 1));
+                break;
+            case 'today': // 当天自然日
+                $currTime = $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d'))));
+                $endTime = date('Y-m-d H:i:s', (strtotime($startTime) + 3600 * 24 - 1));
+                break;
+            case 'prevweek': // 上周
+                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-1 week', time()))) + $finance_sec));
+                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-1 week last monday', time()))) + $finance_sec));
+                $endTime = date('Y-m-d H:i:s', (strtotime($startTime) + 3600 * 24 * 7 - 1));
+                break;
+            case 'currweek': // 本周
+                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-0 week', time()))) + $finance_sec));
+                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-0 week last monday', time()))) + $finance_sec));
+                $endTime = date('Y-m-d H:i:s', (strtotime($startTime) + 3600 * 24 * 7 - 1));
+                break;
+            case 'prevmonth': // 上月
+                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-1 month'))) + $finance_sec));
+                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-01', strtotime('-1 month'))) + $finance_sec));
+                $endTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-t', strtotime('-1 month'))) + 3600*24 + $finance_sec));
+                break;
+            case 'currmonth': // 本月
+                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-0 month'))) + $finance_sec));
+                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-01', strtotime('-0 month'))) + $finance_sec));
+                $endTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-t', strtotime('-0 month'))) + 3600*24 + $finance_sec));
+                break;
+        }
+        
+        if(!empty($startTime) && !empty($endTime)){
+            if($this['type']=='datetimerange'){
+                $defaultValue = date('Y-m-d H:i:s',strtotime($startTime)).' 至 '.date('Y-m-d H:i:s',strtotime($endTime));
+            }elseif($this['type']=='daterange'){
+                $defaultValue = date('Y-m-d',strtotime($startTime)).' 至 '.date('Y-m-d',strtotime($startTime));
+            }elseif($this['type']=='datetime'){
+                $defaultValue = date('Y-m-d H:i:s',strtotime($currTime));
+            }elseif($this['type']=='date'){
+                $defaultValue = date('Y-m-d',strtotime($currTime));
+            }elseif($this['type']=='time'){
+                $defaultValue = date('H:i:s',strtotime($currTime));
+            }
+        }
+        
+        return $defaultValue;
     }
     
     // 删除判断

@@ -111,7 +111,7 @@ $('#dcsetscolumns-name').on('change',function(){
 // 选择是否可查
 $('#dcsetscolumns-is_search').on('change',function(){
     var value = $(this).val();
-    $('#dcsetscolumns-type').closest('.form-group')[value=='1' ? 'slideDown' : 'slideUp']();
+    $('#dcsetscolumns-type,#dcsetscolumns-search_params').closest('.form-group')[value=='1' ? 'slideDown' : 'slideUp']();
 }).triggerHandler('change');
 ");
 ?>

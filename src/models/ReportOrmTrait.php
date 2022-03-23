@@ -146,31 +146,22 @@ trait ReportOrmTrait
         $params = Yii::$app->request->get("SysConfig",[]);
         foreach($this->columns as $item){
             if($this instanceof DcReport){ // 报表
-                if(($colnmn = $item['setsCol']) && $item['setsCol']['model_id']){
-                    $_ = [
-                        'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
-                        'value' => $params[$item['v_alias']],
-                        'attribute' => $item['v_alias'],
-                        'label_name' => $colnmn['v_label'],
-                        'config_params' => $colnmn['search_params'],
-                        'v_config_params' => $colnmn['v_search_params'],
-                        'v_config_ajax' => $colnmn['v_search_ajax'],
-                    ];
-                    $list[] = $_;
-                }
+                $colnmn = $item['setsCol'];
             }elseif($this instanceof DcSets){ // 数据集
-                if($item['model_id']){
-                    $_ = [
-                        'config_type' => ($item['type'] ? $item['type'] : 'text'),
-                        'value' => $params[$item['v_alias']],
-                        'attribute' => $item['v_alias'],
-                        'label_name' => $item['v_label'],
-                        'config_params' => $item['search_params'],
-                        'v_config_params' => $item['v_search_params'],
-                        'v_config_ajax' => $item['v_search_ajax'],
-                    ];
-                    $list[] = $_;
-                }
+                $colnmn = $item;
+            }
+            
+            if($colnmn && $colnmn['model_id']){
+                $_ = [
+                    'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
+                    'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_value']),
+                    'attribute' => $item['v_alias'],
+                    'label_name' => $colnmn['v_label'],
+                    'config_params' => $colnmn['search_params'],
+                    'v_config_params' => $colnmn['v_search_params'],
+                    'v_config_ajax' => $colnmn['v_search_ajax'],
+                ];
+                $list[] = $_;
             }
         }
         return $list;
