@@ -153,6 +153,7 @@ $('#report_div').on('click', '[data-toggle=dispose]', function(){
             if(json.success){
                 $('#report_div').load('{$url3}');
             }else{
+                $('#report_div').load('{$url3}');
                 Notify((json.msg || json.message || '操作失败！'), 'top-right', '5000', 'darkorange', 'fa-warning', true);
             }
         });

@@ -129,8 +129,11 @@ class ReportController extends \webadmin\BController
                 $result = $this->_addReport($result,$model,$id,$rid,$type,$nid,$act);
                 break;
             case '3': // 删除报表
-                $model && $model->delete();
-                $result['success'] = true;
+                if($model && $model->state=='9' && $model->delete()){
+                    $result['success'] = true;
+                }else{
+                    $result['msg'] = "编辑报表时不允许删除操作，请返回报表管理界面删除！";
+                }
                 break;
             case '4': // 保存报表
                 $result = $this->_saveReport($result,$model,$id,$rid,$type,$nid,$act);
