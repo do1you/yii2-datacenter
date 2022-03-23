@@ -60,7 +60,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'is_search' => Yii::t('datacenter', '是否可查'),
             'type' => Yii::t('datacenter', '查询类型'),
             'search_params' => Yii::t('datacenter', '查询参数'),
-            'search_value' => Yii::t('datacenter', '条件默认值'),
+            'search_value' => Yii::t('datacenter', '查询默认值'),
             'formula' => Yii::t('datacenter', '计算公式'),
             'sql_formula' => Yii::t('datacenter', 'SQL公式'),
             'fun' => Yii::t('datacenter', '处理函数'),

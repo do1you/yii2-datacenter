@@ -59,11 +59,6 @@ class DcAttribute extends \webadmin\ModelCAR
     }
     
     // 获取模型关系
-    public function getDcmodel(){
-        return $this->getModel();
-    }
-    
-    // 获取模型关系
     public function getModel(){
         return $this->hasOne(DcModel::className(), ['id'=>'model_id']);
     }
@@ -88,7 +83,7 @@ class DcAttribute extends \webadmin\ModelCAR
     // 返回格式化名称
     public function getV_name()
     {
-        return $this->dcmodel['tb_name'].'.'.$this->name.($this->label ? "【{$this->label}】" : "");
+        return $this->model['tb_name'].'.'.$this->name.($this->label ? "【{$this->label}】" : "");
     }
     
     // 返回字段格式化名称

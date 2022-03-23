@@ -35,10 +35,7 @@ use webadmin\widgets\ActiveForm;
 
 			<?php if($model['sets']['set_type']=='model'):?>
             	<?= $form->field($model, 'model_id',['options'=>['class'=>'form-group box_form box_model']])->textInput()->selectajax(\yii\helpers\Url::toRoute('model'),[]) ?>
-            	
-            	<?= $form->field($model, 'fun')->textInput(['maxlength' => true])->dropDownList($model->getV_fun(false), ['prompt'=>'请选择']) ?>
   			<?php endif;?>
-			
             
         	<?php if($model['sets']['set_type']=='model' && $model['model']):?>
         		<?php 
@@ -50,6 +47,10 @@ use webadmin\widgets\ActiveForm;
         		<?= $form->field($model, 'name')->textInput(['maxlength' => true])->select2($list, ['prompt'=>'默认']) ?>
         		
         		<?= $form->field($model, 'label')->textInput(['maxlength' => true]) ?>
+        		
+        		<?= $form->field($model, 'fun')->textInput(['maxlength' => true])->dropDownList($model->getV_fun(false), ['prompt'=>'请选择']) ?>
+        		
+        		<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true]) ?>
     		<?php elseif($model['sets']['set_type']=='sql'):?>
     			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
         		
@@ -59,8 +60,6 @@ use webadmin\widgets\ActiveForm;
         		
         		<?= $form->field($model, 'label')->textInput(['maxlength' => true]) ?>
         	<?php endif;?>
-        	
-        	<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true]) ?>
             
             <?= $form->field($model, 'formula')->textInput(['maxlength' => true])->hint('通过字段结果公式计算，以标签做主键计算，例：{微信}+{支付宝}+{银行卡}+{现金}') ?>
             
@@ -71,6 +70,8 @@ use webadmin\widgets\ActiveForm;
             <?= $form->field($model, 'paixu')->textInput(['maxlength' => true]) ?>
             
             <?= $form->field($model, 'type')->textInput(['maxlength' => true])->dropDownList($model->getV_type(false), ['prompt'=>'请选择']) ?>
+            
+            <?= $form->field($model, 'search_value')->textInput(['maxlength' => true]) ?>
             
             <?= $form->field($model, 'search_params')->textarea(['rows' => 6]) ?>
             

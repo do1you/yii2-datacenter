@@ -175,7 +175,7 @@ class SetsColController extends \webadmin\BController
      */
     protected function findModel($id)
     {
-        if (($model = DcSetsColumns::findOne($id)) !== null) {
+        if (($model = DcSetsColumns::find()->where(['id'=>$id])->with(['model','model.columns.model.source'])->one()) !== null) {
             return $model;
         }
 
