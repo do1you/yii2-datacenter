@@ -235,6 +235,8 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
             'columns.sets.mainModel.sourceRelation.targetModel',
             'columns.setsCol.column',
             'columns.setsCol.model',
+            'columns.sets.columns.sets.columns.model',
+            'columns.setsCol.sets.columns.model',
         ]);
         
         return ($muli ? $query->all() : $query->one());

@@ -317,10 +317,10 @@ class DcSetsRelation extends \webadmin\ModelCAR
         
         // 写入条件
         if($values){
-            $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
+            $reverse ? $source->where($columns, $values, false, true) : $target->where($columns, $values, false, true);
         }else{
-            $reverse ? $source->where($columns, []) : $target->where($columns, []);
-        }
+            $reverse ? $source->where($columns, [], false, true) : $target->where($columns, [], false, true);
+        } 
         
         // 分组写入
         if($this['rel_type']=='group'){

@@ -303,6 +303,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     {
         $query = parent::findByCondition($condition)->with([
             'columns.column',
+            'columns.sets',
             'columns.model.sourceRelation.sourceModel',
             'columns.model.sourceRelation.targetModel',
             'columns.model.columns.model',
@@ -336,21 +337,34 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     // 格式化计算公式字符串
     public function formatValue($values, $columns)
     {
-        if($this->_replace_params === null || !isset($this->_replace_params['format_formulas']) || !isset($this->_replace_params['format_labels'])){
-            $formatLabels = $formatFormulas = [];
+        // 一次性匹配出模板
+        if($this->_replace_params === null 
+            || !isset($this->_replace_params['format_formulas']) 
+            || !isset($this->_replace_params['format_labels'])
+            || !isset($this->_replace_params['format_dd'])
+        ){
+            $formatDd = $formatLabels = $formatFormulas = [];
             foreach($columns as $col){
                 if($col['formula']){
                     $formatFormulas[$col['v_alias']] = $col['formula'];
+                }
+                if(isset($col['type']) && in_array($col['type'],['dd', 'ddmulti', 'select', 'selectmult', 'select2', 'select2mult', 'ddselect2', 'ddselect2multi'])){
+                    $formatDd[$col['v_alias']] = $col;
                 }
                 
                 $formatLabels[$col['v_format_label']] = "\${$col['v_alias']}";
             }
             $this->_replace_params['format_formulas'] = $formatFormulas;
             $this->_replace_params['format_labels'] = $formatLabels;
+            $this->_replace_params['format_dd'] = $formatDd;
         }
         
+        // 数据过滤
         $formatFormulas = $this->_replace_params['format_formulas'];
         $formatLabels = $this->_replace_params['format_labels'];
+        $formatDd = $this->_replace_params['format_dd'];
+        
+        // 公式数据
         if($formatFormulas && is_array($formatFormulas)){
             $search = $formatLabels ? array_keys($formatLabels) : [];
             $replace = $formatLabels ? array_values($formatLabels) : [];
@@ -366,13 +380,34 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 }catch(\Exception $e) {
                 }
             }
-        }else{
-            foreach($values as $key=>$v){
-                if(strlen($v)<=0){
-                    $values[$key] = '&nbsp;';
-                }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && substr($v,0,1)!='0'){
-                    $values[$key] = floatval($v);
+        }
+        
+        // 选项数据
+        foreach($values as $key=>$v){
+            if(isset($formatDd[$key]) && isset($formatDd[$key]['type']) && strlen($v)>0){
+                switch($formatDd[$key]['type']){
+                    // 数据字典
+                    case 'dd':
+                    case 'ddmulti':
+                    case 'ddselect2':
+                    case 'ddselect2multi':
+                        $value = !empty($formatDd[$key]['search_params']) ? \webadmin\modules\config\models\SysLdItem::dd($formatDd[$key]['search_params'],$v) : null;
+                        $values[$key] = $value!==null ? $value : $v;
+                        break;
+                        // 下拉选项
+                    case 'select':
+                    case 'selectmult':
+                    case 'select2':
+                    case 'select2mult':
+                        $v_search_params = $formatDd[$key]['v_search_params'];
+                        $value = is_array($v_search_params)&&isset($v_search_params[$v]) ? $v_search_params[$v] : null;
+                        $values[$key] = $value!==null ? $value : $v;
+                        break;
                 }
+            }elseif(strlen($v)<=0){
+                $values[$key] = '&nbsp;';
+            }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && substr($v,0,1)!='0'){
+                $values[$key] = floatval($v);
             }
         }
         
@@ -383,6 +418,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     public function filterSelect($cIds = [])
     {
         if($cIds){
+            $cIds = is_array($cIds) ? $cIds : [$cIds];
             if($this->filterSelectIds === null){
                 $this->filterSelectIds = [];
             }
@@ -395,7 +431,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     public function selectColumns(\yii\db\Query $query)
     {
         foreach($this->columns as $col){
-            if($this->filterSelectIds===null || (is_array($this->filterSelectIds) && in_array($col['id'], $this->filterSelectIds))){
+            if($this->filterSelectIds===null || (is_array($this->filterSelectIds) && (in_array($col['id'], $this->filterSelectIds) || in_array($col['name'], $this->filterSelectIds)))){
                 $col->selectColumn($query);
             }
         }
@@ -529,7 +565,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     }
     
     // 数据集关联条件过滤，参数：查询字段，查询值
-    public function where($columns, $values, $op = false)
+    public function where($columns, $values, $op = false, $addSelect = false)
     {
         $dataProvider = $this->getDataProvider();
         switch($this->set_type){
@@ -540,6 +576,11 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             case 'script': // 脚本
                 break;
             case 'model': // 数据库模型
+                if($addSelect){
+                    $this->filterSelect($columns);
+                    $this->selectColumns($dataProvider->query);
+                }
+                    
                 $columns = $this->getFormatColumns($columns, $values);
                 
                 if($op && !is_array($columns) && !is_array($values)){
