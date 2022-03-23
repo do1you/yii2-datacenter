@@ -101,6 +101,12 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return \webadmin\modules\config\models\SysLdItem::dd('dc_db_fun', ($val !== null ? $val : $this->fun));
     }
     
+    // 获取查询默认值
+    public function getV_search_value($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('dc_search_defval', ($val !== null ? $val : $this->search_value));
+    }
+    
     // 获取是否冻结
     public function getV_is_frozen($val = null)
     {
@@ -215,7 +221,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     }
     
     // 返回默认值
-    public function getV_search_value()
+    public function getV_search_defval()
     {
         $finance_sec = 36000; // 定义营业日自然时间误差10个小时
         $defaultValue = $this->search_value;

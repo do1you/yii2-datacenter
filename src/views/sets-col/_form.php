@@ -71,7 +71,7 @@ use webadmin\widgets\ActiveForm;
             
             <?= $form->field($model, 'type')->textInput(['maxlength' => true])->dropDownList($model->getV_type(false), ['prompt'=>'请选择']) ?>
             
-            <?= $form->field($model, 'search_value')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'search_value')->textInput(['maxlength' => true])->dropDownList($model->getV_search_value(false), ['prompt'=>'请选择']) ?>
             
             <?= $form->field($model, 'search_params')->textarea(['rows' => 6]) ?>
             
@@ -112,7 +112,7 @@ $('#dcsetscolumns-name').on('change',function(){
 // 选择是否可查
 $('#dcsetscolumns-is_search').on('change',function(){
     var value = $(this).val();
-    $('#dcsetscolumns-type,#dcsetscolumns-search_params').closest('.form-group')[value=='1' ? 'slideDown' : 'slideUp']();
+    $('#dcsetscolumns-type,#dcsetscolumns-search_params,#dcsetscolumns-search_value').closest('.form-group')[value=='1' ? 'slideDown' : 'slideUp']();
 }).triggerHandler('change');
 ");
 ?>

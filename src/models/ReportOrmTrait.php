@@ -154,7 +154,7 @@ trait ReportOrmTrait
             if($colnmn && $colnmn['model_id']){
                 $_ = [
                     'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
-                    'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_value']),
+                    'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),
                     'attribute' => $item['v_alias'],
                     'label_name' => $colnmn['v_label'],
                     'config_params' => $colnmn['search_params'],
