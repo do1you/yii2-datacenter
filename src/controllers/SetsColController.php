@@ -48,6 +48,16 @@ class SetsColController extends \webadmin\BController
                     'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
                 ]),
             ],
+            // 数据字典
+            'dd' => [
+                'class' => '\webadmin\actions\Select2Action',
+                'className' => '\webadmin\modules\config\models\SysLdItem',
+                'col_id' => 'ident',
+                'col_text' => ['name','ident'],
+                'col_v_text' => 'name',
+                'col_where' => ['parent_id'=>'0'],
+                //'model_withs' => [],
+            ],
         ];
     }
     
@@ -114,6 +124,7 @@ class SetsColController extends \webadmin\BController
     {
         $model = new DcSetsColumns();
         $model->loadDefaultValues();
+        $model->setScenario('insertForm');
         
         if($sId) $model->set_id = $sId;
         if($mId) $model->model_id = $mId;
@@ -135,6 +146,7 @@ class SetsColController extends \webadmin\BController
     public function actionUpdate($id,$sId='',$mId='',$cName='')
     {
         $model = $this->findModel($id);
+        $model->setScenario('updateForm');
         
         if($sId) $model->set_id = $sId;
         if($mId) $model->model_id = $mId;

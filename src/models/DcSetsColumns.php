@@ -24,6 +24,11 @@ class DcSetsColumns extends \webadmin\ModelCAR
     private $v_search_params_cache;
     
     /**
+     * 表单扩展
+     */
+    public $search_params_text,$search_params_dd,$search_value_text;
+    
+    /**
      * 返回数据库表名称
      */
     public static function tableName()
@@ -43,6 +48,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             [['name', 'label', 'type', 'fun', 'search_value'], 'string', 'max' => 50],
             [['formula', 'sql_formula'], 'string', 'max' => 150],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
+            [['search_params_text', 'search_params_dd', 'search_value_text'], 'safe', 'on'=>['insertForm','updateForm']],
         ];
     }
 
@@ -59,13 +65,16 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'label' => Yii::t('datacenter', '标签'),
             'is_search' => Yii::t('datacenter', '是否可查'),
             'type' => Yii::t('datacenter', '查询类型'),
-            'search_params' => Yii::t('datacenter', '查询参数'),
-            'search_value' => Yii::t('datacenter', '查询默认值'),
             'formula' => Yii::t('datacenter', '计算公式'),
             'sql_formula' => Yii::t('datacenter', 'SQL公式'),
             'fun' => Yii::t('datacenter', '处理函数'),
             'paixu' => Yii::t('datacenter', '排序'),
             'is_frozen' => Yii::t('datacenter', '是否冻结'),
+            'search_params' => Yii::t('datacenter', '查询参数'),
+            'search_value' => Yii::t('datacenter', '查询默认值'),
+            'search_params_text' => Yii::t('datacenter', '查询参数'),
+            'search_params_dd' => Yii::t('datacenter', '查询字典'),
+            'search_value_text' => Yii::t('datacenter', '查询默认值'),
         ];
     }
     
@@ -293,10 +302,26 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return parent::delete();
     }
     
+    // 查询后
+    public function afterFind()
+    {
+        if(in_array($this->type, ['mask', 'selectajax', 'selectajaxmult'] )){
+            $this->search_params_text = $this->search_params;
+        }elseif(in_array($this->type, ['dd', 'ddmulti', 'ddselect2', 'ddselect2multi'] )){
+            $this->search_params_dd = $this->search_params;
+        }
+        if(!in_array($this->type, ['datetimerange', 'daterange', 'datetime', 'date'] )){
+            $this->search_value_text =  $this->search_value;
+        }
+        
+        return parent::afterFind();
+    }
+    
     // 保存前动作
     public static $_updateModelIds = [];
     public function beforeSave($insert)
     {
+        // 验证模型是否可保存
         if($this->model_id && !in_array($this->model_id, DcSetsColumns::$_updateModelIds) 
             && $this->sets && $this->sets['set_type']=='model' && $this->sets->mainModel
         ){
@@ -312,6 +337,18 @@ class DcSetsColumns extends \webadmin\ModelCAR
                 throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的模型关系')."{$model['tb_label']}({$model['id']}.{$model['tb_name']})");
             }else{
                 self::$_updateModelIds[] = $this->model_id; // 记录已存在模型关系，不用多次更新
+            }
+        }
+        
+        // 查询默认值和参数保存
+        if(in_array($this->scenario, ['insertForm', 'updateForm'])){
+            if(in_array($this->type, ['mask', 'selectajax', 'selectajaxmult'] )){
+                $this->search_params = $this->search_params_text;
+            }elseif(in_array($this->type, ['dd', 'ddmulti', 'ddselect2', 'ddselect2multi'] )){
+                $this->search_params = $this->search_params_dd;
+            }
+            if(!in_array($this->type, ['datetimerange', 'daterange', 'datetime', 'date'] )){
+                $this->search_value =  $this->search_value_text;
             }
         }
         

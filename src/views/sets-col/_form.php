@@ -63,17 +63,24 @@ use webadmin\widgets\ActiveForm;
             
             <?= $form->field($model, 'formula')->textInput(['maxlength' => true])->hint('通过字段结果公式计算，以标签做主键计算，例：{微信}+{支付宝}+{银行卡}+{现金}') ?>
             
-            <?= $form->field($model, 'is_search')->textInput()->dropDownList($model->getV_is_search(false), []) ?>
+            <?= $form->field($model, 'paixu')->textInput(['maxlength' => true]) ?>
             
             <?= $form->field($model, 'is_frozen')->textInput()->dropDownList($model->getV_is_frozen(false), []) ?>
             
-            <?= $form->field($model, 'paixu')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'is_search')->textInput()->dropDownList($model->getV_is_search(false), []) ?>
             
             <?= $form->field($model, 'type')->textInput(['maxlength' => true])->dropDownList($model->getV_type(false), ['prompt'=>'请选择']) ?>
             
             <?= $form->field($model, 'search_value')->textInput(['maxlength' => true])->dropDownList($model->getV_search_value(false), ['prompt'=>'请选择']) ?>
             
-            <?= $form->field($model, 'search_params')->textarea(['rows' => 6]) ?>
+            <?= $form->field($model, 'search_value_text')->textInput(['maxlength' => true]) ?>
+            
+            <?= $form->field($model, 'search_params')->textarea(['rows' => 6])->hint('每行一个选项，值和名称用“|”分隔，示例：value|name') ?>
+            
+            <?= $form->field($model, 'search_params_text')->textInput(['maxlength' => true])
+                ->hint('格式化文本：正则表达式（9:[0-9], a:[A-Za-z], w:[A-Za-z0-9], *:.）；<br>异步下拉：表名.取值字段.显示字段（table.key.text）')?>
+            
+            <?= $form->field($model, 'search_params_dd')->textInput()->selectajax(\yii\helpers\Url::toRoute('dd'), []) ?>
             
             <?php if(Yii::$app->controller->action->id!='view'):?>
                 <div class="form-group">
@@ -111,8 +118,37 @@ $('#dcsetscolumns-name').on('change',function(){
 });
 // 选择是否可查
 $('#dcsetscolumns-is_search').on('change',function(){
-    var value = $(this).val();
-    $('#dcsetscolumns-type,#dcsetscolumns-search_params,#dcsetscolumns-search_value').closest('.form-group')[value=='1' ? 'slideDown' : 'slideUp']();
+    $('#dcsetscolumns-type').triggerHandler('change');
+}).triggerHandler('change');
+// 选择查询类型
+$('#dcsetscolumns-type').on('change',function(){
+    var isSearch = $('#dcsetscolumns-is_search').val(),
+        value = $(this).val(),
+        fn = function(id,isShow){ $(id).closest('.form-group')[isShow ? 'slideDown' : 'slideUp'](); };
+    fn('#dcsetscolumns-search_params,#dcsetscolumns-search_params_text,#dcsetscolumns-search_params_dd,#dcsetscolumns-search_value,#dcsetscolumns-search_value_text');
+    if(isSearch=='1'){
+        fn(this,1);
+        if(value=='dd' || value=='ddmulti' || value=='ddselect2' || value=='ddselect2multi'){
+            // 字典选项
+            fn('#dcsetscolumns-search_value_text,#dcsetscolumns-search_params_dd',1);
+        }else if(value=='datetimerange' || value=='daterange' || value=='datetime' || value=='date'){
+            // 时间选项
+            fn('#dcsetscolumns-search_value',1);
+        }else if(value=='select' || value=='select2' || value=='select2mult' || value=='selectmult'){
+            // 下拉选项
+            fn('#dcsetscolumns-search_value_text,#dcsetscolumns-search_params',1);
+        }else{
+            // 其他
+            fn('#dcsetscolumns-search_value_text',1);
+            if(value=='mask' || value=='selectajax' || value=='selectajaxmult'){
+                fn('#dcsetscolumns-search_params_text',1);
+            }
+        }
+    }else{
+        fn(this);
+    }
+    
+
 }).triggerHandler('change');
 ");
 ?>
