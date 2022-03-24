@@ -50,7 +50,7 @@ use yii\helpers\Url;
                 	     'default',
                 	     [
                 	         'attribute' => 'model_id',
-                	         'value' => 'dcmodel.v_tb_name',
+                	         'value' => 'model.v_tb_name',
                 	         'filter' => false,
                 	     ],
                 	     [

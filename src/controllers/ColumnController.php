@@ -46,7 +46,7 @@ class ColumnController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcAttribute();
-		$dataProvider = $model->search(Yii::$app->request->queryParams,[],['dcmodel.source']);
+		$dataProvider = $model->search(Yii::$app->request->queryParams,[],['model.source']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 
