@@ -147,6 +147,16 @@ class DcSetsColumns extends \webadmin\ModelCAR
         }
     }
     
+    // 返回带函数的格式化名称
+    public function getV_fncolumn()
+    {
+        if($this->fun){
+            return "{$this->fun}({$this->v_column})";
+        }
+        return $this->v_column;
+    }
+    
+    
     // 返回字段格式化别名
     public function getV_column_alias()
     {
@@ -360,7 +370,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     {
         if(!$this->formula){
             if($this->fun){
-                return $query->addSelect(["{$this->fun}({$this->v_column}) as {$this->v_alias}"]);
+                return $query->addSelect(["{$this->v_fncolumn} as {$this->v_alias}"]);
             }else{
                 return $query->addSelect(["{$this->v_column_alias}"]);
             }

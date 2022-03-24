@@ -167,7 +167,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         if(is_array($columns)){
             foreach($columns as $k=>$col){
                 if(isset($colModels[$col])){
-                    $columns[$k] = $colModels[$col]['v_column'];
+                    $columns[$k] = $colModels[$col]['v_fncolumn'];
                 }
             }
             if($values && is_array($values)){
@@ -179,7 +179,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             }
         }else{
             if(isset($colModels[$columns])){
-                $columns = $colModels[$columns]['v_column'];
+                $columns = $colModels[$columns]['v_fncolumn'];
             }
         }
         
@@ -565,7 +565,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     }
     
     // 数据集关联条件过滤，参数：查询字段，查询值
-    public function where($columns, $values, $op = false, $addSelect = false)
+    public function where($columns, $values, $op = false, $option = false)
     {
         $dataProvider = $this->getDataProvider();
         switch($this->set_type){
@@ -576,7 +576,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             case 'script': // 脚本
                 break;
             case 'model': // 数据库模型
-                if($addSelect){
+                if($option===true){
                     $this->filterSelect($columns);
                     $this->selectColumns($dataProvider->query);
                 }
@@ -586,16 +586,24 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 if($op && !is_array($columns) && !is_array($values)){
                     if($op=='like'){
                         $likeKeyword = $dataProvider->db->driverName === 'pgsql' ? 'ilike' : 'like';
-                        $dataProvider->query->andFilterWhere([$likeKeyword, $columns, $values]);
+                        $option=='having' 
+                            ? $dataProvider->query->andFilterHaving([$likeKeyword, $columns, $values]) 
+                            : $dataProvider->query->andFilterWhere([$likeKeyword, $columns, $values]);
                     }else{
-                        $dataProvider->query->andFilterWhere([$op, $columns, $values]);
+                        $option=='having' 
+                            ? $dataProvider->query->andFilterHaving([$op, $columns, $values]) 
+                            : $dataProvider->query->andFilterWhere([$op, $columns, $values]);
                     }
                 }else{
                     if(is_array($columns) && is_array($values)){
-                        $dataProvider->query->andWhere(['in', $columns, $values]);
+                        $option=='having'
+                            ? $dataProvider->query->andHaving(['in', $columns, $values])
+                            : $dataProvider->query->andWhere(['in', $columns, $values]);
                     }else{
-                        $dataProvider->query->andFilterWhere([$columns => $values]);
-                    }                    
+                        $option=='having' 
+                            ? $dataProvider->query->andFilterHaving([$columns => $values]) 
+                            : $dataProvider->query->andFilterWhere([$columns => $values]);
+                    }
                 }
                 break;
             default: // 未知

@@ -150,6 +150,7 @@ trait ReportOrmTrait
             }elseif($this instanceof DcSets){ // 数据集
                 $colnmn = $item;
             }
+            if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
             
             if($colnmn && $colnmn['model_id']){
                 $_ = [
@@ -171,11 +172,12 @@ trait ReportOrmTrait
     public function setSearchModels($params = null)
     {
         if($params === false){
+            // 默认条件
             //$params = Yii::$app->request->get("SysConfig",[]);
             $searchModels = $this->getSearchModels();
             $params = [];
             foreach($searchModels as $sModel){
-                if(isset($sModel['value']) && strlen($sModel['value'])){
+                if(isset($sModel['value']) && strlen($sModel['value'])>0){
                     $params[$sModel['attribute']] = $sModel['value'];
                 }
             }
@@ -206,12 +208,14 @@ trait ReportOrmTrait
             }elseif($this instanceof DcSets){
                 // 数据集
                 foreach($colnmns as $col){
+                    if($col['formula']) continue;
+                    $option = $col['fun'] ? 'having' : false;
                     if(isset($params[$col['v_alias']]) && (is_array($params[$col['v_alias']]) || strlen($params[$col['v_alias']])>0) && $col['model_id']){
                         switch($col['type'])
                         {
                             case 'date': // 日期
-                                $this->where($col['id'], $params[$col['v_alias']].' 00:00:00', '>=');
-                                $this->where($col['id'], $params[$col['v_alias']].' 23:59:59', '<=');
+                                $this->where($col['id'], $params[$col['v_alias']].' 00:00:00', '>=', $option);
+                                $this->where($col['id'], $params[$col['v_alias']].' 23:59:59', '<=', $option);
                                 break;
                             case 'daterange': // 日期范围
                             case 'datetimerange': // 日期时间范围
@@ -221,8 +225,8 @@ trait ReportOrmTrait
                                         $startTime .= ' 00:00:00';
                                         $endTime .= ' 23:59:59';
                                     }
-                                    $this->where($col['id'], trim($startTime), '>=');
-                                    $this->where($col['id'], trim($endTime), '<=');
+                                    $this->where($col['id'], trim($startTime), '>=', $option);
+                                    $this->where($col['id'], trim($endTime), '<=', $option);
                                 }
                                 break;
                             case 'time': // 时间
@@ -238,7 +242,7 @@ trait ReportOrmTrait
                             case 'ddselect2multi': // 数据字典多选
                             case 'selectajax': // 下拉异步
                             case 'selectajaxmult': // 下拉异步多选框
-                                $this->where($col['id'], $params[$col['v_alias']]); // 直接匹配
+                                $this->where($col['id'], $params[$col['v_alias']], $option); // 直接匹配
                                 break;
                             case 'text': // 文本框
                             case 'textarea': //  多行文本框
@@ -246,14 +250,14 @@ trait ReportOrmTrait
                             default: // 默认文本框
                                 if(strpos($params[$col['v_alias']], '~')!==false){ // 范围查询
                                     list($start, $end) = explode('~', $params[$col['v_alias']]);
-                                    $this->where($col['id'], trim($start), '>=');
-                                    $this->where($col['id'], trim($end), '<=');
+                                    $this->where($col['id'], trim($start), '>=', $option);
+                                    $this->where($col['id'], trim($end), '<=', $option);
                                 }elseif(preg_match('/^(<>|>=|>|<=|<|=)/', $params[$col['v_alias']], $matches)){
                                     $operator = $matches[1];
                                     $value = substr($params[$col['v_alias']], strlen($operator));
-                                    $this->where($col['id'], $value, $operator); // 指定操作
+                                    $this->where($col['id'], $value, $operator, $option); // 指定操作
                                 }else{
-                                    $this->where($col['id'], $params[$col['v_alias']], 'like'); // 模糊查询
+                                    $this->where($col['id'], $params[$col['v_alias']], 'like', $option); // 模糊查询
                                 }
                                 break;
                         }
