@@ -277,7 +277,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             if($this['type']=='datetimerange'){
                 $defaultValue = date('Y-m-d H:i:s',strtotime($startTime)).' 至 '.date('Y-m-d H:i:s',strtotime($endTime));
             }elseif($this['type']=='daterange'){
-                $defaultValue = date('Y-m-d',strtotime($startTime)).' 至 '.date('Y-m-d',strtotime($startTime));
+                $defaultValue = date('Y-m-d',strtotime($startTime)).' 至 '.date('Y-m-d',strtotime($endTime));
             }elseif($this['type']=='datetime'){
                 $defaultValue = date('Y-m-d H:i:s',strtotime($currTime));
             }elseif($this['type']=='date'){

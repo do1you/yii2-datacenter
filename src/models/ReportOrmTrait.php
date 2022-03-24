@@ -171,7 +171,14 @@ trait ReportOrmTrait
     public function setSearchModels($params = null)
     {
         if($params === false){
-            $params = Yii::$app->request->get("SysConfig",[]);
+            //$params = Yii::$app->request->get("SysConfig",[]);
+            $searchModels = $this->getSearchModels();
+            $params = [];
+            foreach($searchModels as $sModel){
+                if(isset($sModel['value']) && strlen($sModel['value'])){
+                    $params[$sModel['attribute']] = $sModel['value'];
+                }
+            }
         }
         
         if($params && ($colnmns = $this->columns)){
