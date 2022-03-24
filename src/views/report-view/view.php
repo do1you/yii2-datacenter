@@ -13,7 +13,6 @@ if($count<=1){
 }
 $row = 12/$col;
 ?>
-<?php Pjax::begin(['timeout'=>5000]); ?>
 <div class="row data-report-row">
 	<?php foreach($list as $key=>$model):?>
 		<?php if($key>0 && $key%$row==0):?>
@@ -27,4 +26,3 @@ $row = 12/$col;
     	</div>
 	<?php endforeach;?>
 </div>
-<?php Pjax::end(); ?>

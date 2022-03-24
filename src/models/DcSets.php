@@ -582,25 +582,25 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 }
                     
                 $columns = $this->getFormatColumns($columns, $values);
-                
+
                 if($op && !is_array($columns) && !is_array($values)){
                     if($op=='like'){
                         $likeKeyword = $dataProvider->db->driverName === 'pgsql' ? 'ilike' : 'like';
-                        $option=='having' 
+                        $option==='having' 
                             ? $dataProvider->query->andFilterHaving([$likeKeyword, $columns, $values]) 
                             : $dataProvider->query->andFilterWhere([$likeKeyword, $columns, $values]);
                     }else{
-                        $option=='having' 
+                        $option==='having' 
                             ? $dataProvider->query->andFilterHaving([$op, $columns, $values]) 
                             : $dataProvider->query->andFilterWhere([$op, $columns, $values]);
                     }
                 }else{
                     if(is_array($columns) && is_array($values)){
-                        $option=='having'
+                        $option==='having'
                             ? $dataProvider->query->andHaving(['in', $columns, $values])
                             : $dataProvider->query->andWhere(['in', $columns, $values]);
                     }else{
-                        $option=='having' 
+                        $option==='having' 
                             ? $dataProvider->query->andFilterHaving([$columns => $values]) 
                             : $dataProvider->query->andFilterWhere([$columns => $values]);
                     }

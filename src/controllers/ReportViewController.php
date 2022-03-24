@@ -62,7 +62,7 @@ class ReportViewController extends \webadmin\BController
     public function behaviors()
     {
         // 已登录用户免判断
-        if(!Yii::$app->user->isGuest){
+        if(!Yii::$app->user->isGuest || !Yii::$app->request->get('access-token')){
             return parent::behaviors();
         }
         

@@ -225,7 +225,17 @@ class DcSetsRelation extends \webadmin\ModelCAR
                 if($this->rel_type=='group' && $this->group_label && $this->groupLabel['v_alias']){
                     $target = clone $target;
                     $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
-                    $target->group($this->group_label)->setPagination(false);
+                    $target->group($this->group_label);
+                    
+                    
+                    // 被关联的数据集不分页限制最大记录数为5000
+                    //$target->setPagination(false);
+                    $pagination = $target->getPagination();
+                    if($pagination){
+                        $pagination->setPage(1);
+                        $pagination->setPageSize(5000);
+                    }
+                    
                     $query = $target->getDataProvider()->query;
                     $query->select([]);
                     $this->groupLabel->selectColumn($query);
@@ -284,7 +294,13 @@ class DcSetsRelation extends \webadmin\ModelCAR
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
         $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
         
-        $target->setPagination(false); // 被关联的数据集不分页
+        // 被关联的数据集不分页限制最大记录数为5000
+        // $target->setPagination(false);
+        $pagination = $target->getPagination();
+        if($pagination){
+            $pagination->setPage(1);
+            $pagination->setPageSize(5000);
+        }
         
         if($reverse){
             $target = clone $target;

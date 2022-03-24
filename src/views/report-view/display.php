@@ -1,5 +1,6 @@
 <?php echo $this->render('view', [
     'list' => $list,
+    //'cache' => false,
 ]);?>
 
 <?php 

@@ -8,7 +8,7 @@ $sourceList = $model ? $model['v_source'] : [];
 	    <div class="widget-buttons">
 	    	<?php if(isset($cache) && $cache===true):?>
 				<?php 
-                $form = Yii::createObject('webadmin\widgets\ActiveForm');
+				$form = $this->context->form;
                 foreach($sourceList as $source){
                     if($source['is_dynamic']=='1'){
                         $model->set_source = Yii::$app->session[$source['v_sessionName']];

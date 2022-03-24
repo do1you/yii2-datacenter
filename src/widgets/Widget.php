@@ -35,6 +35,11 @@ class Widget extends \yii\base\Widget
     public $apiUrl = '';
     
     /**
+     * 缓存表单元素
+     */
+    public $form = null;
+    
+    /**
      * 初始化
      */
     public function init()
@@ -42,6 +47,8 @@ class Widget extends \yii\base\Widget
         parent::init();
         
         $this->apiUrl = $this->isCache ? $this->reportModel['v_apiurl'] : $this->reportModel->getV_apiurl('');
+        $this->form = Yii::createObject('\webadmin\widgets\ActiveForm');
+        
     }
     
     /**
@@ -49,10 +56,13 @@ class Widget extends \yii\base\Widget
      */
     public function run()
     {
+        ob_get_clean();
         $this->renderAsset();
         $content = $this->renderContent();
         $search = $this->showSearchBox ? $this->renderSearch() : '';
-        return $this->renderLayout($content, $search);
+        $content = $this->renderLayout($content, $search);
+        
+        return $content;
     }
     
     /**
