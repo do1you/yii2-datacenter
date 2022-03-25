@@ -3,6 +3,7 @@ use yii\helpers\Html;
 use webadmin\widgets\ActiveForm;
 
 $searchList = $model->getSearchModels();
+/*
 $id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
 $ids = is_array($id) ? $id : ($id ? explode(',',$id) : []);
 $params = Yii::$app->request->get();
@@ -12,6 +13,7 @@ unset($params['SysConfig'],$params['is_export'],$params['_'],$params['t'],$param
 if($pagination){
     unset($params[$pagination->pageSizeParam],$params[$pagination->pageParam]);
 }
+*/
 ?>
 <?php if(!empty($searchList)):?>
     <div class="row dataconter-search">
@@ -19,7 +21,7 @@ if($pagination){
     		<div class="widget margin-bottom-20">
     			<div class="widget-body bordered-left bordered-themeprimary">
                     <?php $form = ActiveForm::begin([
-                        'action' => (count($ids)>1 ? [Yii::$app->controller->action->id] : $params),
+                        'action' => [Yii::$app->controller->action->id],
                         'method' => 'get',
                         'enableClientScript' => false,
                         'enableClientValidation' => false,
@@ -42,11 +44,7 @@ if($pagination){
                     <?php endforeach;?>
     
                     <div class="form-group">
-                    	<?php if(count($ids)>1):?>
-                    		<?= Html::button(Yii::t('common','查询'), ['class' => 'btn btn-primary report_search_btn']) ?>
-                    	<?php else:?>
-                    		<?= Html::submitButton(Yii::t('common','查询'), ['class' => 'btn btn-primary report_search_btn']) ?>
-                    	<?php endif;?>
+                    	<?= Html::button(Yii::t('common','查询'), ['class' => 'btn btn-primary report_search_btn']) ?>
                         <?= Html::submitButton(Yii::t('common','导出'), ['class' => 'btn btn-primary report_export_btn']) ?>
                         <?= Html::hiddenInput('is_export',''); ?>
                         <?php  

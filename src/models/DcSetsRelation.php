@@ -232,8 +232,8 @@ class DcSetsRelation extends \webadmin\ModelCAR
                     //$target->setPagination(false);
                     $pagination = $target->getPagination();
                     if($pagination){
-                        $pagination->setPage(1);
-                        $pagination->setPageSize(5000);
+                        $pagination->setPage(0);
+                        $pagination->setPageSize(2000);
                     }
                     
                     $query = $target->getDataProvider()->query;
@@ -295,11 +295,11 @@ class DcSetsRelation extends \webadmin\ModelCAR
         $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
         
         // 被关联的数据集不分页限制最大记录数为5000
-        // $target->setPagination(false);
+        //$target->setPagination(false);
         $pagination = $target->getPagination();
         if($pagination){
-            $pagination->setPage(1);
-            $pagination->setPageSize(5000);
+            $pagination->setPage(0);
+            $pagination->setPageSize(2000);
         }
         
         if($reverse){
