@@ -228,7 +228,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     // 返回API请求地址
     public function getV_apiurl($cache='1')
     {
-        $params = Yii::$app->request->get("SysConfig",[]);
+        $params = Yii::$app->request->post("SysConfig",Yii::$app->request->get("SysConfig",[]));
         $arr = [
             'report-api/set-data',
             'cache'=>$cache,
