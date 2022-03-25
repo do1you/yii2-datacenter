@@ -12,12 +12,15 @@ if($count<=1){
     $col = 3;
 }
 $row = 12/$col;
+if($count>1){ // 瀑布流
+    $this->registerJsFile("@assetUrl/js/masonry.pkgd.min.js",['depends' => \webadmin\WebAdminAsset::className()]);
+    $this->registerJs("$('.data-report-row').on('relad.layout',function(){
+        $('.data-report-row').masonry({itemSelector:'.data-report-index'});
+    }).triggerHandler('relad.layout');", 4, 'report.item.masonry');
+}
 ?>
 <div class="row data-report-row">
 	<?php foreach($list as $key=>$model):?>
-		<?php if($key>0 && $key%$row==0):?>
-			</div><div class="row data-report-row">
-		<?php endif;?>
     	<div class="col-xs-12 col-md-<?php echo $col?> data-report-index" rid="<?php echo $model['id']?>">
         	<?= \datacenter\widgets\Grid::widget([
                 'reportModel' => $model,

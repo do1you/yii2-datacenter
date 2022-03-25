@@ -3,8 +3,9 @@ use yii\helpers\Html;
 use webadmin\widgets\ActiveForm;
 
 $searchList = $model->getSearchModels();
+$id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
+$ids = is_array($id) ? $id : ($id ? explode(',',$id) : []);
 $params = Yii::$app->request->get();
-$ids = !empty($params['id']) ? explode(',',$params['id']) : '';
 $params[0] = Yii::$app->controller->action->id;
 $pagination = $model['pagination'];
 unset($params['SysConfig'],$params['is_export'],$params['_'],$params['t'],$params['sign']);
@@ -77,6 +78,7 @@ if($pagination){
                             $(this).closest('.dataconter-search').find('.form-group').not('.search_box').toggle();
                             $(this).closest('.search_box').find('.search_box_btn').show();
                             $(this).hide();
+                            $('.data-report-row').triggerHandler('relad.layout');
                         });$('.dataconter-search').find('.form-group').not('.search_box').hide();", 4, 'report.search.slide');
                         ?>
                     </div>

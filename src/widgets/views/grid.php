@@ -44,6 +44,7 @@ var colModel = {$colModel};
 var draw,table = $("#{$id}").dataTable({
 	"sDom": "<B>t<'row'<'col-xs-12 col-md-5 margin-top-10'<'pull-left'l><'pull-left margin-pageing'i>><'col-xs-12 col-md-7 margin-top-10'p>>",
     "buttons": ['colvis'],
+    "initComplete": function(){ $('.data-report-row').triggerHandler('relad.layout'); },
     "processing" : true,
 	"searching" : false,
 	"serverSide" : true,

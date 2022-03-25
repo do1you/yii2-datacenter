@@ -18,7 +18,7 @@ $sourceList = $model ? $model['v_source'] : [];
                             ->select2(\yii\helpers\ArrayHelper::map($source->getAuthorityDynamicList(Yii::$app->user->id), 'id', 'name'),array_merge([
                                 'class'=>'form-control select-dynamic-source',
                                 'source_id'=>$source['id'],
-                                'id'=>'select-dynamic-source-'.$source['id'],
+                                'id'=>"select-dynamic-source-{$model['id']}-{$source['id']}",
                             ],(Yii::$app->request->get('source') ? ['readonly'=>'readonly','disabled'=>'disabled'] : [])));
                             echo '</div></div>';
                         }

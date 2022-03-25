@@ -165,9 +165,10 @@ class ReportViewController extends \webadmin\BController
     /**
      * 报表显示
      */
-    public function actionView($id)
+    public function actionView()
     {
-        $list = $this->findModel($id ? explode(',',$id) : []);
+        $id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
+        $list = $this->findModel(is_array($id) ? $id : ($id ? explode(',',$id) : []));
         if(!empty(Yii::$app->request->get('is_export'))) return $this->exportExcel($list);
         
         return $this->render('display', [
@@ -178,9 +179,10 @@ class ReportViewController extends \webadmin\BController
     /**
      * 数据集显示
      */
-    public function actionSetView($id)
+    public function actionSetView()
     {
-        $list = $this->findSetModel($id ? explode(',',$id) : []);
+        $id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
+        $list = $this->findSetModel(is_array($id) ? $id : ($id ? explode(',',$id) : []));
         if(!empty(Yii::$app->request->get('is_export'))) return $this->exportExcel($list);
         
         return $this->render('display', [

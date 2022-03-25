@@ -23,6 +23,7 @@ use yii\helpers\Url;
     					<div class="pull-right margin-bottom-10">
     						<a class="btn btn-primary" href="<?php echo Url::to(['build']);?>" data-pjax="0"><i class='fa fa-building'></i> <?= Yii::t('datacenter','构建报表')?></a>
     						<button class="btn btn-primary checkSubmit" reaction="<?php echo Url::to(['delete']);?>" type="button"><i class='fa fa-trash-o'></i> <?= Yii::t('common','批量删除')?></button>
+    						<button class="btn btn-primary checkSubmit" reaction="<?php echo Url::to(['report-view/view']);?>" type="button"><i class='fa fa-bars'></i> <?= Yii::t('common','多表查看')?></button>
     						<?php echo Html::hiddenInput(Yii::$app->request->csrfParam, Yii::$app->request->getCsrfToken());?>
     		    		</div>
     				</div>
