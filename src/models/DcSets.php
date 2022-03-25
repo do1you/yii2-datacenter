@@ -73,7 +73,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             [['relation_models'], 'string', 'max' => 255],
             [['run_script', 'excel_file'], 'string', 'max' => 150],
             [['rel_where'], 'string', 'max' => 200],
-            [['rel_group', 'rel_order'], 'string', 'max' => 100],
+            [['rel_group', 'rel_order', 'rel_having'], 'string', 'max' => 100],
         ];
     }
 
@@ -94,6 +94,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             'state' => Yii::t('datacenter', '状态'),
             'rel_where' => Yii::t('datacenter', '条件'),
             'rel_group' => Yii::t('datacenter', '分组'),
+            'rel_having' => Yii::t('datacenter', '分组条件'),
             'rel_order' => Yii::t('datacenter', '排序'),
             'update_time' => Yii::t('datacenter', '更新时间'),
             'cat_id' => Yii::t('datacenter', '数据集分类'),
@@ -773,6 +774,7 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         $this->selectColumns($query);
         $this->rel_where && $query->andWhere($this->formatSql($this->rel_where));
         $this->rel_group && $query->addGroupBy($this->formatSql($this->rel_group));
+        $this->rel_having && $query->andHaving($this->formatSql($this->rel_having));
         $this->rel_order && $query->addOrderBy($this->formatSql($this->rel_order));
 
         $dataProvider = new \yii\data\ActiveDataProvider([

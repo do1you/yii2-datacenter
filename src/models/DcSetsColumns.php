@@ -281,6 +281,16 @@ class DcSetsColumns extends \webadmin\ModelCAR
                 $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-01', strtotime('-0 month'))) + $finance_sec));
                 $endTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-t', strtotime('-0 month'))) + 3600*24 + $finance_sec));
                 break;
+            case '1days': // 最近XX天
+            case '3days':
+            case '7days':
+            case '10days':
+            case '15days':
+            case '30days':
+            case '90days':
+                $currTime = $startTime = date('Y-m-d H:i:s', (strtotime("-{$defaultValue}")));
+                $endTime = date('Y-m-d H:i:s');
+                break;
         }
         
         if(!empty($startTime) && !empty($endTime)){

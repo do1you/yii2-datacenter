@@ -20,6 +20,8 @@ use webadmin\widgets\ActiveForm;
             <?= $form->field($model, 'rel_where',['options'=>['class'=>'form-group box_form box_model']])->textarea(['maxlength' => true]) ?>
 
             <?= $form->field($model, 'rel_group',['options'=>['class'=>'form-group box_form box_model']])->textInput(['maxlength' => true]) ?>
+            
+            <?= $form->field($model, 'rel_having',['options'=>['class'=>'form-group box_form box_model']])->textInput(['maxlength' => true]) ?>
 
             <?= $form->field($model, 'rel_order',['options'=>['class'=>'form-group box_form box_model']])->textInput(['maxlength' => true]) ?>
             

@@ -42,7 +42,7 @@ $script = <<<eot
 (function(){
 var colModel = {$colModel};
 var draw,table = $("#{$id}").dataTable({
-	"sDom": "<B>t<'row'<'col-xs-12 col-md-5 margin-top-10'<'pull-left'l><'pull-left margin-pageing'i>><'col-xs-12 col-md-7 margin-top-10'p>>",
+	"sDom": "<'row'<'col-xs-12 col-md-8'i><'col-xs-12 col-md-4 text-right'<'pull-right'B>>>t<'row'<'col-xs-12 col-md-4 margin-top-10'<'pull-left'l>><'col-xs-12 col-md-8 margin-top-10'p>>",
     "buttons": ['colvis'],
     "initComplete": function(){ $('.data-report-row').triggerHandler('relad.layout'); },
     "processing" : true,
