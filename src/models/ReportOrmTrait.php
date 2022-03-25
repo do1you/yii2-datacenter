@@ -25,6 +25,11 @@ trait ReportOrmTrait
     private $_cache_source;
     
     /**
+     * 查询状态
+     */
+    public $is_skip_search;
+    
+    /**
      * 数据选择
      */
     public $set_source;
@@ -171,6 +176,7 @@ trait ReportOrmTrait
     // 应用过滤条件
     public function setSearchModels($params = null)
     {
+        if($this->is_skip_search) return;
         if($params === false){
             // 默认条件
             //$params = Yii::$app->request->get("SysConfig",[]);
@@ -198,6 +204,7 @@ trait ReportOrmTrait
                 foreach($sets as $set){
                     if(isset($setSearchParams[$set['id']]) && is_array($setSearchParams[$set['id']])){
                         $set->setSearchModels($setSearchParams[$set['id']]);
+                        $set->is_skip_search = true; // 不再应用其他的查询条件
                         
                         // 非主数据集的,查询出结果数据并入到主数据集条件
                         if($mainSet['id'] != $set['id']){
