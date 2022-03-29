@@ -16,10 +16,9 @@ namespace datacenter\models;
 
 use Yii;
 
-class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInterface
+class DcReport extends \webadmin\ModelCAR
 {
-    use ReportDataTrait;
-    use ReportOrmTrait;
+    use \datacenter\models\ReportOrmTrait;
     
     /**
      * 关联的所有数据集
@@ -75,6 +74,20 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
             'create_user' => Yii::t('datacenter', '创建用户'),
             'create_time' => Yii::t('datacenter', '创建时间'),
             'update_time' => Yii::t('datacenter', '更新时间'),
+        ];
+    }
+    
+    /**
+     * 定义数据行为
+     */
+    public function behaviors()
+    {
+        return [
+            // 可以直接调用数据输出提供器的方法
+            'reportDataBehaviors' => [
+                'class' => \datacenter\behaviors\ReportDataBehaviors::className(),
+                'report' => $this,
+            ],
         ];
     }
     
@@ -179,7 +192,9 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
             $list = \yii\helpers\ArrayHelper::map($this->columns, 'set_id', 'sets');
             if($list){
                 foreach($list as $k=>$model){
-                    if(!$model) unset($list[$k]);
+                    if(!$model){
+                        unset($list[$k]);
+                    }
                 }
             }
             $this->_setsList = $list;
@@ -266,20 +281,6 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
         return parent::delete();
     }
     
-    // 查询所有字段信息
-    public function selectColumns()
-    {
-        $columns = \yii\helpers\ArrayHelper::map($this->columns, 'col_id', 'col_id', 'set_id');
-        $setLists = $this->v_sets;
-        foreach($setLists as $set){
-            if(isset($columns[$set['id']])){
-                $set->filterSelect($columns[$set['id']]);
-            }
-        }
-        
-        return $this;
-    }
-    
     // 返回API请求地址
     public function getV_apiurl($cache='1')
     {
@@ -313,36 +314,32 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
             $query->where($where);
         }
         
-        
         return $query;
     }
     
-    // 初始化数据集关联
-    public function initJoinSet($isExit = true)
+    /**
+     * 初始化数据集关联
+     */
+    public function initJoinSet()
     {
         if($this->_joinSetState === null){
-            // 关联数据集
-            $this->selectColumns();
-            $this->orderColumns($this->getSort());
             $mainSet = $this->getV_mainSet();
-            $allSets = $setLists = $this->v_sets;
+            $setLists = $this->v_sets;
+            $this->_joinSetState = true;
             
             $mainSet && $mainSet->joinSets($setLists);
             if($setLists){
-                $this->_joinSetState = false;
-                if($isExit){
-                    $set = reset($setLists);
-                    throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的数据集')."{$set['title']}({$set['id']})");
-                }
-            }else{
-                $this->_joinSetState = true;
+                $set = reset($setLists);
+                throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的数据集')."{$set['title']}({$set['id']})");
             }
         }
         
         return $this->_joinSetState;
     }
     
-    // 复制报表
+    /**
+     * 复制报表
+     */
     public function copyReport()
     {
         $model = new DcReport();
@@ -366,68 +363,21 @@ class DcReport extends \webadmin\ModelCAR implements \yii\data\DataProviderInter
         }
     }
     
-    // 组装报表数据
-    protected function prepareModels()
-    {
-        $this->initJoinSet();
-        
-        // 应用过滤条件
-        $this->setSearchModels(false);
-        
-        // 分组字段优先提取
-        $setLists = $this->getV_sets();
-        foreach($setLists as $set){
-            $relation = $set ? $set['v_relation'] : null;
-            if($set && $relation && $relation['rel_type']=='group'){
-                $relation->getV_group_list($set);
-            }
-        }
-        
-        // 提取数据集数据
-        $mainSet = $this->getV_mainSet();
-        $callModel = new DcSets();
-        $data = $mainSet ? $mainSet->getModels() : [];
-        foreach($data as $k=>$v){
-            $data[$k] = call_user_func_array([$callModel, 'formatValue'], [$this->filterColumns($v), $this->columns]);
-        }
-        return $data;
-    }
-    
-    // 查询出所有的字段信息
-    private function filterColumns($values)
-    {
-        $data = [];
-        $setLists = $this->v_sets;
-        foreach($this->columns as $col){
-            $set = isset($setLists[$col['set_id']]) ? $setLists[$col['set_id']] : null;
-            $relation = $set ? $set['v_relation'] : null;
-            if($set && $relation && $relation['rel_type']=='group'){
-                $groupCols = $relation->getV_group_list($set);
-                if($groupCols && is_array($groupCols)){
-                    foreach($groupCols as $k=>$v){
-                        $data[$col['v_alias'].'_'.$k] = isset($values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']])
-                        ? $values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']]
-                        : $col['v_default_value'];
-                    }
-                }
-            }else{
-                $data[$col['v_alias']] = isset($values[$col['setsCol']['v_alias']]) 
-                    ? $values[$col['setsCol']['v_alias']] 
-                    : (
-                        isset($values['_'][$col['set_id']][$col['setsCol']['v_alias']]) 
-                        ? $values['_'][$col['set_id']][$col['setsCol']['v_alias']] 
-                        : $col['v_default_value']
-                    );
-            }
-        }
-        
-        return $data;
-    }
-    
-    // 返回数据集提供器
-    protected function prepareDataProvider()
+    /**
+     * 返回报表数据提供器
+     */
+    public function prepareDataProvider()
     {
         $mainSet = $this->getV_mainSet();
-        return $mainSet->getDataProvider();
+        $class = DcSets::dataProviderMap[$mainSet->set_type]!==null ? DcSets::dataProviderMap[$mainSet->set_type] : null;
+        if(!$class){
+            throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
+        }
+        
+        return Yii::createObject([
+            'class' => $class,
+            'sets' => $mainSet,
+            'report' => $this,
+        ]);
     }
 }

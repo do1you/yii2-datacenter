@@ -375,55 +375,6 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return parent::beforeSave($insert);
     }
     
-    // 查询器增加查询字段
-    public function selectColumn(\yii\db\Query $query)
-    {
-        if(!$this->formula){
-            if($this->fun){
-                return $query->addSelect(["{$this->v_fncolumn} as {$this->v_alias}"]);
-            }else{
-                return $query->addSelect(["{$this->v_column_alias}"]);
-            }
-        }
-        return $this;
-    }
-    
-    // 查询器增加字段过滤
-    public function whereColumn(\yii\db\Query $query, $values)
-    {
-        if(is_array($values) || in_array($this->column['type'], [
-            'tinyint', 'bit', 'smallint', 'mediumint', 'int', 'integer', 'bigint', 'float', 'double',
-            'real', 'decimal', 'numeric',
-        ])){
-            $query->andFilterWhere([$this->v_column => $values]);
-        }else{
-            if($values && strpos($values, '至') && in_array($this->column['type'], [
-                'datetime', 'year', 'date', 'time', 'timestamp',
-            ])){ // 时间
-                list($startTime, $endTime) = explode('至', $values);
-                $query->andFilterWhere(['>=', $this->v_column, trim($startTime)]);
-                $query->andFilterWhere(['<=', $this->v_column, trim($endTime)]);
-            }else{
-                $db = $this->model['source'] ? $this->model['source']->getSourceDb() : null;
-                $likeKeyword = ($db && $db->driverName === 'pgsql') ? 'ilike' : 'like';
-                $query->andFilterWhere([$likeKeyword, $this->v_column, $values]);
-            }
-        }
-        
-        return $this;
-    }
-    
-    // 增加排序索引
-    public function orderColumn(\yii\data\Sort $sort)
-    {
-        $sort->attributes[$this->v_alias] = [
-            'asc' => [$this->v_column => SORT_ASC],
-            'desc' => [$this->v_column => SORT_DESC],
-            'label' => $this->label,
-        ];
-        return $this;
-    }
-    
     // 保存后动作
     public function afterSave($insert, $changedAttributes)
     {

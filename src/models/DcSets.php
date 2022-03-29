@@ -20,10 +20,9 @@ namespace datacenter\models;
 
 use Yii;
 
-class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterface
+class DcSets extends \webadmin\ModelCAR
 {
-    use ReportDataTrait;
-    use ReportOrmTrait;
+    use \datacenter\models\ReportOrmTrait;
     
     /**
      * 关联的所有模型
@@ -46,9 +45,14 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     public $_relation_target = [];
     
     /**
-     * 需要查询字段的列表
+     * 数据提供器驱动类
      */
-    public $filterSelectIds = null;
+    const dataProviderMap = [
+        'model' => '\datacenter\base\ActiveDataProvider', // 模型
+        'excel' => '\datacenter\base\ExcelDataProvider', // EXCEL
+        'sql' => '\datacenter\base\SqlDataProvider', // SQL
+        'script' => '\datacenter\base\ScriptDataProvider', // 脚本
+    ];
             
     /**
      * 返回数据库表名称
@@ -98,6 +102,20 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             'rel_order' => Yii::t('datacenter', '排序'),
             'update_time' => Yii::t('datacenter', '更新时间'),
             'cat_id' => Yii::t('datacenter', '数据集分类'),
+        ];
+    }
+    
+    /**
+     * 定义数据行为
+     */
+    public function behaviors()
+    {
+        return [
+            // 可以直接调用数据输出提供器的方法
+            'reportDataBehaviors' => [
+                'class' => \datacenter\behaviors\ReportDataBehaviors::className(),
+                'sets' => $this,
+            ],
         ];
     }
     
@@ -160,31 +178,6 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
     public function getV_title()
     {
         return "{$this->title}[{$this->id}]";
-    }
-    
-    // 获取格式化字段
-    public function getFormatColumns($columns, &$values = null){
-        $colModels = \yii\helpers\ArrayHelper::map($this['columns'], 'id', 'v_self');
-        if(is_array($columns)){
-            foreach($columns as $k=>$col){
-                if(isset($colModels[$col])){
-                    $columns[$k] = $colModels[$col]['v_fncolumn'];
-                }
-            }
-            if($values && is_array($values)){
-                foreach($values as $k=>$value){
-                    if(is_array($value)){
-                        $values[$k] = array_combine($columns, $value);
-                    }
-                }
-            }
-        }else{
-            if(isset($colModels[$columns])){
-                $columns = $colModels[$columns]['v_fncolumn'];
-            }
-        }
-        
-        return $columns;
     }
     
     // 获取模型匹配关系
@@ -316,8 +309,8 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         return ($muli ? $query->all() : $query->one());
     }
     
-    // 格式化SQL字符串
-    public function formatSql($str)
+    // 返回格式化SQL的参数
+    public function formatSqlTpl()
     {
         if($this->_replace_params === null || !isset($this->_replace_params['search']) || !isset($this->_replace_params['replace'])){
             $search = $replace = [];
@@ -332,15 +325,22 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             $this->_replace_params['replace'] = $replace;
         }
         
-        return str_replace($this->_replace_params['search'], $this->_replace_params['replace'], $str);
+        return [$this->_replace_params['search'], $this->_replace_params['replace']];
     }
     
-    // 格式化计算公式字符串
-    public function formatValue($values, $columns)
+    // 格式化SQL替换字符串参数
+    public function formatSql($str)
+    {
+        list($search, $replace) = $this->formatSqlTpl();
+        return str_replace($search, $replace, $str);
+    }
+    
+    // 返回格式化计算公式参数
+    public function formatValueTpl($columns)
     {
         // 一次性匹配出模板
-        if($this->_replace_params === null 
-            || !isset($this->_replace_params['format_formulas']) 
+        if($this->_replace_params === null
+            || !isset($this->_replace_params['format_formulas'])
             || !isset($this->_replace_params['format_labels'])
             || !isset($this->_replace_params['format_dd'])
         ){
@@ -359,11 +359,13 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             $this->_replace_params['format_labels'] = $formatLabels;
             $this->_replace_params['format_dd'] = $formatDd;
         }
-        
-        // 数据过滤
-        $formatFormulas = $this->_replace_params['format_formulas'];
-        $formatLabels = $this->_replace_params['format_labels'];
-        $formatDd = $this->_replace_params['format_dd'];
+        return [$this->_replace_params['format_formulas'],$this->_replace_params['format_labels'],$this->_replace_params['format_dd']];
+    }
+    
+    // 格式化计算公式字符串
+    public function formatValue($values, $columns)
+    {
+        list($formatFormulas, $formatLabels, $formatDd) = $this->formatValueTpl($columns);
         
         // 公式数据
         if($formatFormulas && is_array($formatFormulas)){
@@ -384,60 +386,37 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         }
         
         // 选项数据
-        foreach($values as $key=>$v){
-            if(isset($formatDd[$key]) && isset($formatDd[$key]['type']) && strlen($v)>0){
-                switch($formatDd[$key]['type']){
-                    // 数据字典
-                    case 'dd':
-                    case 'ddmulti':
-                    case 'ddselect2':
-                    case 'ddselect2multi':
-                        $value = !empty($formatDd[$key]['search_params']) ? \webadmin\modules\config\models\SysLdItem::dd($formatDd[$key]['search_params'],$v) : null;
-                        $values[$key] = $value!==null ? $value : $v;
-                        break;
-                        // 下拉选项
-                    case 'select':
-                    case 'selectmult':
-                    case 'select2':
-                    case 'select2mult':
-                        $v_search_params = $formatDd[$key]['v_search_params'];
-                        $value = is_array($v_search_params)&&isset($v_search_params[$v]) ? $v_search_params[$v] : null;
-                        $values[$key] = $value!==null ? $value : $v;
-                        break;
+        if($this->id){
+            foreach($values as $key=>$v){
+                if(isset($formatDd[$key]) && isset($formatDd[$key]['type']) && strlen($v)>0){
+                    switch($formatDd[$key]['type']){
+                        // 数据字典
+                        case 'dd':
+                        case 'ddmulti':
+                        case 'ddselect2':
+                        case 'ddselect2multi':
+                            $value = !empty($formatDd[$key]['search_params']) ? \webadmin\modules\config\models\SysLdItem::dd($formatDd[$key]['search_params'],$v) : null;
+                            $values[$key] = $value!==null ? $value : $v;
+                            break;
+                            // 下拉选项
+                        case 'select':
+                        case 'selectmult':
+                        case 'select2':
+                        case 'select2mult':
+                            $v_search_params = $formatDd[$key]['v_search_params'];
+                            $value = is_array($v_search_params)&&isset($v_search_params[$v]) ? $v_search_params[$v] : null;
+                            $values[$key] = $value!==null ? $value : $v;
+                            break;
+                    }
+                }elseif(strlen($v)<=0){
+                    $values[$key] = '&nbsp;';
+                }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && substr($v,0,1)!='0'){
+                    $values[$key] = floatval($v);
                 }
-            }elseif(strlen($v)<=0){
-                $values[$key] = '&nbsp;';
-            }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && substr($v,0,1)!='0'){
-                $values[$key] = floatval($v);
             }
         }
         
         return $values;
-    }
-    
-    // 过滤查询字段
-    public function filterSelect($cIds = [])
-    {
-        if($cIds){
-            $cIds = is_array($cIds) ? $cIds : [$cIds];
-            if($this->filterSelectIds === null){
-                $this->filterSelectIds = [];
-            }
-            $this->filterSelectIds = array_merge($this->filterSelectIds,$cIds);
-        }
-        return $this;
-    }
-    
-    // 查询所有字段信息
-    public function selectColumns(\yii\db\Query $query)
-    {
-        foreach($this->columns as $col){
-            if($this->filterSelectIds===null || (is_array($this->filterSelectIds) && (in_array($col['id'], $this->filterSelectIds) || in_array($col['name'], $this->filterSelectIds)))){
-                $col->selectColumn($query);
-            }
-        }
-        
-        return $this;
     }
     
     // 连接其他数据集
@@ -453,8 +432,8 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             if(isset($relations[$set['id']])){
                 $this->_relation_source[$set['id']] = [$relations[$set['id']], $set];
                 $set->_relation_target[$this['id']] = [$relations[$set['id']], $this];
-                $set->off(self::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
-                $set->on(self::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
+                $set->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
+                $set->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
                 $joinSets[$set['id']] = $set;
                 unset($sets[$k]);
             }
@@ -468,8 +447,8 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                     }
                 }
             }
-            $this->off(self::$EVENT_AFTER_MODEL, [$this, 'sourceAfterFindModels']);
-            $this->on(self::$EVENT_AFTER_MODEL, [$this, 'sourceAfterFindModels']);
+            $this->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$this, 'sourceAfterFindModels']);
+            $this->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$this, 'sourceAfterFindModels']);
         }
         
         return $this;
@@ -485,7 +464,6 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 $target->getModels();
             }
         }
-        return $this;
     }
     
     // 数据结果集合匹配
@@ -524,7 +502,6 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
                 $source->setModels($sourceList);
             }
         }
-        return $this;
     }
     
     // 目标数据集写入到源数据集查询条件
@@ -541,95 +518,6 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
             }
         }
         return $this;
-    }
-    
-    // 数据集分组
-    public function group($columns)
-    {
-        $dataProvider = $this->getDataProvider();
-        switch($this->set_type){
-            case 'sql': // SQL
-                break;
-            case 'excel': // EXCEL文档
-                break;
-            case 'script': // 脚本
-                break;
-            case 'model': // 数据库模型
-                $columns = $this->getFormatColumns($columns);
-                $columns && $dataProvider->query->addGroupBy($columns);
-                break;
-            default: // 未知
-                throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
-                break;
-        }
-        return $this;
-    }
-    
-    // 数据集关联条件过滤，参数：查询字段，查询值
-    public function where($columns, $values, $op = false, $option = false)
-    {
-        $dataProvider = $this->getDataProvider();
-        switch($this->set_type){
-            case 'sql': // SQL
-                break;
-            case 'excel': // EXCEL文档
-                break;
-            case 'script': // 脚本
-                break;
-            case 'model': // 数据库模型
-                if($option===true){
-                    $this->filterSelect($columns);
-                    $this->selectColumns($dataProvider->query);
-                }
-                    
-                $columns = $this->getFormatColumns($columns, $values);
-
-                if($op && !is_array($columns) && !is_array($values)){
-                    if($op=='like'){
-                        $likeKeyword = $dataProvider->db->driverName === 'pgsql' ? 'ilike' : 'like';
-                        $option==='having' 
-                            ? $dataProvider->query->andFilterHaving([$likeKeyword, $columns, $values]) 
-                            : $dataProvider->query->andFilterWhere([$likeKeyword, $columns, $values]);
-                    }else{
-                        $option==='having' 
-                            ? $dataProvider->query->andFilterHaving([$op, $columns, $values]) 
-                            : $dataProvider->query->andFilterWhere([$op, $columns, $values]);
-                    }
-                }else{
-                    if(is_array($columns) && is_array($values)){
-                        $option==='having'
-                            ? $dataProvider->query->andHaving(['in', $columns, $values])
-                            : $dataProvider->query->andWhere(['in', $columns, $values]);
-                    }else{
-                        $option==='having' 
-                            ? $dataProvider->query->andFilterHaving([$columns => $values]) 
-                            : $dataProvider->query->andFilterWhere([$columns => $values]);
-                    }
-                }
-                break;
-            default: // 未知
-                throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
-                break;
-        }
-        return $this;
-    }
-    
-    // 返回报表权限条件Query
-    public static function authorityFind($userId='0', $query = null)
-    {
-        $query = $query ? $query : self::find();
-        
-        if($userId!='1'){
-            //取角色和用户包含的报表权限
-            $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>$userId]), 'role_id', 'role_id');
-            
-            $query->joinWith(['roleSets']);
-            $where = ['in','dc_role_authority.role_id',$roleIds];
-            $query->where($where);
-        }
-        
-        
-        return $query;
     }
     
     // 复制数据集
@@ -680,116 +568,20 @@ class DcSets extends \webadmin\ModelCAR implements \yii\data\DataProviderInterfa
         }
     }
     
-    // 组装数据集数据
-    protected function prepareModels()
+    /**
+     * 返回数据集提供器
+     */
+    public function prepareDataProvider()
     {
-        $dataProvider = $this->getDataProvider();
-        
-        // 应用过滤条件
-        $this->setSearchModels(false);
-        $dataProvider->prepare(true);
-        $data = $dataProvider->getModels();
-        foreach($data as $k=>$v){
-            $data[$k] = $this->formatValue($v, $this->columns);
-        }
-        return $data;
-    }
-    
-    // 返回数据集提供器
-    protected function prepareDataProvider()
-    {
-        switch($this->set_type){
-            case 'sql': // SQL
-                $dataProvider = $this->data_sql();
-                break;
-            case 'excel': // EXCEL文档
-                $dataProvider = $this->data_excel();
-                break;
-            case 'script': // 脚本
-                $dataProvider = $this->data_script();
-                break;
-            case 'model': // 数据库模型
-                $dataProvider = $this->data_model();
-                break;
-            default: // 未知
-                throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
-                break;
+        $class = self::dataProviderMap[$this->set_type]!==null ? self::dataProviderMap[$this->set_type] : null;
+        if(!$class){
+            throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
         }
         
-        return $dataProvider;
-    }
-    
-    // 返回SQL数据提供器
-    private function data_sql()
-    {
-        throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
-        /*
-        $provider = new SqlDataProvider([
-            'sql' => $this->run_sql,
-            'totalCount' => $count,
-            'pagination' => ['pageSizeLimit' => [1, 500]],
-        ]);*/
-    }
-    
-    // 返回EXCEL数据提供器
-    private function data_excel()
-    {
-        throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
-        /*
-        $provider = new ArrayDataProvider([
-            'allModels' => $data,
-            'pagination' => ['pageSizeLimit' => [1, 500]],
-        ]);*/
-    }
-    
-    // 返回脚本数据提供器
-    private function data_script()
-    {
-        throw new \yii\web\HttpException(200, Yii::t('datacenter','未知的数据集类型'));
-        /*
-         $provider = new ArrayDataProvider([
-         'allModels' => $data,
-         'pagination' => ['pageSizeLimit' => [1, 500]],
-         ]);*/
-    }
-    
-    // 返回模型数据提供器
-    private function data_model()
-    {
-        if(!$this->mainModel || !$this->mainModel['source'] || !($db = $this->mainModel['source']->getSourceDb())) return null;
-        
-        $query = new \yii\db\Query();
-        $query->from("{$this->mainModel['v_model']} as {$this->mainModel['v_alias']}");
-        
-        // 关联模型
-        $allModels = $models = $this->getV_relation_models();
-        unset($models[$this->mainModel['id']]);
-        $this->mainModel->joinModel($query, $models);
-        if($models){
-            $model = reset($models);
-            throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的模型关系')."{$model['tb_label']}({$model['id']}.{$model['tb_name']})");
-        }
-        
-        // 查询字段
-        $this->selectColumns($query);
-        $this->rel_where && $query->andWhere($this->formatSql($this->rel_where));
-        $this->rel_group && $query->addGroupBy($this->formatSql($this->rel_group));
-        $this->rel_having && $query->andHaving($this->formatSql($this->rel_having));
-        $this->rel_order && $query->addOrderBy($this->formatSql($this->rel_order));
-
-        $dataProvider = new \yii\data\ActiveDataProvider([
-            'db' => $db,
-            'query' => $query,
-            'pagination' => ['pageSizeLimit' => [1, 500]],
+        return Yii::createObject([
+            'class' => $class,
+            'sets' => $this,
         ]);
-        
-        // 增加排序关联
-        $sort = $dataProvider->getSort();
-        foreach($allModels as $model){
-            $model->orderColumns($sort);
-        }
-        $this->orderColumns($sort);
-        
-        return $dataProvider;
     }
+    
 }

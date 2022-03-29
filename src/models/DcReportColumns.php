@@ -111,20 +111,6 @@ class DcReportColumns extends \webadmin\ModelCAR
         }
     }
     
-    // 增加排序索引
-    public function orderColumn(\yii\data\Sort $sort)
-    {
-        if($this->col_id>0 && $this->setsCol){
-            $sort->attributes[$this->v_alias] = [
-                'asc' => [$this->setsCol['v_column'] => SORT_ASC],
-                'desc' => [$this->setsCol['v_column'] => SORT_DESC],
-                'label' => $this->v_label,
-            ];
-        }
-        
-        return $this;
-    }
-    
     // 保存后动作
     public function afterSave($insert, $changedAttributes)
     {

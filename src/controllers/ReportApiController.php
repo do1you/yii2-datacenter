@@ -9,12 +9,17 @@ use datacenter\models\DcReport;
 use yii\data\ActiveDataProvider;
 use datacenter\models\DcSets;
 
-class ReportApiController extends \webadmin\restful\AController // \webadmin\BController
+class ReportApiController extends \webadmin\restful\AController // \webadmin\BController  \webadmin\restful\AController
 {
     /**
      * 当前授制器是否需要认证口令
      */
     public $isAccessToken = true;
+    
+    /**
+     * 当前控制器中需要缓存查询条件的方法
+     */
+    public $searchCacheActions = ['index', 'list', 'tree', 'data', 'set-data'];
     
     /**
      * 列表数据格式化定义输出
@@ -41,6 +46,24 @@ class ReportApiController extends \webadmin\restful\AController // \webadmin\BCo
             ],
         ];
     }
+    
+    /**
+     * 定义默认行为
+     * {@inheritDoc}
+     * @see \yii\rest\Controller::behaviors()
+     */
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+        
+        // 缓存查询条件
+        $behaviors['searchBehaviors'] = [
+            'class' => \webadmin\behaviors\SearchBehaviors::className(),
+            'searchCacheActions' => $this->searchCacheActions,
+        ];
+        
+        return $behaviors;
+    }
         
     /**
      * 获取报表字段
@@ -57,9 +80,9 @@ class ReportApiController extends \webadmin\restful\AController // \webadmin\BCo
     public function actionData($id,$cache='1')
     {
         $model = $this->findModel($id,$cache);
-        return $model;
+        return $model->getDataProvider();
         /*return $this->render('/report-view/api', [
-            'dataProvider' => $model,
+            'dataProvider' => $model->getDataProvider(),
         ]); */
     }
     
@@ -78,7 +101,10 @@ class ReportApiController extends \webadmin\restful\AController // \webadmin\BCo
     public function actionSetData($id,$cache='1')
     {
         $model = $this->findSetModel($id,$cache);
-        return $model;
+        return $model->getDataProvider();
+        /*return $this->render('/report-view/api', [
+            'dataProvider' => $model->getDataProvider(),
+        ]);*/
     }
     
     /**

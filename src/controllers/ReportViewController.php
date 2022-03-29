@@ -12,6 +12,11 @@ use datacenter\models\DcRoleAuthority;
 
 class ReportViewController extends \webadmin\BController
 {
+    /**
+     * 当前控制器中需要缓存查询条件的方法
+     */
+    public $searchCacheActions = ['index', 'list', 'tree', 'view', 'set-view'];
+    
     // 初始化
     public function init()
     {

@@ -224,7 +224,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
                 $list = [];
                 if($this->rel_type=='group' && $this->group_label && $this->groupLabel['v_alias']){
                     $target = clone $target;
-                    $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
+                    $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
                     $target->group($this->group_label);
                     
                     
@@ -303,15 +303,19 @@ class DcSetsRelation extends \webadmin\ModelCAR
         }
         
         if($reverse){
-            $target = clone $target;
             $columns = $this->getV_source_columns($source, false);
             $keys = $this->getV_target_columns($target);
+            $source->select($columns);
+            $target->select($keys);
             
             // 反向需要关闭事件处理
-            $target->off(DcSets::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']);
+            $target = clone $target;
+            $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']);
         }else{
             $columns = $this->getV_target_columns($target, false);
             $keys = $this->getV_source_columns($source);
+            $source->select($keys);
+            $target->select($columns);
         }
         
         $values = [];
@@ -332,11 +336,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
         }
         
         // 写入条件
-        if($values){
-            $reverse ? $source->where($columns, $values, false, true) : $target->where($columns, $values, false, true);
-        }else{
-            $reverse ? $source->where($columns, [], false, true) : $target->where($columns, [], false, true);
-        } 
+        $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
         
         // 分组写入
         if($this['rel_type']=='group'){

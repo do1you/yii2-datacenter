@@ -189,25 +189,6 @@ class DcModel extends \webadmin\ModelCAR
         return parent::delete();
     }
     
-    // 查询所有字段信息
-    public function selectColumns(\yii\db\Query $query)
-    {
-        foreach($this->columns as $col){
-            $col->selectColumn($query);
-        }
-        
-        return $this;
-    }
-    
-    // 增加排序索引
-    public function orderColumns(\yii\data\Sort $sort)
-    {
-        foreach($this->columns as $col){
-            $col->orderColumn($sort);
-        }
-        return $this;
-    }
-    
     // 连接到指定模型
     public function joinModel(\yii\db\Query $query, &$models=[])
     {
