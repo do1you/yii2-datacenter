@@ -294,6 +294,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
     {
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
         $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
+        if($reverse) $target = clone $target;
         
         // 被关联的数据集不分页限制最大记录数为2000
         //$target->setPagination(false);
@@ -311,7 +312,6 @@ class DcSetsRelation extends \webadmin\ModelCAR
             $target->select($keys);
             
             // 反向需要关闭事件处理
-            $target = clone $target;
             $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']);
         }else{
             $columns = $this->getV_target_columns($target, false);

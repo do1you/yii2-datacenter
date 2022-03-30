@@ -75,10 +75,12 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
     public function actionData($id,$cache='1')
     {
         $model = $this->findModel($id,$cache);
+        if(Yii::$app->request->get('debug')){
+            return $this->render('/report-view/api', [
+                'dataProvider' => $model->getDataProvider(),
+            ]);
+        }
         return $model->getDataProvider();
-        /*return $this->render('/report-view/api', [
-            'dataProvider' => $model->getDataProvider(),
-        ]); */
     }
     
     /**
@@ -96,10 +98,12 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
     public function actionSetData($id,$cache='1')
     {
         $model = $this->findSetModel($id,$cache);
+        if(Yii::$app->request->get('debug')){
+            return $this->render('/report-view/api', [
+                'dataProvider' => $model->getDataProvider(),
+            ]);
+        }
         return $model->getDataProvider();
-        /*return $this->render('/report-view/api', [
-            'dataProvider' => $model->getDataProvider(),
-        ]);*/
     }
     
     /**
