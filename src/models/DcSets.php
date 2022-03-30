@@ -45,6 +45,11 @@ class DcSets extends \webadmin\ModelCAR
     public $_relation_target = [];
     
     /**
+     * 数据集所属的报表实例
+     */
+    public $report;
+    
+    /**
      * 数据提供器驱动类
      */
     const dataProviderMap = [
@@ -581,6 +586,7 @@ class DcSets extends \webadmin\ModelCAR
         return Yii::createObject([
             'class' => $class,
             'sets' => $this,
+            'forReport' => $this->report,
         ]);
     }
     

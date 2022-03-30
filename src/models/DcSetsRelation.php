@@ -228,12 +228,13 @@ class DcSetsRelation extends \webadmin\ModelCAR
                     $target->group($this->group_label);
                     
                     
-                    // 被关联的数据集不分页限制最大记录数为5000
+                    // 被关联的数据集不分页限制最大记录数为2000
                     //$target->setPagination(false);
                     $pagination = $target->getPagination();
                     if($pagination){
                         $pagination->setPage(0);
                         $pagination->setPageSize(2000);
+                        $target->setTotalCount(2000);
                     }
                     
                     $query = $target->getDataProvider()->query;
@@ -294,12 +295,13 @@ class DcSetsRelation extends \webadmin\ModelCAR
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
         $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
         
-        // 被关联的数据集不分页限制最大记录数为5000
+        // 被关联的数据集不分页限制最大记录数为2000
         //$target->setPagination(false);
         $pagination = $target->getPagination();
         if($pagination){
             $pagination->setPage(0);
             $pagination->setPageSize(2000);
+            $target->setTotalCount(2000);
         }
         
         if($reverse){
@@ -336,7 +338,11 @@ class DcSetsRelation extends \webadmin\ModelCAR
         }
         
         // 写入条件
-        $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
+        if($values){
+            $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
+        }else{
+            $reverse ? $source->setModels([]) : $target->setModels([]);
+        }
         
         // 分组写入
         if($this['rel_type']=='group'){

@@ -194,6 +194,8 @@ class DcReport extends \webadmin\ModelCAR
                 foreach($list as $k=>$model){
                     if(!$model){
                         unset($list[$k]);
+                    }else{
+                        $model->report = $this;
                     }
                 }
             }

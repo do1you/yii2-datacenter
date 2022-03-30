@@ -23,38 +23,61 @@ trait ReportDataProviderTrait
     public static $EVENT_AFTER_MODEL = 'afterModel';
     
     /**
+     * 用于查询的数据模型
+     */
+    private $_searchModels;
+    
+    /**
+     * 运行数据集时归集的报表模型
+     */
+    public $forReport;
+    
+    /**
      * 返回数据查询条件的表单构建模型
      */
     public function getSearchModels()
     {
-        $list = [];
-        $params = Yii::$app->request->get("SysConfig",[]);
-        $columns = $this->report ? $this->report->columns : $this->sets->columns;
-        foreach($columns as $item){
-            $colnmn = $this->report ? $item['setsCol'] : $item;
-            if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
-            
-            if($colnmn && $colnmn['model_id']){
-                $_ = [
-                    'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
-                    'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),
-                    'attribute' => $item['v_alias'],
-                    'label_name' => $colnmn['v_label'],
-                    'config_params' => $colnmn['search_params'],
-                    'v_config_params' => $colnmn['v_search_params'],
-                    'v_config_ajax' => $colnmn['v_search_ajax'],
-                ];
-                $list[] = $_;
+        if($this->_searchModels === null){
+         $list = [];
+            $params = Yii::$app->request->get("SysConfig",[]);
+            $columns = $this->report ? $this->report->columns : $this->sets->columns;
+            foreach($columns as $item){
+                $colnmn = $this->report ? $item['setsCol'] : $item;
+                if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
+                
+                if($colnmn && $colnmn['model_id']){
+                    $_ = [
+                        'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
+                        'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),
+                        'attribute' => $item['v_alias'],
+                        'label_name' => $colnmn['v_label'],
+                        'config_params' => $colnmn['search_params'],
+                        'v_config_params' => $colnmn['v_search_params'],
+                        'v_config_ajax' => $colnmn['v_search_ajax'],
+                    ];
+                    $list[] = $_;
+                }
             }
+            $this->_searchModels = $list;
         }
-        return $list;
+        
+        return $this->_searchModels;
+    }
+    
+    /**
+     * 设置数据查询条件的表单构建模型
+     */
+    public function setSearchModels($models)
+    {
+        $this->_searchModels = $models;
     }
     
     /**
      * 应用过滤条件
      */
-    public function setSearchModels($params = null)
+    public function applySearchModels($params = null)
     {
+        if($this->forReport) return;
         if($params === false){
             // 默认条件
             $searchModels = $this->getSearchModels();
@@ -81,7 +104,7 @@ trait ReportDataProviderTrait
                 
                 foreach($sets as $set){
                     if(isset($setSearchParams[$set['id']]) && is_array($setSearchParams[$set['id']])){
-                        $set->setSearchModels($setSearchParams[$set['id']]);
+                        $set->applySearchModels($setSearchParams[$set['id']]);
                         
                         // 非主数据集的,查询出结果数据并入到主数据集条件
                         if($mainSet['id'] != $set['id']){

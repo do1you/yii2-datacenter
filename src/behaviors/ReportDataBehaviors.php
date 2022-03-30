@@ -234,11 +234,19 @@ class ReportDataBehaviors extends \yii\base\Behavior
     }
     
     /**
+     * 设置数据查询条件的表单构建模型
+     */
+    public function setSearchModels($value)
+    {
+        return $this->getDataProvider()->setSearchModels($value);
+    }
+    
+    /**
      * 应用过滤条件
      */
-    public function setSearchModels($params = null)
+    public function applySearchModels($params = null)
     {
-        return $this->getDataProvider()->setSearchModels($params);
+        return $this->getDataProvider()->applySearchModels($params);
     }
 }
 

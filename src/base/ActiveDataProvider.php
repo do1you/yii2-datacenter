@@ -89,8 +89,7 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
         }
         
         // 应用过滤条件
-        $this->setSearchModels(false);
-        
+        $this->applySearchModels(false);
     }
     
     /**
