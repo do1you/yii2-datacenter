@@ -291,7 +291,7 @@ class DcReport extends \webadmin\ModelCAR
             'report-api/data',
             'cache'=>$cache,
             'id'=>$this['id'],
-            'access-token'=>Yii::$app->user->identity['access_token'],
+            //'access-token'=>Yii::$app->user->identity['access_token'],
         ];
         $params && ($arr['SysConfig'] = $params);
         return \yii\helpers\Url::to($arr);

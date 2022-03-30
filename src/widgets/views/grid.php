@@ -65,14 +65,15 @@ var draw,table = $("#{$id}").dataTable({
 		"url" : '{$apiUrl}',
 		"dataType": "json",
         "dataSrc": function(json){
+            var data = json.data&&json.data.pages ? json.data : json;
             json = $.extend(json,{
                 'draw' : (draw || 1),
-                'page' : json.data.pages.currentPage,
-                'total' : json.data.pages.pageCount,
-                'recordsTotal' : json.data.pages.totalCount,
-                'recordsFiltered' : json.data.pages.totalCount
+                'page' : data.pages.currentPage,
+                'total' : data.pages.pageCount,
+                'recordsTotal' : data.pages.totalCount,
+                'recordsFiltered' : data.pages.totalCount
             });
-            return json.data.rows;
+            return data.rows;
         },
 		"data" : function(data){
             draw = data.draw;

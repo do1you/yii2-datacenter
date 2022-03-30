@@ -9,13 +9,8 @@ use datacenter\models\DcReport;
 use yii\data\ActiveDataProvider;
 use datacenter\models\DcSets;
 
-class ReportApiController extends \webadmin\restful\AController // \webadmin\BController  \webadmin\restful\AController
+class ReportApiController extends ReportViewController // \webadmin\BController  \webadmin\restful\AController
 {
-    /**
-     * 当前授制器是否需要认证口令
-     */
-    public $isAccessToken = true;
-    
     /**
      * 当前控制器中需要缓存查询条件的方法
      */

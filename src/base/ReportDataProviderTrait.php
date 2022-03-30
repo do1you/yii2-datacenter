@@ -77,7 +77,7 @@ trait ReportDataProviderTrait
      */
     public function applySearchModels($params = null)
     {
-        if($this->forReport) return;
+        if($this->forReport && $params===false) return;
         if($params === false){
             // 默认条件
             $searchModels = $this->getSearchModels();
