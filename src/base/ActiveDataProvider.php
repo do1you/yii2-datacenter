@@ -55,7 +55,8 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
         
         // 默认条件、分组、排序
         $sets->rel_where && $query->andWhere($sets->formatSql($sets->rel_where));
-        $sets->rel_group && $query->addGroupBy($sets->formatSql($sets->rel_group));
+        $sets->rel_group && $query->addGroupBy(new \yii\db\Expression(($gSql = $sets->formatSql($sets->rel_group)))) 
+            && $query->addSelect(new \yii\db\Expression(str_ireplace([' desc',' asc'],'',$gSql)));
         $sets->rel_having && $query->andHaving($sets->formatSql($sets->rel_having));
         $sets->rel_order && $query->addOrderBy($sets->formatSql($sets->rel_order));
         
@@ -117,7 +118,7 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
      */
     public function select($columns)
     {
-        $this->query->addSelect($this->getColumns($columns));
+        $this->query->addSelect($this->getColumns($columns, null, true));
         return $this;
     }
     
@@ -202,7 +203,7 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
     /**
      * 获取字段
      */
-    public function getColumns($columns, &$values = null)
+    public function getColumns($columns, &$values = null, $isAs = false)
     {
         if($this->sets && $this->sets['columns']){
             if(is_array($columns)){
@@ -219,9 +220,9 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
             }else{
                 list($idColumns, $aliasColumns) = $this->initColumns();
                 if($idColumns && isset($idColumns[$columns])){
-                    $columns = $idColumns[$columns]['v_fncolumn'];
+                    $columns = $idColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$idColumns[$columns]['v_alias']}" : '');
                 }elseif($aliasColumns && isset($aliasColumns[$columns])){
-                    $columns = $aliasColumns[$columns]['v_fncolumn'];
+                    $columns = $aliasColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$aliasColumns[$columns]['v_alias']}" : '');
                 }
             }
         }

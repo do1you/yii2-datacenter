@@ -45,7 +45,7 @@ trait ReportDataProviderTrait
                 $colnmn = $this->report ? $item['setsCol'] : $item;
                 if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
                 
-                if($colnmn && $colnmn['model_id']){
+                if($colnmn && $colnmn['model_id'] && $colnmn['is_search']){
                     $_ = [
                         'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
                         'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),

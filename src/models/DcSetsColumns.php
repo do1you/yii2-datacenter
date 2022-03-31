@@ -137,11 +137,9 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function getV_column()
     {
         $column = $this->v_field;
-        if(strpos($column, '.')!==false){
+        if(strpos($column, '.')!==false || preg_match("/[\+\-\*\/]/",$column)){
             $column = $this->sets ? $this->sets->formatSql($column) : $column;
             return "({$column})";
-        }elseif(preg_match("/[\+\-\*\/]/",$column)){
-            return "({$this->model['v_alias']}.{$column})";
         }else{
             return "{$this->model['v_alias']}.{$column}";
         }
@@ -160,7 +158,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     // 返回字段格式化别名
     public function getV_column_alias()
     {
-        return "{$this->v_column} as {$this->v_alias}";
+        return "{$this->v_fncolumn} as {$this->v_alias}";
     }
     
     // 返回字段别名
