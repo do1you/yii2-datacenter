@@ -209,7 +209,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
         if($this->v_search_params_cache === null){
             $search_params = $this->search_params ? $this->search_params : "";
             $result = [];
-            $list = explode("\n", $search_params);
+            $list = explode("\n", str_replace("\r","",$search_params));
             if($list){
                 foreach($list as $val){
                     if(stripos($val,'|')===false){

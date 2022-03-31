@@ -56,7 +56,7 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
         // 默认条件、分组、排序
         $sets->rel_where && $query->andWhere($sets->formatSql($sets->rel_where));
         $sets->rel_group && $query->addGroupBy(new \yii\db\Expression(($gSql = $sets->formatSql($sets->rel_group)))) 
-            && $query->addSelect(new \yii\db\Expression(str_ireplace([' desc',' asc'],'',$gSql)));
+            && $query->addSelect(new \yii\db\Expression(str_ireplace([' desc',' asc'],'',$gSql))); // 兼容mycat分组不支持转义问题
         $sets->rel_having && $query->andHaving($sets->formatSql($sets->rel_having));
         $sets->rel_order && $query->addOrderBy($sets->formatSql($sets->rel_order));
         
@@ -83,7 +83,11 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
                     
                     // 添加查询
                     if(!$item->formula && !$col->formula && (!$this->report || $this->sets['id']==$col['set_id'])){
-                        $query->addSelect(["{$col->v_fncolumn} as {$col->v_alias}"]);
+                        if($col->fun){
+                            $query->addSelect([new \yii\db\Expression("{$col->v_fncolumn} as {$col->v_alias}")]);
+                        }else{
+                            $query->addSelect(["{$col->v_fncolumn} as {$col->v_alias}"]);
+                        }
                     }
                 }
             }
@@ -118,7 +122,8 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
      */
     public function select($columns)
     {
-        $this->query->addSelect($this->getColumns($columns, null, true));
+        $values = null;
+        $this->query->addSelect($this->getColumns($columns, $values, true));
         return $this;
     }
     

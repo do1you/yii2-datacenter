@@ -382,6 +382,7 @@ class DcSets extends \webadmin\ModelCAR
                     $formula = str_replace($search, $replace, $formula);
                     extract($values, EXTR_OVERWRITE);
                     $formula = preg_replace('/[{][^}]*?[}]/','$null',$formula);
+                    //var_dump('$values[$key] = '.$formula.';');
                     eval('$values[$key] = '.$formula.';');
                     $values[$key] = (string)$values[$key];
                     if(strlen($values[$key])<=0) $values[$key] = '&nbsp;';
