@@ -66,22 +66,30 @@ class ReportViewController extends \webadmin\BController
     // 设置场所过滤器
     public function behaviors()
     {
+        $behaviors = parent::behaviors();
+        
+        // 缓存查询条件
+        $behaviors['searchBehaviors'] = [
+            'class' => \webadmin\behaviors\SearchBehaviors::className(),
+            'searchCacheActions' => $this->searchCacheActions,
+            'cacheKey' => Yii::$app->session->id.'/datacenter/report-api/'.
+                ($this->action ? (in_array($this->action->id,['view','set-view']) ? str_replace('view','data',$this->action->id) : $this->action->id) : 'index'),
+        ];
+        
         // 已登录用户免判断
         if(!Yii::$app->user->isGuest || !Yii::$app->request->get('access-token')){
-            return parent::behaviors();
+            return $behaviors;
         }
         
         // 通过token直接登录
-        $behaviors = [
-            'authenticator' => [
-                'class' => \yii\filters\auth\CompositeAuth::className(),
-                'authMethods' => [
-                    \yii\filters\auth\HttpBearerAuth::className(),
-                    \yii\filters\auth\QueryParamAuth::className(),
-                ],
-                'optional' => ['token'],
-            ],            
-        ] + parent::behaviors();
+        $behaviors['authenticator'] = [
+            'class' => \yii\filters\auth\CompositeAuth::className(),
+            'authMethods' => [
+                \yii\filters\auth\HttpBearerAuth::className(),
+                \yii\filters\auth\QueryParamAuth::className(),
+            ],
+            'optional' => ['token'],
+        ];
         return $behaviors;
     }
     

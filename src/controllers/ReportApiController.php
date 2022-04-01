@@ -50,11 +50,13 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
     public function behaviors()
     {
         $behaviors = parent::behaviors();
-        
+
         // 缓存查询条件
         $behaviors['searchBehaviors'] = [
             'class' => \webadmin\behaviors\SearchBehaviors::className(),
             'searchCacheActions' => $this->searchCacheActions,
+            'cacheKey' => Yii::$app->session->id.'/datacenter/'.$this->id.'/'.
+                ($this->action ? (in_array($this->action->id,['view','set-view']) ? str_replace('view','data',$this->action->id) : $this->action->id) : 'index'),
         ];
         
         return $behaviors;

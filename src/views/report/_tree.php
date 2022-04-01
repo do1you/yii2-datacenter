@@ -5,7 +5,7 @@ use datacenter\models\DcRoleAuthority;
     <div class="tree-folder" style="display: none;">
         <div class="tree-folder-header">
             <i class="fa fa-folder"></i>
-            <div class="tree-folder-name" style="display:inline-block"></div>
+            <div class="tree-folder-name"></div>
         </div>
         <div class="tree-folder-content">
         </div>
@@ -152,6 +152,7 @@ $('#report_div').on('click', '[data-toggle=dispose]', function(){
         $.getJSON('{$url2}',{rid:rid,type:3},function(json){
             if(json.success){
                 $('#report_div').load('{$url3}');
+                Notify('操作成功！', 'top-right', '5000', 'success', 'fa-check', true);
             }else{
                 $('#report_div').load('{$url3}');
                 Notify((json.msg || json.message || '操作失败！'), 'top-right', '5000', 'darkorange', 'fa-warning', true);
@@ -184,6 +185,7 @@ $('#report_div').on('click', '[data-toggle=save]', function(){
                             success: function(json){
                                 if(json.success){
                                     $('#report_div').load('{$url3}');
+                                    Notify('操作成功！', 'top-right', '5000', 'success', 'fa-check', true);
                                 }else{
                                     Notify((json.msg || json.message || '操作失败！'), 'top-right', '5000', 'darkorange', 'fa-warning', true);
                                 }
@@ -207,6 +209,8 @@ $(document)
                     if(!json.success){
                         $('#report_div').load('{$url3}');
                         Notify((json.msg || json.message || '操作失败！'), 'top-right', '5000', 'darkorange', 'fa-warning', true);
+                    }else{
+                        Notify('操作成功！', 'top-right', '5000', 'success', 'fa-check', true);
                     }
                 });
             }
@@ -253,6 +257,7 @@ $(document).contextmenu({
                                         success: function(json){
                                             if(json.success){
                                                 $('#report_div').load('{$url3}');
+                                                Notify('操作成功！', 'top-right', '5000', 'success', 'fa-check', true);
                                             }else{
                                                 Notify((json.msg || json.message || '操作失败！'), 'top-right', '5000', 'darkorange', 'fa-warning', true);
                                             }
@@ -268,6 +273,7 @@ $(document).contextmenu({
                     $.getJSON('{$url2}',{id:column.colnmnId,rid:reportId,type:(target.is('.frozen') ? 6 : 7)},function(json){
                         if(json.success){
                             $('#report_div').load('{$url3}');
+                            Notify('操作成功！', 'top-right', '5000', 'success', 'fa-check', true);
                         }else{
                             Notify((json.msg || json.message || '操作失败！'), 'top-right', '5000', 'darkorange', 'fa-warning', true);
                         }

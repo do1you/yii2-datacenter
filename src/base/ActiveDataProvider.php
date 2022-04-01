@@ -55,8 +55,8 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
         
         // 默认条件、分组、排序
         $sets->rel_where && $query->andWhere($sets->formatSql($sets->rel_where));
-        $sets->rel_group && $query->addGroupBy(new \yii\db\Expression(($gSql = $sets->formatSql($sets->rel_group)))) 
-            && $query->addSelect(new \yii\db\Expression(str_ireplace([' desc',' asc'],'',$gSql))); // 兼容mycat分组不支持转义问题
+        $sets->rel_group && $query->addGroupBy(new \yii\db\Expression(($gSql = $sets->formatSql($sets->rel_group)))); 
+            // && $query->addSelect(new \yii\db\Expression(str_ireplace([' desc',' asc'],'',$gSql))); // 兼容mycat分组不支持转义问题
         $sets->rel_having && $query->andHaving($sets->formatSql($sets->rel_having));
         $sets->rel_order && $query->addOrderBy($sets->formatSql($sets->rel_order));
         

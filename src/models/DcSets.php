@@ -302,7 +302,7 @@ class DcSets extends \webadmin\ModelCAR
     {
         $query = parent::findByCondition($condition)->with([
             'columns.column',
-            'columns.sets',
+            'columns.sets.columns.model',
             'columns.model.sourceRelation.sourceModel',
             'columns.model.sourceRelation.targetModel',
             'columns.model.columns.model',
@@ -533,6 +533,7 @@ class DcSets extends \webadmin\ModelCAR
         $attributes = $this->attributes;
         unset($attributes['id']);
         if($model->load($attributes, '') && $model->save()){
+            $columnsMap = [];
             if($this->columns){
                 // 复制字段
                 foreach($this->columns as $col){
@@ -542,6 +543,7 @@ class DcSets extends \webadmin\ModelCAR
                     $colModel = new DcSetsColumns();
                     $colModel->load($attributes,'');
                     $colModel->save(false);
+                    $columnsMap[$col['id']] = $colModel['id'];
                 }
             }
             
@@ -553,6 +555,8 @@ class DcSets extends \webadmin\ModelCAR
                     $attributes['source_sets'] = $model['id'];
                     $relModel = new DcSetsRelation();
                     $relModel->load($attributes,'');
+                    $relModel->source_col = $this->_copySetsRel($relModel['v_source_col'],$columnsMap);
+                    $relModel->target_col = $this->_copySetsRel($relModel['v_target_col'],$columnsMap,true);
                     $relModel->save(false);
                 }
             }
@@ -565,6 +569,8 @@ class DcSets extends \webadmin\ModelCAR
                     $attributes['target_sets'] = $model['id'];
                     $relModel = new DcSetsRelation();
                     $relModel->load($attributes,'');
+                    $relModel->source_col = $this->_copySetsRel($relModel['v_source_col'],$columnsMap,true);
+                    $relModel->target_col = $this->_copySetsRel($relModel['v_target_col'],$columnsMap);
                     $relModel->save(false);
                 }
             }
@@ -572,6 +578,21 @@ class DcSets extends \webadmin\ModelCAR
         }else{
             return false;
         }
+    }
+    
+    // 复制数据集字段关系匹配
+    private function _copySetsRel($rels, $maps, $reverse = false)
+    {
+        $newRels = [];
+        foreach($rels as $k=>$v){
+            if($reverse){
+                $newRels[$k] = isset($maps[$v]) ? $maps[$v] : $v;
+            }else{
+                $newRels[isset($maps[$k]) ? $maps[$k] : $k] = $v;
+            }
+        }
+        
+        return json_encode($newRels);
     }
     
     /**
