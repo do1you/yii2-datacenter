@@ -38,6 +38,8 @@ class DcRelation extends \webadmin\ModelCAR
             [['source_model', 'target_model'], 'integer'],
             [['source_model', 'target_model'], 'required'],
             [['source_col', 'target_col', 'is_reverse_save'], 'safe'],
+            [['target_model'], 'compare', 'compareAttribute'=>'source_model', 'operator'=>'!='],
+            [['source_model', 'target_model'], 'unique', 'targetAttribute' => ['source_model', 'target_model']],
             [['rel_type'], 'string', 'max' => 30],
             [['rel_where'], 'string', 'max' => 255],
         ];

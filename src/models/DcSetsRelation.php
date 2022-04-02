@@ -44,6 +44,8 @@ class DcSetsRelation extends \webadmin\ModelCAR
             [['source_col', 'target_col', 'rel_type', 'is_reverse_save', 'group_col', 'group_label'], 'safe'],
             [['rel_type'], 'string', 'max' => 30],
             [['source_sets', 'target_sets'], 'required'],
+            [['target_sets'], 'compare', 'compareAttribute'=>'source_sets', 'operator'=>'!='],
+            [['source_sets', 'target_sets'], 'unique', 'targetAttribute' => ['source_sets', 'target_sets']],
             [['group_col', 'group_label'], 'required', 'when' => function ($model) {
                 return ($model->rel_type=='group');
             }],
