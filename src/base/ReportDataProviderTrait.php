@@ -88,7 +88,7 @@ trait ReportDataProviderTrait
                 }
             }
         }
-        
+
         if($params && ($colnmns = $this->report ? $this->report->columns : $this->sets->columns)){
             if($this->report){
                 // 报表条件
@@ -105,7 +105,6 @@ trait ReportDataProviderTrait
                 foreach($sets as $set){
                     if(isset($setSearchParams[$set['id']]) && is_array($setSearchParams[$set['id']])){
                         $set->applySearchModels($setSearchParams[$set['id']]);
-                        
                         // 非主数据集的,查询出结果数据并入到主数据集条件
                         if($mainSet['id'] != $set['id']){
                             $set->filterSourceSearch($mainSet);

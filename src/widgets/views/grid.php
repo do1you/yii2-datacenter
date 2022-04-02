@@ -52,7 +52,7 @@ var draw,table = $("#{$id}").dataTable({
 	"bAutoWidth" : true,
 	"colReorder" : ({$reorderState} ? {"iFixedColumnsLeft":1,"reorderCallback":function(){this.reportId = "{$model['id']}"; $(document).triggerHandler('dataTable.colReorder',this); }} : true),
     "stateSave": true,
-    "sScrollX" : '100%',
+    "sScrollX" : true, // '100%'
     "sScrollY" : ($(window).height()-280),
     "bScrollCollapse" : true,
     //"sScrollXInner" : '150%',
@@ -65,6 +65,10 @@ var draw,table = $("#{$id}").dataTable({
 		"url" : '{$apiUrl}',
 		"dataType": "json",
         "dataSrc": function(json){
+            if((json.code || json.status) && json.message){
+                Notify(json.message, 'top-right', '5000', 'darkorange', 'fa-warning', true);
+                return [];
+            }
             var data = json.data&&json.data.pages ? json.data : json;
             json = $.extend(json,{
                 'draw' : (draw || 1),

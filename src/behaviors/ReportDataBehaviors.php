@@ -156,7 +156,7 @@ class ReportDataBehaviors extends \yii\base\Behavior
     /**
      * 刷新数据
      */
-    public function refresh()
+    public function refreshData()
     {
         return $this->getDataProvider()->refresh();
     }

@@ -228,10 +228,9 @@ class DcSetsRelation extends \webadmin\ModelCAR
                     $target = clone $target;
                     $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
                     $target->group($this->group_label);
-                    
+                    $target->select($this->group_label);
                     
                     // 被关联的数据集不分页限制最大记录数为2000
-                    //$target->setPagination(false);
                     $pagination = $target->getPagination();
                     if($pagination){
                         $pagination->setPage(0);
@@ -239,14 +238,11 @@ class DcSetsRelation extends \webadmin\ModelCAR
                         $target->setTotalCount(2000);
                     }
                     
-                    $query = $target->getDataProvider()->query;
-                    $query->select([]);
-                    $this->groupLabel->selectColumn($query);
                     $list = $target->getModels(true);
                     $list = \yii\helpers\ArrayHelper::map($list, $this->groupLabel['v_alias'], $this->groupLabel['v_alias']);
                 }
                 
-                Yii::$app->cache->set($cacheKey, $list, 3600);
+                Yii::$app->cache->set($cacheKey, $list, 7200);
             }
             
             $this->_cache_group_columns = $list;
@@ -296,25 +292,25 @@ class DcSetsRelation extends \webadmin\ModelCAR
     {
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
         $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
-        if($reverse) $target = clone $target;
         
-        // 被关联的数据集不分页限制最大记录数为2000
-        //$target->setPagination(false);
+        // 被关联的数据集不分页
         $pagination = $target->getPagination();
         if($pagination){
             $pagination->setPage(0);
             $pagination->setPageSize(2000);
-            $target->setTotalCount(2000);
         }
-        
+
         if($reverse){
             $columns = $this->getV_source_columns($source, false);
             $keys = $this->getV_target_columns($target);
             $source->select($columns);
             $target->select($keys);
             
-            // 反向需要关闭事件处理
+            // 反向时需要关闭事件处理
             $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']);
+            if(($count = $target->getTotalCount())>2000){
+                throw new \yii\web\HttpException(200, Yii::t('datacenter','请缩小过滤条件范围，辅助二次查询的数据量较多').$count);
+            }
         }else{
             $columns = $this->getV_target_columns($target, false);
             $keys = $this->getV_source_columns($source);
@@ -350,6 +346,12 @@ class DcSetsRelation extends \webadmin\ModelCAR
         if($this['rel_type']=='group'){
             $groupCols = $this->getV_source_columns($target, false, $this['v_group_col']);
             $groupCols && $target->group($groupCols);
+        }
+        
+        // 重写事件
+        if($reverse){
+            $target->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']);
+            $target->refreshData();
         }
         
         return $this;
