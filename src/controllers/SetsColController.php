@@ -15,6 +15,7 @@ class SetsColController extends \webadmin\BController
     public function beforeAction($action){
         Yii::$app->controller->pageTitle = Yii::t('datacenter', '数据集属性');
 		Yii::$app->controller->currNav[] = Yii::$app->controller->pageTitle;
+		$this->currUrl = $this->module->id.'/'.$this->id.'/index';
 		
         return parent::beforeAction($action);
     }
@@ -136,6 +137,47 @@ class SetsColController extends \webadmin\BController
         }
 
         return $this->render('create', [
+            'model' => $model,
+        ]);
+    }
+    
+    /**
+     * 批量添加模型
+     */
+    public function actionBatchCreate($sId='',$mId='')
+    {
+        $model = new DcSetsColumns();
+        $model->loadDefaultValues();
+        $model->setScenario('batchInsertForm');
+        
+        if($sId) $model->set_id = $sId;
+        if($mId) $model->model_id = $mId;
+        
+        if($model['sets']['set_type']!='model'){
+            throw new \yii\web\HttpException(200, Yii::t('datacenter','只有数据集类型为模型的数据集才允许批量添加字段'));
+        }
+        
+        if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->name && is_array($model->name)) {
+            $transaction = DcSetsColumns::getDb()->beginTransaction(); // 使用事务关联
+            
+            $labels = $model['model'] ? \yii\helpers\ArrayHelper::map($model['model']['columns'], 'name', 'label') : [];
+            foreach($model->name as $name){
+                $newModel = clone $model;
+                $newModel->name = $name;
+                $newModel->label = isset($labels[$name]) ? $labels[$name] : $name;
+                if($newModel->sql_formula){
+                    $newModel->sql_formula = str_replace('{name}',$name,$newModel->sql_formula);
+                }
+                $newModel->save(false);
+            }
+            
+            $transaction->commit(); // 提交事务
+            
+            Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));
+            return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
+        }
+        
+        return $this->render('batch-create', [
             'model' => $model,
         ]);
     }

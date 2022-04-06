@@ -48,7 +48,8 @@ class DcSetsColumns extends \webadmin\ModelCAR
             [['name', 'label', 'type', 'fun', 'search_value'], 'string', 'max' => 50],
             [['formula', 'sql_formula'], 'string', 'max' => 255],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
-            [['search_params_text', 'search_params_dd', 'search_value_text'], 'safe', 'on'=>['insertForm','updateForm']],
+            [['search_params_text', 'search_params_dd', 'search_value_text'], 'safe', 'on'=>['insertForm','batchInsertForm','updateForm']],
+            [['model_id'], 'required', 'on'=>'batchInsertForm'],
         ];
     }
 

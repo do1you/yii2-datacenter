@@ -23,6 +23,7 @@ use yii\helpers\Url;
     					<div class="pull-right margin-bottom-10">
     						<?php /* <a class="btn btn-primary" href="<?php echo Url::to(['tree']);?>"><i class='fa fa-sitemap'></i> <?= Yii::t('common','树型数据')?></a> */?>
     						<a class="btn btn-primary" data-pjax="<?php echo (empty($sId) ? '1' : '0')?>" href="<?php echo Url::to(['sets-col/create', 'sId'=>(empty($sId) ? '' : $sId)]);?>"><i class='fa fa-plus'></i> <?= Yii::t('common','添加')?></a>
+    						<a class="btn btn-primary" data-pjax="<?php echo (empty($sId) ? '1' : '0')?>" href="<?php echo Url::to(['sets-col/batch-create', 'sId'=>(empty($sId) ? '' : $sId)]);?>"><i class='fa fa-indent'></i> <?= Yii::t('common','批量添加')?></a>
     						<button class="btn btn-primary checkSubmit" data-pjax="<?php echo (empty($sId) ? '1' : '0')?>" reaction="<?php echo Url::to(['sets-col/delete']);?>" type="button"><i class='fa fa-trash-o'></i> <?= Yii::t('common','批量删除')?></button>
     						<?php echo Html::hiddenInput(Yii::$app->request->csrfParam, Yii::$app->request->getCsrfToken());?>
     		    		</div>
