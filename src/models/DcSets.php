@@ -416,7 +416,7 @@ class DcSets extends \webadmin\ModelCAR
                     }
                 }elseif(strlen($v)<=0){
                     $values[$key] = '&nbsp;';
-                }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && substr($v,0,1)!='0'){
+                }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && (substr($v,0,2)=='0.' || substr($v,0,1)!='0')){
                     $values[$key] = floatval($v);
                 }
             }
@@ -485,7 +485,7 @@ class DcSets extends \webadmin\ModelCAR
                 $targetList = $target->getModels();
                 $columns = $relation->getV_target_columns($target);
                 if($relation['rel_type']=='group'){
-                    $groupCols = $relation->getV_source_columns($target, true, $relation['group_label']);
+                    $groupCols = $relation->getV_source_columns($target, true, $relation['v_group_col']);
                 }
                 foreach($targetList as $model){
                     $k = $this->getModelKey($model, $columns);

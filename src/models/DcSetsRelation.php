@@ -22,9 +22,9 @@ class DcSetsRelation extends \webadmin\ModelCAR
     public $is_reverse_save;
     
     /**
-     * 分组的数据列缓存
+     * 缓存的字段对象
      */
-    private $_cache_group_columns;
+    private $_cache_col_models;
     
     /**
      * 返回数据库表名称
@@ -88,7 +88,38 @@ class DcSetsRelation extends \webadmin\ModelCAR
     // 获取分组字段关系
     public function getGroupCol()
     {
-        return (($cols = $this->getV_group_col()) ? DcSetsColumns::findAll(['id'=>$cols,'set_id'=>$this->target_sets]) : []);
+        return $this->hasMany(DcSetsColumns::className(), ['set_id' => 'target_sets'])->where(['id'=>$this->getV_group_col(),]);
+    }
+    
+    // 返回源属性关系
+    public function getV_source_col_models()
+    {
+        $source_col = $this->getV_source_col();
+        $ids = array_keys($source_col);
+        return $this->hasMany(DcSetsColumns::className(), ['set_id' => 'source_sets'])->with(['sets'])->where(['id'=>$ids,]);
+    }
+    
+    // 返回目标属性关系
+    public function getV_target_col_models()
+    {
+        $source_col = $this->getV_source_col();
+        $ids = array_values($source_col);
+        if($this->group_label){
+            $ids[] = $this->group_label;
+        }
+        if($this->group_col){
+            $ids = array_merge($ids, $this->getV_group_col());
+        }
+        return $this->hasMany(DcSetsColumns::className(), ['set_id' => 'target_sets'])->with(['sets'])->where(['id'=>$ids,]);
+    }
+    
+    // 返回属性关系数据所有字段集合
+    public function getV_col_models()
+    {
+        if($this->_cache_col_models === null){
+            $this->_cache_col_models = \yii\helpers\ArrayHelper::map($this->v_source_col_models, 'id', 'v_self') + \yii\helpers\ArrayHelper::map($this->v_target_col_models, 'id', 'v_self');
+        }
+        return $this->_cache_col_models;
     }
     
     // 返回关联关系类型
@@ -103,32 +134,15 @@ class DcSetsRelation extends \webadmin\ModelCAR
         return (is_array($this->group_col) ? $this->group_col : ($this->group_col ? explode(',',$this->group_col) : []));
     }
     
-    // 返回属性关系数据所有字段集合
-    public function getV_col_models()
-    {
-        $source_col = $this->getV_source_col();
-        $ids = array_merge(array_keys($source_col), array_values($source_col));
-        if($this->group_label){
-            $ids[] = $this->group_label;
-        }
-        if($this->group_col){
-            $ids = array_merge($ids, $this->getV_group_col());
-        }
-        $cModels = $ids ? DcSetsColumns::find()->where(['id'=>$ids])->with(['sets'])->all() : [];
-        return \yii\helpers\ArrayHelper::map($cModels, 'id', 'v_self');
-    }
-    
     // 返回源属性关系
     public function getV_source_col()
     {
-        $this->arrangement_col();
         return (is_array($this->source_col) ? $this->source_col : ($this->source_col ? json_decode($this->source_col,true) : []));
     }
     
     // 返回目标属性关系
     public function getV_target_col()
     {
-        $this->arrangement_col();
         return (is_array($this->target_col) ? $this->target_col : ($this->target_col ? json_decode($this->target_col,true) : []));
     }
     
@@ -173,7 +187,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
         }
     }
     
-    // 返回格式化源键名
+    // 返回格式化源键名,isTarget: false 取源字段， true 取目标字段， 其它 指定字段
     public function getV_source_columns($source = null, $isAlias = true, $isTarget = false)
     {
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
@@ -217,38 +231,34 @@ class DcSetsRelation extends \webadmin\ModelCAR
     }
     
     // 返回被分组字段的全部属性
-    public function getV_group_list($target = null, $f5 = false)
+    public function getV_group_list($target = null)
     {
-        if($this->_cache_group_columns === null){
+        if($this->rel_type=='group' && $this->group_label && $this->group_col){
             $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
-            $cacheKey = "datacenter/dynamicGroupColumns/{$this->id}/".md5(serialize($target));
-            if(($list = Yii::$app->cache->get($cacheKey))===false || $f5){
-                $list = [];
-                if($this->rel_type=='group' && $this->group_label && $this->groupLabel['v_alias']){
-                    $target = clone $target;
-                    $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
-                    $target->group($this->group_label);
-                    $target->select($this->group_label);
-                    
-                    // 被关联的数据集不分页限制最大记录数为2000
-                    $pagination = $target->getPagination();
-                    if($pagination){
-                        $pagination->setPage(0);
-                        $pagination->setPageSize(2000);
-                        $target->setTotalCount(2000);
-                    }
-                    
-                    $list = $target->getModels(true);
-                    $list = \yii\helpers\ArrayHelper::map($list, $this->groupLabel['v_alias'], $this->groupLabel['v_alias']);
-                }
-                
-                Yii::$app->cache->set($cacheKey, $list, 7200);
+            $target = clone $target;
+            $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
+            $v_group_col = $this->v_group_col;
+            $target->group(false)->group($v_group_col);
+            $target->select(false)->select($this->group_label)->select($v_group_col)->order($v_group_col);
+            
+            // 被关联的数据集不分页限制最大记录数为2000
+            $pagination = $target->getPagination();
+            if($pagination){
+                $pagination->setPage(0);
+                $pagination->setPageSize(2000);
+                $target->setTotalCount(2000);
             }
             
-            $this->_cache_group_columns = $list;
+            $list = $target->getModels();
+            $columns = $this->getV_source_columns($target,true,$v_group_col);
+            $result = [];
+            foreach($list as $model){
+                $key = $this->getModelKey($model,$columns);
+                $result[$key] = $model[$this->groupLabel['v_alias']];
+            }
+            return $result;
         }
-        
-        return $this->_cache_group_columns;
+        return [];
     }
     
     // 保存前动作
@@ -293,14 +303,14 @@ class DcSetsRelation extends \webadmin\ModelCAR
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
         $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
         
-        // 被关联的数据集不分页
-        $pagination = $target->getPagination();
-        if($pagination){
-            $pagination->setPage(0);
-            $pagination->setPageSize(2000);
-        }
-
         if($reverse){
+            // 被关联的数据集不分页
+            $pagination = $target->getPagination();
+            if($pagination){
+                $pagination->setPage(0);
+                $pagination->setPageSize(2000);
+            }
+            
             $columns = $this->getV_source_columns($source, false);
             $keys = $this->getV_target_columns($target);
             $source->select($columns);
@@ -312,6 +322,8 @@ class DcSetsRelation extends \webadmin\ModelCAR
                 throw new \yii\web\HttpException(200, Yii::t('datacenter','请缩小过滤条件范围，辅助二次查询的数据量较多').$count);
             }
         }else{
+            $target->setPagination(false); // 不分页
+            
             $columns = $this->getV_target_columns($target, false);
             $keys = $this->getV_source_columns($source);
             $source->select($keys);
@@ -343,9 +355,8 @@ class DcSetsRelation extends \webadmin\ModelCAR
         }
         
         // 分组写入
-        if($this['rel_type']=='group'){
-            $groupCols = $this->getV_source_columns($target, false, $this['v_group_col']);
-            $groupCols && $target->group($groupCols);
+        if($this->rel_type=='group' && $this->group_col){
+            $target->group($this['v_group_col']);
         }
         
         // 重写事件

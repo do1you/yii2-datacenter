@@ -46,7 +46,8 @@ if($group_col && is_array($group_col)){
 
             <?= $form->field($model, 'rel_type')->textInput(['maxlength' => true])->select2($model->getV_rel_type(false), []) ?>
             
-            <?= $form->field($model, 'group_col')->textInput(['maxlength' => true])->select2($groupColList, ['multiple'=>'multiple']) ?>
+            <?= $form->field($model, 'group_col')->textInput(['maxlength' => true])->select2($groupColList, ['multiple'=>'multiple'])
+                ->hint('原则上分组字段不包含被关联关系的字段，即：分组字段不含关系关系中的目标字段')?>
             
             <?= $form->field($model, 'group_label')->textInput(['maxlength' => true])->select2(($model->group_label 
                 ? [$model->group_label=>(isset($colModels[$model->group_label]) ? $colModels[$model->group_label]['v_name'] : $model->group_label)] : []), []) ?>

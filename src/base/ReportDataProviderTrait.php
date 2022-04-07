@@ -33,6 +33,51 @@ trait ReportDataProviderTrait
     public $forReport;
     
     /**
+     * 初始化分组字段
+     */
+    private function initColumns()
+    {
+        // 取出字段
+        if($this->_alias_columns===null || $this->_id_columns===null){
+            $this->_alias_columns = $this->_id_columns = [];
+            foreach($this->sets['columns'] as $column){
+                $this->_alias_columns[$column['v_alias']] = $this->_id_columns[$column['id']] = $column;
+            }
+        }
+        return [$this->_id_columns, $this->_alias_columns];
+    }
+    
+    /**
+     * 获取字段
+     */
+    public function getColumns($columns, &$values = null, $isAs = false)
+    {
+        if($this->sets && $this->sets['columns']){
+            if(is_array($columns)){
+                foreach($columns as $k=>$col){
+                    $columns[$k] = $this->getColumns($col, $values, $isAs);
+                }
+                if($values && is_array($values)){
+                    foreach($values as $k=>$value){
+                        if(is_array($value)){
+                            $values[$k] = array_combine($columns, $value);
+                        }
+                    }
+                }
+            }else{
+                list($idColumns, $aliasColumns) = $this->initColumns();
+                if($idColumns && isset($idColumns[$columns])){
+                    $columns = $idColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$idColumns[$columns]['v_alias']}" : '');
+                }elseif($aliasColumns && isset($aliasColumns[$columns])){
+                    $columns = $aliasColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$aliasColumns[$columns]['v_alias']}" : '');
+                }
+            }
+        }
+        
+        return $columns;
+    }
+    
+    /**
      * 返回数据查询条件的表单构建模型
      */
     public function getSearchModels()
@@ -187,7 +232,7 @@ trait ReportDataProviderTrait
             $set = isset($setLists[$col['set_id']]) ? $setLists[$col['set_id']] : null;
             $relation = $set ? $set['v_relation'] : null;
             if($set && $relation && $relation['rel_type']=='group'){
-                $groupCols = $relation->getV_group_list($set);
+                $groupCols = $relation->getCache('getV_group_list', [$set, $this->report->v_cache_key]);
                 if($groupCols && is_array($groupCols)){
                     foreach($groupCols as $k=>$v){
                         $data[$col['v_alias'].'_'.$k] = isset($values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']])

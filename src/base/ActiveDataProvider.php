@@ -122,8 +122,12 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
      */
     public function select($columns)
     {
-        $values = null;
-        $this->query->addSelect($this->getColumns($columns, $values, true));
+        if($columns===false){
+            $this->query->select([]);
+        }else{
+            $values = null;
+            $this->query->addSelect($this->getColumns($columns, $values, true));
+        }
         return $this;
     }
     
@@ -132,9 +136,13 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
      */
     public function where($columns, $values, $op = false)
     {
-        $columns = $this->getColumns($columns, $values);
-        $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
-        $this->query->andWhere([$op, $columns, $values]);
+        if($columns===false){
+            $this->query->where([]);
+        }else{
+            $columns = $this->getColumns($columns, $values);
+            $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
+            $this->query->andWhere([$op, $columns, $values]);
+        }
         return $this;
     }
     
@@ -154,9 +162,13 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
      */
     public function having($columns, $values, $op = false)
     {
-        $columns = $this->getColumns($columns, $values);
-        $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
-        $this->query->andHaving([$op, $columns, $values]);
+        if($columns===false){
+            $this->query->having([]);
+        }else{
+            $columns = $this->getColumns($columns, $values);
+            $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
+            $this->query->andHaving([$op, $columns, $values]);
+        }
         return $this;
     }
     
@@ -176,7 +188,11 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
      */
     public function group($columns)
     {
-        $this->query->addGroupBy($this->getColumns($columns));
+        if($columns===false){
+            $this->query->groupBy([]);
+        }else{
+            $this->query->addGroupBy($this->getColumns($columns));
+        }
         return $this;
     }
     
@@ -185,53 +201,18 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
      */
     public function order($columns)
     {
-        $this->query->addOrderBy($this->getColumns($columns));
-        return $this;
-    }
-    
-    /**
-     * 初始化分组字段
-     */
-    private function initColumns()
-    {
-        // 取出字段
-        if($this->_alias_columns===null || $this->_id_columns===null){
-            $this->_alias_columns = $this->_id_columns = [];
-            foreach($this->sets['columns'] as $column){
-                $this->_alias_columns[$column['v_alias']] = $this->_id_columns[$column['id']] = $column;
-            }
-        }
-        
-        return [$this->_id_columns, $this->_alias_columns];
-    }
-    
-    /**
-     * 获取字段
-     */
-    public function getColumns($columns, &$values = null, $isAs = false)
-    {
-        if($this->sets && $this->sets['columns']){
+        if($columns===false){
+            $this->query->orderBy([]);
+        }else{
+            $columns = $this->getColumns($columns);
             if(is_array($columns)){
-                foreach($columns as $k=>$col){
-                    $columns[$k] = $this->getColumns($col);
-                }
-                if($values && is_array($values)){
-                    foreach($values as $k=>$value){
-                        if(is_array($value)){
-                            $values[$k] = array_combine($columns, $value);
-                        }
-                    }
+                foreach($columns as $col){
+                    $this->query->addOrderBy($col);
                 }
             }else{
-                list($idColumns, $aliasColumns) = $this->initColumns();
-                if($idColumns && isset($idColumns[$columns])){
-                    $columns = $idColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$idColumns[$columns]['v_alias']}" : '');
-                }elseif($aliasColumns && isset($aliasColumns[$columns])){
-                    $columns = $aliasColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$aliasColumns[$columns]['v_alias']}" : '');
-                }
+                $this->query->addOrderBy($columns);
             }
         }
-        
-        return $columns;
+        return $this;
     }
 }

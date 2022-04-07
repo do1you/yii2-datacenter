@@ -27,9 +27,33 @@ trait ReportOrmTrait
     private $_cache_source;
     
     /**
+     * 根据数据源设置缓存主键
+     */
+    private $_cache_key;
+    
+    /**
      * 数据源选择
      */
     public $set_source;
+    
+    /**
+     * 返回缓存主键值
+     */
+    public function getV_cache_key()
+    {
+        if($this->_cache_key === null){
+            $sources = $this->getV_source();
+            $keys = [];
+            foreach($sources as $source){
+                if($source['is_dynamic']=='1'){
+                    $keys[$source['id']] = Yii::$app->session[$source['v_sessionName']];
+                }
+            }
+            $this->_cache_key = md5(serialize($keys));
+        }
+        
+        return $this->_cache_key;
+    }
     
     /**
      * 返回包含的数据源
@@ -75,7 +99,7 @@ trait ReportOrmTrait
                 $set = (($this instanceof DcReport) && isset($setLists[$col['set_id']])) ? $setLists[$col['set_id']] : null;
                 $relation = $set ? $set['v_relation'] : null;
                 if(!in_array($col['id'], $skipIds) && $set && $relation && $relation['rel_type']=='group'){
-                    $groupCols = $relation->getV_group_list($set);
+                    $groupCols = $relation->getCache('getV_group_list', [$set, $this->v_cache_key]);
                     if($groupCols && is_array($groupCols)){
                         foreach($groupCols as $k=>$v){
                             // 同一数据集的其他字段一并拉取
