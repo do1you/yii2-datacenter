@@ -1,9 +1,34 @@
 <?php 
 $columns = $model->getV_columns();
+$oneCols = $model->getV_oneCols();
+$twoCols = $model->getV_twoCols();
 ?>
 <div class="table-scrollable-debug">
     <table class="table table-striped table-bordered table-hover table-nowrap notFix" id="<?php echo $id?>">
-    	<thead></thead>
+    	<thead>
+    		<?php 
+    		foreach([$oneCols, $twoCols] as $item){
+    		    if($item){
+    		        echo '<tr>';
+    		        foreach($columns as $col){
+    		            if(isset($item[$col['name']])){
+    		                $c = $item[$col['name']];
+    		                $colspan = $c['colspan'];
+    		                echo "<th colspan='{$colspan}'>{$c['label']}</th>";
+    		            }elseif(empty($colspan) || --$colspan <= 0){
+    		                echo "<th>&nbsp;</th>";
+    		            }
+    		        }
+    		        echo '</tr>';
+    		    }
+    		}
+    		echo '<tr>';
+    		foreach($columns as $col){
+    		    echo "<th>{$col['label']}</th>";
+    		}
+    		echo '</tr>';
+    		?>
+    	</thead>
     	<tbody></tbody>
     	<?php if(($totalRow = $model['v_summary']) && !empty($columns)):?>
     	<tfoot>

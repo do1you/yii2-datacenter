@@ -12,9 +12,19 @@ use datacenter\models\DcReport;
 trait ReportOrmTrait
 {
     /**
-     * 关联所有的字段
+     * 所有的三级字段
      */
-    private $_setColumns;
+    private $_setThreeColumns;
+    
+    /**
+     * 所有的二级字段
+     */
+    private $_setTwoColumns;
+    
+    /**
+     * 所有的一级字段
+     */
+    private $_setOneColumns;
     
     /**
      * 冻结列数
@@ -84,36 +94,76 @@ trait ReportOrmTrait
     }
     
     /**
-     * 返回格式化所有列字段
+     * 返回一级字段
+     */
+    public function getV_oneCols()
+    {
+        $this->getV_columns();
+        return $this->_setOneColumns;
+    }
+    
+    /**
+     * 返回二级字段
+     */
+    public function getV_twoCols()
+    {
+        $this->getV_columns();
+        return $this->_setTwoColumns;
+    }
+    
+    /**
+     * 返回格式化所有三级字段
      */
     public function getV_columns()
     {
-        if($this->_setColumns===null){
+        if($this->_setThreeColumns===null){
             if($this instanceof DcReport){ // 报表
                 $this->initJoinSet();
                 $setLists = $this->getV_sets();
             }
-            $skipIds = $list = [];
+            $this->_setOneColumns = $this->_setTwoColumns = $skipIds = $list = [];
             $setColumns = \yii\helpers\ArrayHelper::map($this->columns, 'id', 'v_self', 'set_id');
             foreach($this->columns as $col){
+                if(in_array($col['id'], $skipIds)) continue;
                 $set = (($this instanceof DcReport) && isset($setLists[$col['set_id']])) ? $setLists[$col['set_id']] : null;
                 $relation = $set ? $set['v_relation'] : null;
                 if(!in_array($col['id'], $skipIds) && $set && $relation && $relation['rel_type']=='group'){
                     $groupCols = $relation->getV_group_list($set);
                     if($groupCols && is_array($groupCols)){
+                        $colspan = 0;
                         foreach($groupCols as $k=>$v){
                             // 同一数据集的其他字段一并拉取
                             if(isset($setColumns[$col['set_id']]) && is_array($setColumns[$col['set_id']])){
+                                $count = count($setColumns[$col['set_id']]);
+                                $colspan2 = 0;
                                 foreach($setColumns[$col['set_id']] as $c){
                                     $list[] = [
                                         'id' => $c['id'],
                                         'name' => $c['v_alias'].'_'.$k,
-                                        'label' => "[{$v}]{$c['v_label']}",
+                                        'label' => ($count>1 ? $c['v_label'] : $v),
                                         'order' => false,
-                                        ];
+                                    ];
                                     $skipIds[] = $c['id'];
+                                    $colspan++;
+                                    if($count>1) $colspan2++;
+                                    if($colspan==1) $beginCol = $c['v_alias'].'_'.$k;
+                                    if($colspan2==1) $beginCol2 = $c['v_alias'].'_'.$k;
+                                }
+                                if($count>1 && $colspan2>=1){
+                                    $this->_setTwoColumns[$beginCol2] = [
+                                        'begin' => $beginCol2,
+                                        'colspan' => $colspan2,
+                                        'label' => $v,
+                                    ];
                                 }
                             }
+                        }
+                        if($colspan>=1){
+                            $this->_setOneColumns[$beginCol] = [
+                                'begin' => $beginCol,
+                                'colspan' => $colspan,
+                                'label' => $set['title'],
+                            ];
                         }
                     }
                 }elseif(!in_array($col['id'], $skipIds)){
@@ -125,10 +175,10 @@ trait ReportOrmTrait
                     ];
                 }
             }
-            $this->_setColumns = $list;
+            $this->_setThreeColumns = $list;
         }
         
-        return $this->_setColumns;
+        return $this->_setThreeColumns;
     }
     
     /**
