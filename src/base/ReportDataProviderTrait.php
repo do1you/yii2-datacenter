@@ -232,7 +232,7 @@ trait ReportDataProviderTrait
             $set = isset($setLists[$col['set_id']]) ? $setLists[$col['set_id']] : null;
             $relation = $set ? $set['v_relation'] : null;
             if($set && $relation && $relation['rel_type']=='group'){
-                $groupCols = $relation->getCache('getV_group_list', [$set, $this->report->v_cache_key]);
+                $groupCols = $relation->getV_group_list($set);
                 if($groupCols && is_array($groupCols)){
                     foreach($groupCols as $k=>$v){
                         $data[$col['v_alias'].'_'.$k] = isset($values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']])

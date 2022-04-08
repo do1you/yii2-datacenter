@@ -231,34 +231,38 @@ class DcSetsRelation extends \webadmin\ModelCAR
     }
     
     // 返回被分组字段的全部属性
-    public function getV_group_list($target = null)
+    public function getV_group_list($target = null, $f5 = false)
     {
-        if($this->rel_type=='group' && $this->group_label && $this->group_col){
-            $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
-            $target = clone $target;
-            $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
-            $v_group_col = $this->v_group_col;
-            $target->group(false)->group($v_group_col);
-            $target->select(false)->select($this->group_label)->select($v_group_col)->order($v_group_col);
-            
-            // 被关联的数据集不分页限制最大记录数为2000
-            $pagination = $target->getPagination();
-            if($pagination){
-                $pagination->setPage(0);
-                $pagination->setPageSize(2000);
-                $target->setTotalCount(2000);
-            }
-            
-            $list = $target->getModels();
-            $columns = $this->getV_source_columns($target,true,$v_group_col);
+        $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
+        $cacheKey = "datacenter/setGroupList/{$this->id}/{$target->v_cache_key}";
+        if(($result = Yii::$app->cache->get($cacheKey))===false || $f5){
             $result = [];
-            foreach($list as $model){
-                $key = $this->getModelKey($model,$columns);
-                $result[$key] = $model[$this->groupLabel['v_alias']];
+            if($this->rel_type=='group' && $this->group_label && $this->group_col){
+                $target = clone $target;
+                $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']); // 关闭事件
+                $v_group_col = $this->v_group_col;
+                $target->group(false)->group($v_group_col);
+                $target->select(false)->select($this->group_label)->select($v_group_col)->order($v_group_col);
+                
+                // 被关联的数据集不分页限制最大记录数为2000
+                $pagination = $target->getPagination();
+                if($pagination){
+                    $pagination->setPage(0);
+                    $pagination->setPageSize(2000);
+                    $target->setTotalCount(2000);
+                }
+                
+                $list = $target->getModels();
+                $columns = $this->getV_source_columns($target,true,$v_group_col);
+                foreach($list as $model){
+                    $key = $this->getModelKey($model,$columns);
+                    $result[$key] = $model[$this->groupLabel['v_alias']];
+                }
             }
-            return $result;
+            Yii::$app->cache->set($cacheKey, $result, 86400);
         }
-        return [];
+        
+        return $result;
     }
     
     // 保存前动作

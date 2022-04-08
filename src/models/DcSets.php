@@ -571,6 +571,8 @@ class DcSets extends \webadmin\ModelCAR
                     $relModel->load($attributes,'');
                     $relModel->source_col = $this->_copySetsRel($relModel['v_source_col'],$columnsMap,true);
                     $relModel->target_col = $this->_copySetsRel($relModel['v_target_col'],$columnsMap);
+                    //$relModel->group_col = $this->_copySetsRel($relModel['v_group_col'],$columnsMap);
+                    //$relModel->group_label
                     $relModel->save(false);
                 }
             }

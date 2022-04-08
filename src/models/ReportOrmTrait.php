@@ -99,7 +99,7 @@ trait ReportOrmTrait
                 $set = (($this instanceof DcReport) && isset($setLists[$col['set_id']])) ? $setLists[$col['set_id']] : null;
                 $relation = $set ? $set['v_relation'] : null;
                 if(!in_array($col['id'], $skipIds) && $set && $relation && $relation['rel_type']=='group'){
-                    $groupCols = $relation->getCache('getV_group_list', [$set, $this->v_cache_key]);
+                    $groupCols = $relation->getV_group_list($set);
                     if($groupCols && is_array($groupCols)){
                         foreach($groupCols as $k=>$v){
                             // 同一数据集的其他字段一并拉取
