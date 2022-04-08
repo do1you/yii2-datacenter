@@ -2,10 +2,10 @@
 $sourceList = $model ? $model['v_source'] : [];
 ?>
 <div class="report-item-box" rid="<?php echo $model['id']?>" api-url="<?php echo $this->context->apiUrl?>">
-    <?php /*if(isset($cache) && $cache===true) */echo $search;?>
+    <?php echo $search;?>
     <div class="widget flat radius-bordered">
     	<div class="widget-header bg-themeprimary">
-    	    <span class="widget-caption"><?php echo $model['title']?>&nbsp;</span>
+    	    <span class="widget-caption tooltip-primary" style="position:absolute;left:12px;" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo $model['title']?>"><?php echo $model['title']?>&nbsp;</span>
     	    <div class="widget-buttons">
     	    	<?php //if(isset($cache) && $cache===true):?>
     				<?php 
@@ -27,6 +27,7 @@ $sourceList = $model ? $model['v_source'] : [];
                 <?php //endif;?>
     			<a href="#" data-toggle="collapse" title="<?= Yii::t('common','最小化')?>"><i class="fa fa-minus"></i></a>
     			<a href="#" data-toggle="maximize" title="<?= Yii::t('common','最大化')?>"><i class="fa fa-expand"></i></a>
+    			<a href="#" data-toggle="search" title="<?= Yii::t('datacenter','打开查询面板')?>"><i class="fa fa-search"></i></a>
     			<?php if(isset($cache) && $cache===false):?>
     				<a href="#" data-toggle="save" report-id="<?php echo $model['id']?>" title="<?= Yii::t('datacenter','保存报表')?>"><i class="fa fa-save"></i></a>
     				<a href="#" data-toggle="dispose" report-id="<?php echo $model['id']?>" title="<?= Yii::t('datacenter','删除')?>"><i class="fa fa-times"></i></a>
@@ -50,6 +51,12 @@ $('select.select-dynamic-source').off('change').on('change',function(){
         sid = t.attr('source_id');
     location.href = "{$url}?id="+id+"&sid="+sid;
 
+});
+// 条件过滤
+$(document).off('click','a[data-toggle="search"]').on('click','a[data-toggle="search"]',function(){
+    $(this).closest('.report-item-box').find('.dataconter-search').slideToggle(function(){
+        $('.data-report-row').triggerHandler('relad.layout');
+    });
 });
 eot;
 $this->registerJs($script);
