@@ -185,6 +185,13 @@ class DcSets extends \webadmin\ModelCAR
         return "{$this->title}[{$this->id}]";
     }
     
+    // 返回运行脚本
+    public function getV_run_script()
+    {
+        if(!$this->run_script) return false;
+        return '\\datacenter\\base\\script\\'.ucfirst($this->run_script);
+    }
+    
     // 获取模型匹配关系
     public function getV_relation_models()
     {

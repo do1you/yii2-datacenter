@@ -21,16 +21,6 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
     public $report;
     
     /**
-     * ID分组数据集字段
-     */
-    private $_id_columns;
-    
-    /**
-     * 别名分组数据集字段
-     */
-    private $_alias_columns;
-    
-    /**
      * 初始化
      */
     public function init()

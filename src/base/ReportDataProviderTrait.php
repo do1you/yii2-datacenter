@@ -13,6 +13,11 @@ trait ReportDataProviderTrait
     protected $_keys;
     
     /**
+     * 运行数据集时归集的报表模型
+     */
+    public $forReport;
+    
+    /**
      * 查询数据前事件名称
      */
     public static $EVENT_BEFORE_MODEL = 'beforeModel';
@@ -28,10 +33,15 @@ trait ReportDataProviderTrait
     private $_searchModels;
     
     /**
-     * 运行数据集时归集的报表模型
+     * ID分组数据集字段
      */
-    public $forReport;
+    private $_id_columns;
     
+    /**
+     * 别名分组数据集字段
+     */
+    private $_alias_columns;
+        
     /**
      * 初始化分组字段
      */
@@ -67,9 +77,17 @@ trait ReportDataProviderTrait
             }else{
                 list($idColumns, $aliasColumns) = $this->initColumns();
                 if($idColumns && isset($idColumns[$columns])){
-                    $columns = $idColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$idColumns[$columns]['v_alias']}" : '');
+                    if($this->sets['set_type']=='model'){
+                        $columns = $idColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$idColumns[$columns]['v_alias']}" : '');
+                    }else{
+                        $columns = $idColumns[$columns]['name'];
+                    }
                 }elseif($aliasColumns && isset($aliasColumns[$columns])){
-                    $columns = $aliasColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$aliasColumns[$columns]['v_alias']}" : '');
+                    if($this->sets['set_type']=='model'){
+                        $columns = $aliasColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$aliasColumns[$columns]['v_alias']}" : '');
+                    }else{
+                        $columns = $idColumns[$columns]['name'];
+                    }
                 }
             }
         }
@@ -90,7 +108,7 @@ trait ReportDataProviderTrait
                 $colnmn = $this->report ? $item['setsCol'] : $item;
                 if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
                 
-                if($colnmn && $colnmn['model_id'] && $colnmn['is_search']){
+                if($colnmn && $colnmn['is_search'] && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')){
                     $_ = [
                         'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
                         'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),
@@ -161,7 +179,7 @@ trait ReportDataProviderTrait
                 foreach($colnmns as $col){
                     if($col['formula']) continue;
                     $callFn = $col['fun'] ? 'having' : 'where';
-                    if(isset($params[$col['v_alias']]) && (is_array($params[$col['v_alias']]) || strlen($params[$col['v_alias']])>0) && $col['model_id']){
+                    if(isset($params[$col['v_alias']]) && (is_array($params[$col['v_alias']]) || strlen($params[$col['v_alias']])>0) && ($col['model_id'] || $this->sets['set_type']!='model')){
                         switch($col['type'])
                         {
                             case 'date': // 日期
@@ -249,6 +267,21 @@ trait ReportDataProviderTrait
                         : $col['v_default_value']
                     );
             }
+        }
+        return $data;
+    }
+    
+    /**
+     * 过滤出数据集的字段
+     */
+    public function filterSetsColumns($values)
+    {
+        if(!$this->sets) return $values;
+        $data = [];
+        foreach($this->sets->columns as $col){
+            $data[$col['v_alias']] = isset($values[$col['v_alias']])
+                ? $values[$col['v_alias']]
+                : (isset($values[$col['name']]) ? $values[$col['name']] : $col['v_default_value']);
         }
         return $data;
     }

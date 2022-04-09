@@ -183,7 +183,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     // 是否允许排序
     public function getV_order()
     {
-        return ($this->model_id>0&&$this->column&&!$this->formula&&!$this->fun ? true : false);
+        return ((($this->model_id>0&&$this->column&&!$this->formula&&!$this->fun) || $this->sets['set_type']!='model') ? true : false);
     }
     
     // 返回计算公式替换内容
