@@ -45,7 +45,7 @@ if($pagination){
     
                     <div class="form-group">
                     	<?= Html::button(Yii::t('common','查询'), ['class' => 'btn btn-primary report_search_btn']) ?>
-                        <?= Html::submitButton(Yii::t('common','导出'), ['class' => 'btn btn-primary report_export_btn']) ?>
+                        <?= Html::button(Yii::t('common','导出'), ['class' => 'btn btn-primary report_export_btn']) ?>
                         <?= Html::hiddenInput('is_export',''); ?>
                         <?php  
                         $apiUrl = $this->context->apiUrl;
@@ -62,6 +62,8 @@ if($pagination){
                                     ajax.reload();
                                 }
                                 return false;
+                            }else{
+                                form.submit();
                             }
                         });", 4, 'report.search.submit');
                         ?>

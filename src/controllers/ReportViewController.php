@@ -211,13 +211,13 @@ class ReportViewController extends \webadmin\BController
         if($list && is_array($list)){
             foreach($list as $key=>$item){
                 if($key==0){
-                    $dataProvider = $item;
+                    $dataProvider = $item->getDataProvider();
                     $titles= $item['v_excelData'];
                     $filename = $item['title'];
                     $options = ['title'=>$item['title']];
                 }else{
                     $options['sheets'][$item['id']] = [
-                        'dataProvider' => $item,
+                        'dataProvider' => $item->getDataProvider(),
                         'titles' => $item['v_excelData'],
                         'title' => $item['title'],
                     ];
