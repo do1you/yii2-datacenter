@@ -28,7 +28,7 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
         parent::init();
         
         if(!($sets = $this->sets) || !$sets->mainModel || !$sets->mainModel['source'] || !($db = $sets->mainModel['source']->getSourceDb())){
-            throw new \yii\base\InvalidConfigException(Yii::t('datacenter', '数据集尚未配置正确的主模型.'));
+            throw new \yii\web\HttpException(200, Yii::t('datacenter', '数据集尚未配置正确的主模型.'));
         }
         
         $query = new \yii\db\Query();

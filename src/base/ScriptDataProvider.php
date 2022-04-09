@@ -38,11 +38,11 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
         parent::init();
         
         if(!($sets = $this->sets)){
-            throw new \yii\base\InvalidConfigException(Yii::t('datacenter', '数据集尚未配置正确的数据集.'));
+            throw new \yii\web\HttpException(200, Yii::t('datacenter', '数据集尚未配置正确的数据集.'));
         }
         
         if(!$this->scriptObj && (!($class = $sets->v_run_script) || !class_exists($class))){
-            throw new \yii\base\InvalidConfigException(Yii::t('datacenter', '数据集尚未配置正确的数据脚本实例.'));
+            throw new \yii\web\HttpException(200, Yii::t('datacenter', '数据集尚未配置正确的数据脚本实例.'));
         }
         
         $this->scriptObj = $this->scriptObj ? $this->scriptObj : Yii::createObject($class);
