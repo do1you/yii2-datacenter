@@ -25,6 +25,17 @@ class SetsController extends \webadmin\BController
     public function actions()
     {
         return [
+            // 数据源查询
+            'source' => [
+                'class' => '\webadmin\actions\Select2Action',
+                'className' => '\datacenter\models\DcSource',
+                'col_id' => 'id',
+                'col_text' => 'name',
+                'col_v_text' => 'name',
+                /*'col_where' => (Yii::$app->user->id=='1' ? [] : [
+                 'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
+                 ]),*/
+            ],
             // 数据模型查询
             'model' => [
                 'class' => '\webadmin\actions\Select2Action',

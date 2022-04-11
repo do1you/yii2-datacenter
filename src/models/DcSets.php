@@ -75,7 +75,7 @@ class DcSets extends \webadmin\ModelCAR
         return [
             [['title', 'set_type', 'cat_id'], 'required'],
             [['main_model', 'relation_models', 'run_script', 'run_sql', 'excel_file', 'rel_where', 'rel_group', 'rel_order', 'update_time'], 'safe'],
-            [['main_model', 'state', 'cat_id'], 'integer'],
+            [['main_model', 'state', 'cat_id', 'source_id'], 'integer'],
             [['run_sql'], 'string'],
             [['update_time'], 'safe'],
             [['title', 'set_type'], 'string', 'max' => 50],
@@ -89,7 +89,7 @@ class DcSets extends \webadmin\ModelCAR
             [['run_script'], 'required', 'when' => function ($model) {
                 return ($model->set_type=='script');
             }],
-            [['run_sql'], 'required', 'when' => function ($model) {
+            [['run_sql', 'source_id'], 'required', 'when' => function ($model) {
                 return ($model->set_type=='sql');
             }],
         ];
@@ -108,6 +108,7 @@ class DcSets extends \webadmin\ModelCAR
             'relation_models' => Yii::t('datacenter', '模型匹配关系'),
             'run_script' => Yii::t('datacenter', '运行脚本'),
             'run_sql' => Yii::t('datacenter', '运行SQL'),
+            'source_id' => Yii::t('datacenter', 'SQL数据源'),
             'excel_file' => Yii::t('datacenter', 'EXCEL文件'),
             'state' => Yii::t('datacenter', '状态'),
             'rel_where' => Yii::t('datacenter', '条件'),
@@ -174,6 +175,11 @@ class DcSets extends \webadmin\ModelCAR
     // 获取数据报表字段属性关系
     public function getReportColumns(){
         return $this->hasMany(DcReportColumns::className(), ['set_id' => 'id']);
+    }
+    
+    // 获取数据源关系
+    public function getSource(){
+        return $this->hasOne(DcSource::className(), ['id'=>'source_id']);
     }
     
     // 获取数据集类型
@@ -286,6 +292,8 @@ class DcSets extends \webadmin\ModelCAR
         // excel文件保存
         if($this->set_type=='excel'){
             $this->saveExcelData();
+        }elseif($this->set_type=='sql'){
+            $this->saveSqlData();
         }
         
         return parent::afterSave($insert, $changedAttributes);
@@ -307,6 +315,33 @@ class DcSets extends \webadmin\ModelCAR
                     'set_id' => $this->id,
                     'name' => $key,
                     'label' => $label,
+                ],'');
+                $model->save(false);
+                unset($columns[$key]);
+            }
+            foreach($columns as $item){
+                $item->delete();
+            }
+        }
+    }
+    
+    // 保存SQL数据
+    public function saveSqlData()
+    {
+        if(!$this->run_sql || !$this->source_id || !$this->source || !($db = $this->source->getSourceDb())){
+            return;
+        }
+        
+        $sql = $db->getQueryBuilder()->buildOrderByAndLimit($this->run_sql, [], 1, 0);
+        $titles = $db->createCommand($sql)->queryOne();
+        if($titles){
+            $columns = \yii\helpers\ArrayHelper::map($this->columns, 'name', 'v_self');
+            foreach($titles as $key=>$value){
+                $model = isset($columns[$key]) ? $columns[$key] : (new DcSetsColumns());
+                $model->load([
+                    'set_id' => $this->id,
+                    'name' => $key,
+                    'label' => $key,
                 ],'');
                 $model->save(false);
                 unset($columns[$key]);
@@ -353,6 +388,7 @@ class DcSets extends \webadmin\ModelCAR
     public function findModel($condition, $muli = false)
     {
         $query = parent::findByCondition($condition)->with([
+            'source',
             'columns.column',
             'columns.sets.columns.model',
             'columns.model.sourceRelation.sourceModel',

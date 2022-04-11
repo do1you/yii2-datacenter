@@ -26,6 +26,8 @@ use webadmin\widgets\ActiveForm;
             <?= $form->field($model, 'rel_order',['options'=>['class'=>'form-group box_form box_model']])->textInput(['maxlength' => true]) ?>
             
             <?= $form->field($model, 'run_script',['options'=>['class'=>'form-group box_form box_script']])->textInput(['maxlength' => true]) ?>
+            
+            <?= $form->field($model, 'source_id',['options'=>['class'=>'form-group box_form box_sql']])->textInput()->selectajax(\yii\helpers\Url::toRoute('source'),[]) ?>
 
             <?= $form->field($model, 'run_sql',['options'=>['class'=>'form-group box_form box_sql']])->textarea(['rows' => 6]) ?>
 
