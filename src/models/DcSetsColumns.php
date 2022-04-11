@@ -261,24 +261,24 @@ class DcSetsColumns extends \webadmin\ModelCAR
                 $endTime = date('Y-m-d H:i:s', (strtotime($startTime) + 3600 * 24 - 1));
                 break;
             case 'prevweek': // 上周
-                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-1 week', time()))) + $finance_sec));
-                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-1 week last monday', time()))) + $finance_sec));
+                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-1 week', time())))));
+                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-1 week last monday', time())))));
                 $endTime = date('Y-m-d H:i:s', (strtotime($startTime) + 3600 * 24 * 7 - 1));
                 break;
             case 'currweek': // 本周
-                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-0 week', time()))) + $finance_sec));
-                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-0 week last monday', time()))) + $finance_sec));
+                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-0 week', time())))));
+                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-0 week last monday', time())))));
                 $endTime = date('Y-m-d H:i:s', (strtotime($startTime) + 3600 * 24 * 7 - 1));
                 break;
             case 'prevmonth': // 上月
-                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-1 month'))) + $finance_sec));
-                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-01', strtotime('-1 month'))) + $finance_sec));
-                $endTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-t', strtotime('-1 month'))) + 3600*24 + $finance_sec));
+                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-1 month')))));
+                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-01', strtotime('-1 month')))));
+                $endTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-t', strtotime('-1 month')))));
                 break;
             case 'currmonth': // 本月
-                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-0 month'))) + $finance_sec));
-                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-01', strtotime('-0 month'))) + $finance_sec));
-                $endTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-t', strtotime('-0 month'))) + 3600*24 + $finance_sec));
+                $currTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-d', strtotime('-0 month')))));
+                $startTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-01', strtotime('-0 month')))));
+                $endTime = date('Y-m-d H:i:s', (strtotime(date('Y-m-t', strtotime('-0 month')))));
                 break;
             case '1days': // 最近XX天
             case '3days':
@@ -303,6 +303,8 @@ class DcSetsColumns extends \webadmin\ModelCAR
                 $defaultValue = date('Y-m-d',strtotime($currTime));
             }elseif($this['type']=='time'){
                 $defaultValue = date('H:i:s',strtotime($currTime));
+            }elseif($this['type']=='dateyear'){
+                $defaultValue = date('Y',strtotime($currTime));
             }
         }
         
@@ -329,7 +331,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
         }elseif(in_array($this->type, ['dd', 'ddmulti', 'ddselect2', 'ddselect2multi'] )){
             $this->search_params_dd = $this->search_params;
         }
-        if(!in_array($this->type, ['datetimerange', 'daterange', 'datetime', 'date'] )){
+        if(!in_array($this->type, ['datetimerange', 'daterange', 'datetime', 'date', 'dateyear'] )){
             $this->search_value_text =  $this->search_value;
         }
         
@@ -366,7 +368,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             }elseif(in_array($this->type, ['dd', 'ddmulti', 'ddselect2', 'ddselect2multi'] )){
                 $this->search_params = $this->search_params_dd;
             }
-            if(!in_array($this->type, ['datetimerange', 'daterange', 'datetime', 'date'] )){
+            if(!in_array($this->type, ['datetimerange', 'daterange', 'datetime', 'date', 'dateyear'] )){
                 $this->search_value =  $this->search_value_text;
             }
         }

@@ -45,11 +45,13 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
             throw new \yii\web\HttpException(200, Yii::t('datacenter', '数据集尚未配置正确的数据脚本实例.'));
         }
         
-        $this->scriptObj = $this->scriptObj ? $this->scriptObj : Yii::createObject($class);
+        $this->scriptObj = $this->scriptObj ? $this->scriptObj : Yii::createObject([
+            'class' => $class,
+            'dataProvider' => $this,
+        ]);
         
         // 默认数据
         Yii::configure($this,[
-            'allModels' => $this->scriptObj->getModels(),
             'pagination' => ['pageSizeLimit' => [1, 500]],
         ]);
         
@@ -168,7 +170,7 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
     {
         if($this->_wheres){
             $list = [];
-            foreach($this->allModels as $model){
+            foreach($this->scriptObj->getModels($this->_wheres) as $model){
                 $isHave = true;
                 foreach($this->_wheres as $where){
                     list($op,$columns,$values) = $where;
@@ -241,6 +243,8 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
                 }
             }
             $this->allModels = $list;
+        }else{
+            $this->allModels = $this->scriptObj->getModels();
         }
     }
     

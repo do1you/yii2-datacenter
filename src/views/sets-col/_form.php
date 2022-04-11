@@ -131,7 +131,7 @@ $('#dcsetscolumns-type').on('change',function(){
         if(value=='dd' || value=='ddmulti' || value=='ddselect2' || value=='ddselect2multi'){
             // 字典选项
             fn('#dcsetscolumns-search_value_text,#dcsetscolumns-search_params_dd',1);
-        }else if(value=='datetimerange' || value=='daterange' || value=='datetime' || value=='date'){
+        }else if(value=='datetimerange' || value=='daterange' || value=='datetime' || value=='date' || value=='dateyear'){
             // 时间选项
             fn('#dcsetscolumns-search_value',1);
         }else if(value=='select' || value=='select2' || value=='select2mult' || value=='selectmult'){

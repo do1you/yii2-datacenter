@@ -94,13 +94,19 @@ var draw,table = $("#{$id}").dataTable({
                 Notify(json.message, 'top-right', '5000', 'darkorange', 'fa-warning', true);
                 return [];
             }
-            var data = json.data&&json.data.pages ? json.data : json;
-            json = $.extend(json,{
+            var data = json.data&&json.data.rows ? json.data : json;
+            json = data.pages ? $.extend(json,{
                 'draw' : (draw || 1),
                 'page' : data.pages.currentPage,
                 'total' : data.pages.pageCount,
                 'recordsTotal' : data.pages.totalCount,
                 'recordsFiltered' : data.pages.totalCount
+            }) : $.extend(json,{
+                'draw' : (draw || 1),
+                'page' : 1,
+                'total' : 1,
+                'recordsTotal' : 1,
+                'recordsFiltered' : 1
             });
             return data.rows;
         },

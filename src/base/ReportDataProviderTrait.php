@@ -183,7 +183,7 @@ trait ReportDataProviderTrait
                         switch($col['type'])
                         {
                             case 'date': // 日期
-                                $this->$callFn($col['id'], $params[$col['v_alias']].' 00:00:00', '>=');
+                                $this->$callFn($col['id'], $params[$col['v_alias']], '>=');
                                 $this->$callFn($col['id'], $params[$col['v_alias']].' 23:59:59', '<=');
                                 break;
                             case 'daterange': // 日期范围
@@ -191,8 +191,8 @@ trait ReportDataProviderTrait
                                 if(strpos($params[$col['v_alias']], '至')!==false){
                                     list($startTime, $endTime) = explode('至', $params[$col['v_alias']]);
                                     if($col['type']=='daterange'){
-                                        $startTime .= ' 00:00:00';
-                                        $endTime .= ' 23:59:59';
+                                        $startTime = trim($startTime);
+                                        $endTime = trim($endTime).' 23:59:59';
                                     }
                                     $this->$callFn($col['id'], trim($startTime), '>=');
                                     $this->$callFn($col['id'], trim($endTime), '<=');
@@ -200,6 +200,7 @@ trait ReportDataProviderTrait
                                 break;
                             case 'time': // 时间
                             case 'datetime': // 日期时间
+                            case 'dateyear': // 年份
                             case 'checkbox': // 复选框
                             case 'select': // 下拉框
                             case 'selectmult': // 下拉多选框
