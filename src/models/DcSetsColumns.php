@@ -314,6 +314,10 @@ class DcSetsColumns extends \webadmin\ModelCAR
     // 删除判断
     public function delete()
     {
+        if($this->id<0){
+            throw new \yii\web\HttpException(200, Yii::t('datacenter', '系统内置数据集，禁止删除！'));
+        }
+        
         if($this->reportColumns){
             foreach($this->reportColumns as $item){
                 $item->delete();

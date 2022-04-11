@@ -283,6 +283,10 @@ class DcSets extends \webadmin\ModelCAR
             throw new \yii\web\HttpException(200, Yii::t('datacenter', '该数据集下存在数据报表，请先删除数据数据报表！'));
         }
         
+        if($this->id<0){
+            throw new \yii\web\HttpException(200, Yii::t('datacenter', '系统内置数据集，禁止删除！'));
+        }
+        
         if($this->columns){
             foreach($this->columns as $item){
                 $item->delete();
