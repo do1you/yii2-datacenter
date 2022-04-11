@@ -22,7 +22,7 @@ use yii\helpers\Url;
     				<div class="col-xs-12 col-md-12">
     					<div class="pull-right margin-bottom-10">
     						<?php /* <a class="btn btn-primary" href="<?php echo Url::to(['tree']);?>"><i class='fa fa-sitemap'></i> <?= Yii::t('common','树型数据')?></a> */?>
-    						<a class="btn btn-primary" href="<?php echo Url::to(['create']);?>"><i class='fa fa-plus'></i> <?= Yii::t('common','添加')?></a>
+    						<a class="btn btn-primary" data-pjax="0" href="<?php echo Url::to(['create']);?>"><i class='fa fa-plus'></i> <?= Yii::t('common','添加')?></a>
     						<button class="btn btn-primary checkSubmit" reaction="<?php echo Url::to(['delete']);?>" type="button"><i class='fa fa-trash-o'></i> <?= Yii::t('common','批量删除')?></button>
     						<button class="btn btn-primary checkSubmit" reaction="<?php echo Url::to(['report-view/set-view']);?>" type="button"><i class='fa fa-bars'></i> <?= Yii::t('common','多表查看')?></button>
     						<?php echo Html::hiddenInput(Yii::$app->request->csrfParam, Yii::$app->request->getCsrfToken());?>

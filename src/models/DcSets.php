@@ -83,6 +83,15 @@ class DcSets extends \webadmin\ModelCAR
             [['run_script', 'excel_file'], 'string', 'max' => 150],
             [['rel_where'], 'string', 'max' => 200],
             [['rel_group', 'rel_order', 'rel_having'], 'string', 'max' => 100],
+            [['excel_file'], 'required', 'when' => function ($model) {
+                return ($model->set_type=='excel');
+            }],
+            [['run_script'], 'required', 'when' => function ($model) {
+                return ($model->set_type=='script');
+            }],
+            [['run_sql'], 'required', 'when' => function ($model) {
+                return ($model->set_type=='sql');
+            }],
         ];
     }
 
@@ -261,6 +270,7 @@ class DcSets extends \webadmin\ModelCAR
     // 保存后动作
     public function afterSave($insert, $changedAttributes)
     {
+        // 保存默认数据集权限
         if($insert && Yii::$app instanceof \yii\web\Application){
             $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>Yii::$app->user->id]), 'role_id', 'role_id');
             foreach($roleIds as $roleId){
@@ -273,7 +283,38 @@ class DcSets extends \webadmin\ModelCAR
             \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'], 86400, true);
         }
         
+        // excel文件保存
+        if($this->set_type=='excel'){
+            $this->saveExcelData();
+        }
+        
         return parent::afterSave($insert, $changedAttributes);
+    }
+    
+    // 保存excel数据
+    public function saveExcelData()
+    {
+        if(!$this->excel_file){
+            return;
+        }
+        $array = \webadmin\ext\PhpExcel::readfile($this->excel_file);
+        $titles = $array ? array_shift($array) : [];
+        if($titles){
+            $columns = \yii\helpers\ArrayHelper::map($this->columns, 'name', 'v_self');
+            foreach($titles as $key=>$label){
+                $model = isset($columns[$key]) ? $columns[$key] : (new DcSetsColumns());
+                $model->load([
+                    'set_id' => $this->id,
+                    'name' => $key,
+                    'label' => $label,
+                ],'');
+                $model->save(false);
+                unset($columns[$key]);
+            }
+            foreach($columns as $item){
+                $item->delete();
+            }
+        }
     }
     
     // 删除判断

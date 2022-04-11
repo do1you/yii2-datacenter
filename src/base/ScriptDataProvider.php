@@ -170,7 +170,8 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
     {
         if($this->_wheres){
             $list = [];
-            foreach($this->scriptObj->getModels($this->_wheres) as $model){
+            $allModels = $this->sets->set_type=='script' ? $this->scriptObj->getModels($this->_wheres) : $this->allModels;
+            foreach($allModels as $model){
                 $isHave = true;
                 foreach($this->_wheres as $where){
                     list($op,$columns,$values) = $where;
@@ -244,7 +245,7 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
             }
             $this->allModels = $list;
         }else{
-            $this->allModels = $this->scriptObj->getModels();
+            $this->allModels = $this->sets->set_type=='script' ? $this->scriptObj->getModels() : $this->allModels;
         }
     }
     
