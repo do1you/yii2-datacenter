@@ -528,6 +528,10 @@ class DcSets extends \webadmin\ModelCAR
                 $set->_relation_target[$this['id']] = [$relations[$set['id']], $this];
                 $set->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
                 $set->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
+                if($relations[$set['id']]->rel_type=='union'){
+                    $this->setPagination(false);
+                    $set->setPagination(false);
+                }
                 $joinSets[$set['id']] = $set;
                 unset($sets[$k]);
             }
@@ -569,31 +573,37 @@ class DcSets extends \webadmin\ModelCAR
                 list($relation, $source) = $item;
                 $buckets = $values = [];
                 
-                // 目标数据集合
-                $targetList = $target->getModels();
-                $columns = $relation->getV_target_columns($target);
-                if($relation['rel_type']=='group'){
-                    $groupCols = $relation->getV_source_columns($target, true, $relation['v_group_col']);
-                }
-                foreach($targetList as $model){
-                    $k = $this->getModelKey($model, $columns);
-                    if($relation['rel_type']=='group' && $groupCols){
-                        $gk = $this->getModelKey($model, $groupCols);
-                        $buckets[$k][$gk] = $model;
-                    }else{
-                        $buckets[$k] = $model;
+                if($relation['rel_type']=='union'){
+                    $sourceList = $source->getModels();
+                    $targetList = $target->getModels();
+                    $source->setModels(\yii\helpers\ArrayHelper::merge($sourceList,$targetList));
+                }else{
+                    // 目标数据集合
+                    $targetList = $target->getModels();
+                    $columns = $relation->getV_target_columns($target);
+                    if($relation['rel_type']=='group'){
+                        $groupCols = $relation->getV_source_columns($target, true, $relation['v_group_col']);
                     }
+                    foreach($targetList as $model){
+                        $k = $this->getModelKey($model, $columns);
+                        if($relation['rel_type']=='group' && $groupCols){
+                            $gk = $this->getModelKey($model, $groupCols);
+                            $buckets[$k][$gk] = $model;
+                        }else{
+                            $buckets[$k] = $model;
+                        }
+                    }
+                    
+                    // 源数据集合
+                    $sourceList = $source->getModels();
+                    $keys = $relation->getV_source_columns($source);
+                    foreach($sourceList as $index=>$model){
+                        $k = $this->getModelKey($model, $keys);
+                        $sourceList[$index]['_'][$target['id']] = isset($buckets[$k]) ? $buckets[$k] : null;
+                    }
+                    
+                    $source->setModels($sourceList);
                 }
-                
-                // 源数据集合
-                $sourceList = $source->getModels();
-                $keys = $relation->getV_source_columns($source);
-                foreach($sourceList as $index=>$model){
-                    $k = $this->getModelKey($model, $keys);
-                    $sourceList[$index]['_'][$target['id']] = isset($buckets[$k]) ? $buckets[$k] : null;
-                }
-                
-                $source->setModels($sourceList);
             }
         }
     }

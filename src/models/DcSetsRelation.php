@@ -49,6 +49,9 @@ class DcSetsRelation extends \webadmin\ModelCAR
             [['group_col', 'group_label'], 'required', 'when' => function ($model) {
                 return ($model->rel_type=='group');
             }],
+            [['source_col', 'target_col'], 'required', 'when' => function ($model) {
+                return ($model->rel_type!='union');
+            }],
         ];
     }
 
@@ -185,6 +188,8 @@ class DcSetsRelation extends \webadmin\ModelCAR
             $this->source_col = json_encode($params);
             $this->target_col = json_encode($params1);
         }
+        $this->source_col = trim($this->source_col);
+        $this->target_col = trim($this->target_col);
     }
     
     // 返回格式化源键名,isTarget: false 取源字段， true 取目标字段， 其它 指定字段
@@ -292,7 +297,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
                 'target_sets' => $this->source_sets,
                 'source_col' => $this->target_col,
                 'target_col' => $this->source_col,
-                'rel_type' => ($model['rel_type'] ? $model['rel_type'] : 'one'),
+                'rel_type' => ($model['rel_type'] ? $model['rel_type'] : ($this->rel_type == 'union' ? 'union' : 'one')),
             ],'');
             $model->is_reverse_save = false;
             $model->save(false);
@@ -306,6 +311,12 @@ class DcSetsRelation extends \webadmin\ModelCAR
     {
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
         $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
+        
+        if($this->rel_type=='union'){
+            $source->setPagination(false);
+            $target->setPagination(false);
+            return $this;
+        }
         
         if($reverse){
             // 被关联的数据集不分页

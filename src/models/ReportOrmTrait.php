@@ -121,13 +121,24 @@ trait ReportOrmTrait
                 $this->initJoinSet();
                 $setLists = $this->getV_sets();
             }
-            $this->_setOneColumns = $this->_setTwoColumns = $skipIds = $list = [];
+            $this->_setOneColumns = $this->_setTwoColumns = $skipIds = $list = $labelList = [];
             $setColumns = \yii\helpers\ArrayHelper::map($this->columns, 'id', 'v_self', 'set_id');
             foreach($this->columns as $col){
                 if(in_array($col['id'], $skipIds)) continue;
                 $set = (($this instanceof DcReport) && isset($setLists[$col['set_id']])) ? $setLists[$col['set_id']] : null;
                 $relation = $set ? $set['v_relation'] : null;
-                if(!in_array($col['id'], $skipIds) && $set && $relation && $relation['rel_type']=='group'){
+                if($set && $relation && $relation['rel_type']=='union'){ // 合并
+                    if(!isset($labelList[$col['v_label']])){
+                        $data = [
+                            'id' => $col['id'],
+                            'name' => $col['v_alias'],
+                            'label' => $col['v_label'],
+                            'order' => $col['v_order'],
+                        ];
+                        $list[] = $data;
+                        $labelList[$col['v_label']] = $data;
+                    }
+                }elseif($set && $relation && $relation['rel_type']=='group'){ // 分组
                     $groupCols = $relation->getV_group_list($set);
                     if($groupCols && is_array($groupCols)){
                         $colspan = 0;
@@ -137,12 +148,14 @@ trait ReportOrmTrait
                                 $count = count($setColumns[$col['set_id']]);
                                 $colspan2 = 0;
                                 foreach($setColumns[$col['set_id']] as $c){
-                                    $list[] = [
+                                    $data = [
                                         'id' => $c['id'],
                                         'name' => $c['v_alias'].'_'.$k,
                                         'label' => ($count>1 ? $c['v_label'] : $v),
                                         'order' => false,
                                     ];
+                                    $list[] = $data;
+                                    $labelList[$col['v_label']] = $data;
                                     $skipIds[] = $c['id'];
                                     $colspan++;
                                     if($count>1) $colspan2++;
@@ -166,13 +179,15 @@ trait ReportOrmTrait
                             ];
                         }
                     }
-                }elseif(!in_array($col['id'], $skipIds)){
-                    $list[] = [
+                }else{
+                    $data = [
                         'id' => $col['id'],
                         'name' => $col['v_alias'],
                         'label' => $col['v_label'],
                         'order' => $col['v_order'],
                     ];
+                    $list[] = $data;
+                    $labelList[$col['v_label']] = $data;
                 }
             }
             $this->_setThreeColumns = $list;

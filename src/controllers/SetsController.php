@@ -113,7 +113,10 @@ class SetsController extends \webadmin\BController
         $model = new DcSets();
         $model->loadDefaultValues();
 
-        if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
+        if($model->load(Yii::$app->request->post()) && $model->ajaxValidation() &&
+            ($transaction = DcSets::getDb()->beginTransaction()) && $model->save()
+        ){
+            $transaction->commit(); // 提交事务
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));
             return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
         }
@@ -130,7 +133,10 @@ class SetsController extends \webadmin\BController
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
+        if($model->load(Yii::$app->request->post()) && $model->ajaxValidation() &&
+            ($transaction = DcSets::getDb()->beginTransaction()) && $model->save()
+        ){
+            $transaction->commit(); // 提交事务
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息修改成功'));
             return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
         }

@@ -25,8 +25,6 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
      */
     public function init()
     {
-        parent::init();
-        
         if(!($sets = $this->sets) || !$sets->mainModel || !$sets->mainModel['source'] || !($db = $sets->mainModel['source']->getSourceDb())){
             throw new \yii\web\HttpException(200, Yii::t('datacenter', '数据集尚未配置正确的主模型.'));
         }
@@ -98,6 +96,7 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
             foreach($list as $key=>$item){
                 $list[$key] = call_user_func_array([$callModel, 'formatValue'], [$this->filterColumns($item), $this->report->columns]);
             }
+            $this->setPaginationTotalCount();
         }else{
             $list = parent::prepareModels();
             foreach($list as $key=>$item){

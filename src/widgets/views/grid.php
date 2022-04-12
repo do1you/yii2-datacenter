@@ -59,8 +59,9 @@ if($columns){
     }
 }
 $colModel = json_encode($colModel);
-$pageSize = $model->getPagination()->getPageSize();
-$pageStart = $model->getPagination()->getPage();
+$pagination = $model->getPagination();
+$pageSize = $pagination->getPageSize();
+$pageStart = $pagination->getPage();
 $fixedScript = $model['v_frozen']>0 ? 'new $.fn.dataTable.FixedColumns(table,{"iLeftColumns":'.$model['v_frozen'].'});' : '';
 $reorderState = $this->context && $this->context->isCache===false ? 'true' : 'false'; // 'table-tool-cus'
 $script = <<<eot
@@ -112,8 +113,8 @@ var draw,table = $("#{$id}").dataTable({
         },
 		"data" : function(data){
             draw = data.draw;
-			data['page'] = (data.start / data.length) + 1;
-            data['per-page'] = data.length;
+            data['{$pagination->pageParam}'] = (data.start / data.length) + 1;
+            data['{$pagination->pageSizeParam}'] = data.length;
 			delete data.search;
 			delete data.start;
             delete data.length;

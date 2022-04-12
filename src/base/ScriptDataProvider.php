@@ -35,8 +35,6 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
      */
     public function init()
     {
-        parent::init();
-        
         if(!($sets = $this->sets)){
             throw new \yii\web\HttpException(200, Yii::t('datacenter', '数据集尚未配置正确的数据集.'));
         }
@@ -87,6 +85,7 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
             foreach($list as $key=>$item){
                 $list[$key] = call_user_func_array([$callModel, 'formatValue'], [$this->filterColumns($item), $this->report->columns]);
             }
+            $this->setPaginationTotalCount();
         }else{
             $this->filterAllModels();
             $list = parent::prepareModels();

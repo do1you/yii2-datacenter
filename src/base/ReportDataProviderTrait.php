@@ -41,6 +41,11 @@ trait ReportDataProviderTrait
      * 别名分组数据集字段
      */
     private $_alias_columns;
+    
+    /**
+     * 合并数据集
+     */
+    private $_union_sets = [];
         
     /**
      * 初始化分组字段
@@ -93,6 +98,26 @@ trait ReportDataProviderTrait
         }
         
         return $columns;
+    }
+    
+    /**
+     * 设置总记录数
+     */
+    public function setPaginationTotalCount()
+    {
+        if($this->report){
+            $total = $this->getTotalCount();
+            if($this->_union_sets){
+                foreach($this->_union_sets as $set){
+                    $total += $set->getTotalCount();
+                }
+                $this->setTotalCount($total);
+            }
+            $pagination = $this->getPagination();
+            if($pagination !== false) {
+                $pagination->totalCount = $total;
+            }
+        }
     }
     
     /**
@@ -247,6 +272,7 @@ trait ReportDataProviderTrait
         if(!$this->report) return $values;
         $data = [];
         $setLists = $this->report->v_sets;
+        $labelColmns = \yii\helpers\ArrayHelper::map($this->report->getV_columns(), 'label', 'name');
         foreach($this->report->columns as $col){
             $set = isset($setLists[$col['set_id']]) ? $setLists[$col['set_id']] : null;
             $relation = $set ? $set['v_relation'] : null;
@@ -267,6 +293,13 @@ trait ReportDataProviderTrait
                         ? $values['_'][$col['set_id']][$col['setsCol']['v_alias']]
                         : $col['v_default_value']
                     );
+            }
+            
+            if($set && $relation && $relation['rel_type']=='union'){
+                if(strlen($data[$labelColmns[$col['v_label']]])<=0){
+                    $data[$labelColmns[$col['v_label']]] = $data[$col['v_alias']];
+                }
+                $this->_union_sets[$set['id']] = $set;
             }
         }
         return $data;
