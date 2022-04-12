@@ -320,7 +320,7 @@ class DcSets extends \webadmin\ModelCAR
                 unset($columns[$key]);
             }
             foreach($columns as $item){
-                $item->delete();
+                if(!$item->formula) $item->delete();
             }
         }
     }
@@ -341,13 +341,13 @@ class DcSets extends \webadmin\ModelCAR
                 $model->load([
                     'set_id' => $this->id,
                     'name' => $key,
-                    'label' => $key,
+                    'label' => (($model->id && $model->name==$key && $model->label) ? $model->label : $key),
                 ],'');
                 $model->save(false);
                 unset($columns[$key]);
             }
             foreach($columns as $item){
-                $item->delete();
+                if(!$item->formula) $item->delete();
             }
         }
     }

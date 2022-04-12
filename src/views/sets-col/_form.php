@@ -55,6 +55,8 @@ use webadmin\widgets\ActiveForm;
     			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
         		
         		<?= $form->field($model, 'label')->textInput(['maxlength' => true]) ?>
+        		
+        		<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true]) ?>
         	<?php else:?>
         		<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
         		
