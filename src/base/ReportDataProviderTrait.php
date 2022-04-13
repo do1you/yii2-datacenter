@@ -106,7 +106,7 @@ trait ReportDataProviderTrait
     public function setPaginationTotalCount()
     {
         if($this->report){
-            $total = $this->getTotalCount();
+            $total = $this->sets->getTotalCount();
             if($this->_union_sets){
                 foreach($this->_union_sets as $set){
                     $total += $set->getTotalCount();
