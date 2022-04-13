@@ -21,6 +21,11 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
     public $report;
     
     /**
+     * 需要统计汇总的字段
+     */
+    private $summaryColumns = [];
+    
+    /**
      * 初始化
      */
     public function init()
@@ -44,7 +49,6 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
         // 默认条件、分组、排序
         $sets->rel_where && $query->andWhere($sets->formatSql($sets->rel_where));
         $sets->rel_group && $query->addGroupBy(new \yii\db\Expression(($gSql = $sets->formatSql($sets->rel_group)))); 
-            // && $query->addSelect(new \yii\db\Expression(str_ireplace([' desc',' asc'],'',$gSql))); // 兼容mycat分组不支持转义问题
         $sets->rel_having && $query->andHaving($sets->formatSql($sets->rel_having));
         $sets->rel_order && $query->addOrderBy($sets->formatSql($sets->rel_order));
         
@@ -71,10 +75,23 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
                     
                     // 添加查询
                     if(!$item->formula && !$col->formula && (!$this->report || $this->sets['id']==$col['set_id'])){
+                        $v_column = $col->v_fncolumn;
                         if($col->fun){
-                            $query->addSelect([new \yii\db\Expression("{$col->v_fncolumn} as {$col->v_alias}")]);
+                            $query->addSelect([new \yii\db\Expression("{$v_column} as {$col->v_alias}")]);
                         }else{
-                            $query->addSelect(["{$col->v_fncolumn} as {$col->v_alias}"]);
+                            $query->addSelect(["{$v_column} as {$col->v_alias}"]);
+                        }
+                        // 汇总查询
+                        if($col['model_id'] && $col['column'] && in_array($col['column']['type'], [
+                            'int', 'mediumint', 'integer', 'float', 'double', 'decimal', 'bigint'
+                        ]) && (empty($col['type']) || in_array($col['type'], ['text']))){
+                            if($col->fun){
+                                $this->summaryColumns[] = new \yii\db\Expression("{$v_column} as {$col->v_alias}");
+                            }elseif(!in_array(strtolower(substr($v_column,-2)), ['id','no'])
+                                && !in_array(strtolower(substr($v_column,-4)), ['type','flag'])
+                            ){
+                                $this->summaryColumns[] = "SUM({$v_column}) as {$col->v_alias}";
+                            }
                         }
                     }
                 }
@@ -107,6 +124,74 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
     }
     
     /**
+     * 汇总数据
+     */
+    protected function summaryModels()
+    {
+        $row = [];
+        if($this->report){
+            $callModel = new \datacenter\models\DcSets();
+            $row = $this->sets->getV_summary();
+            $row = $this->sets->sourceAfterFindModels($row);
+            $row = call_user_func_array([$callModel, 'formatValue'], [$this->filterColumns($row), $this->report->columns]);
+            unset($row['_']);
+        }else{
+            if($this->summaryColumns){
+                $this->sets->group(false)->select(false);
+                if($this->forReport && ($arr = $this->sets->getV_relation(true))){
+                    list($relation, $source) = $arr;
+                    
+                    // 写入条件
+                    $columns = $relation->getV_target_columns($this->sets, false);
+                    $keys = $relation->getV_source_columns($source);
+                    $source->select(false)->select($keys);
+                    $this->sets->where($columns, $source);
+                    
+                    // 分组写入
+                    if($relation->rel_type=='group' && $relation->group_col){
+                        $this->sets->group($relation['v_group_col'])->select($relation['v_group_col']);
+                    }
+                }
+                
+                $query = $this->query;
+                if($query->having){
+                    $newQuery = new \yii\db\Query([
+                        'from' => ['sub' => $query],
+                    ]);
+                    foreach($this->summaryColumns as $select){
+                        if($select instanceof \yii\db\ExpressionInterface) {
+                            $select = $select->expression;
+                        }
+                        
+                        if(preg_match('/^(.*?)(?i:\s+as\s+|\s+)([\w\-_\.]+)$/', $select, $matches)) {
+                            $select = $matches[2];
+                        }
+                        $newQuery->addSelect($select);
+                    }
+                }else{
+                    foreach($this->summaryColumns as $select){
+                        $query->addSelect($select);
+                    }
+                    $newQuery = $query;
+                }
+                
+                if(!empty($relation) && $relation['rel_type']=='group'){
+                    $list = $newQuery->all($this->db);
+                    $groupCols = $relation->getV_source_columns($this->sets, true, $relation['v_group_col']);
+                    $buckets = [];
+                    foreach($list as $item){
+                        $gk = $relation->getModelKey($item, $groupCols);
+                        $row['_'][$this->sets['id']][$gk] = $this->sets->formatValue($item, $this->sets->columns);
+                    }
+                }else{
+                    $row = $this->sets->formatValue($newQuery->one($this->db), $this->sets->columns);
+                }
+            }
+        }
+        return $row;        
+    }
+    
+    /**
      * 添加查询字段
      */
     public function select($columns)
@@ -129,7 +214,12 @@ class ActiveDataProvider extends \yii\data\ActiveDataProvider implements ReportD
             $this->query->where([]);
         }else{
             $columns = $this->getColumns($columns, $values);
-            $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
+            $op = $op ? $op : ((is_array($columns) || is_array($values) || is_object($values)) ? 'in' : '=');
+            if(is_object($values)){
+                if($values instanceof \datacenter\models\DcSets){
+                    $values = $values->getDataProvider()->query;
+                }
+            }
             $this->query->andWhere([$op, $columns, $values]);
         }
         return $this;

@@ -261,10 +261,11 @@ class DcSets extends \webadmin\ModelCAR
     }
     
     // 返回数据集关联关系
-    public function getV_relation()
+    public function getV_relation($retrnSet = false)
     {
         if($this->_relation_target && is_array($this->_relation_target)){
             foreach($this->_relation_target as $key=>$item){
+                if($retrnSet) return $item;
                 list($relation, $source) = $item;
                 return $relation;
             }
@@ -394,6 +395,7 @@ class DcSets extends \webadmin\ModelCAR
             'columns.model.sourceRelation.sourceModel',
             'columns.model.sourceRelation.targetModel',
             'columns.model.columns.model',
+            'columns.model.source',
             'mainModel.source',
             'mainModel.sourceRelation.sourceModel',
             'mainModel.sourceRelation.targetModel',
@@ -553,15 +555,21 @@ class DcSets extends \webadmin\ModelCAR
     }
     
     // 同时匹配查询关联数据集合
-    public function sourceAfterFindModels()
+    public function sourceAfterFindModels($summary = null)
     {
         if($this->_relation_source){
             foreach($this->_relation_source as $key=>$item){
                 list($relation, $target) = $item;
-                $relation->joinWhere($this, $target);
-                $target->getModels();
+                if(is_array($summary)){
+                    $summary = \yii\helpers\ArrayHelper::merge($target->getV_summary(), $summary);
+                    $summary = $target->sourceAfterFindModels($summary);
+                }else{
+                    $relation->joinWhere($this, $target);
+                    $target->getModels();
+                }
             }
         }
+        return $summary;
     }
     
     // 数据结果集合匹配

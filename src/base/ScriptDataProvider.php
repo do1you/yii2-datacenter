@@ -97,6 +97,14 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
     }
     
     /**
+     * 汇总数据
+     */
+    protected function summaryModels()
+    {
+        return [];
+    }
+    
+    /**
      * 添加查询字段
      */
     public function select($columns)

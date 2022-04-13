@@ -11,6 +11,7 @@ trait ReportDataProviderTrait
 {
     protected $_models;
     protected $_keys;
+    protected $_summarys;
     
     /**
      * 运行数据集时归集的报表模型
@@ -358,11 +359,23 @@ trait ReportDataProviderTrait
     }
     
     /**
+     * 处理汇总数据
+     */
+    public function prepareSummary($forcePrepare = false)
+    {
+        if ($forcePrepare || $this->_summarys === null) {
+            $this->_summarys = $this->summaryModels();
+        }
+    }
+    
+    /**
      * 获取汇总数据，预留
      */
     public function getSummary()
     {
-        return [];
+        $this->prepareSummary();
+        
+        return $this->_summarys;
     }
     
     /**
