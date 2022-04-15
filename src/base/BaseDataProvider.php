@@ -326,7 +326,11 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         !in_array(strtolower(substr($v_column,-2)), ['id','no'])
                         && !in_array(strtolower(substr($v_column,-4)), ['type','flag'])
                     ){
-                        $list[] = "SUM({$v_column}) as {$colnmn->v_alias}";
+                        if(in_array($colnmn['sets']['set_type'],['sql','model'])){
+                            $list[] = "SUM({$v_column}) as {$colnmn->v_alias}";
+                        }else{
+                            $list[] = $v_column;
+                        }                        
                     }
                 }
             }

@@ -157,7 +157,25 @@ class ScriptDataProvider extends BaseDataProvider
      */
     protected function summaryModels()
     {
-        return [];
+        $row = [];
+        if($this->report){
+            $row = $this->sets->getSummary();
+            $row = $this->filterColumns($row);
+        }else{
+            if(($summaryColumns = $this->getSummaryModels())){
+                $models = $this->filterAllModels();
+                foreach($models as $model){
+                    foreach($summaryColumns as $index){
+                        if(isset($model[$index]) && is_numeric($model[$index])){
+                            if(!isset($row[$index])) $row[$index] = 0;
+                            $row[$index] += $model[$index];
+                        }
+                    }
+                }
+                $row = $this->filterSetsColumns($row);
+            }
+        }
+        return $row;   
     }
         
     /**
