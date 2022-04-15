@@ -43,7 +43,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     {
         return [
             [['name', 'label', 'set_id'], 'required'],
-            [['set_id', 'is_search', 'paixu'], 'integer'],
+            [['set_id', 'is_search', 'is_summary', 'paixu'], 'integer'],
             [['name', 'label', 'type', 'model_id', 'formula', 'fun', 'is_frozen', 'search_params'], 'safe'],
             [['name', 'label', 'type', 'fun', 'search_value'], 'string', 'max' => 50],
             [['formula', 'sql_formula'], 'string', 'max' => 255],
@@ -65,6 +65,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'name' => Yii::t('datacenter', '名称'),
             'label' => Yii::t('datacenter', '标签'),
             'is_search' => Yii::t('datacenter', '是否可查'),
+            'is_summary' => Yii::t('datacenter', '是否汇总'),
             'type' => Yii::t('datacenter', '查询类型'),
             'formula' => Yii::t('datacenter', '计算公式'),
             'sql_formula' => Yii::t('datacenter', 'SQL公式'),
@@ -123,10 +124,16 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_frozen));
     }
     
-    // 获取数据集类型
+    // 获取是否可查
     public function getV_is_search($val = null)
     {
         return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_search));
+    }
+    
+    // 获取是否汇总
+    public function getV_is_summary($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_summary));
     }
     
     // 返回格式化名称

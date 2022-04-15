@@ -1,22 +1,44 @@
 <?php
 /**
- * 数据提供器扩展方法
+ * 数据集、报表数据提供器基类
  */
 namespace datacenter\base;
 
 use Yii;
 use yii\base\ModelEvent;
 
-trait ReportDataProviderTrait
+abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements ReportDataInterface
 {
-    protected $_models;
-    protected $_keys;
-    protected $_summarys;
     
     /**
-     * 运行数据集时归集的报表模型
+     * 数据集
+     */
+    public $sets;
+    
+    /**
+     * 数据报表
+     */
+    public $report;
+    
+    /**
+     * 运行数据集时，所归集的报表
      */
     public $forReport;
+    
+    /**
+     * 数据缓存
+     */
+    protected $_models;
+    
+    /**
+     * 主键缓存
+     */
+    protected $_keys;
+    
+    /**
+     * 汇总数据缓存
+     */
+    protected $_summarys;
     
     /**
      * 查询数据前事件名称
@@ -29,42 +51,89 @@ trait ReportDataProviderTrait
     public static $EVENT_AFTER_MODEL = 'afterModel';
     
     /**
-     * 用于查询的数据模型
+     * 汇总数据前事件名称
+     */
+    public static $EVENT_BEFORE_SUMMARY = 'beforeSummary';
+    
+    /**
+     * 汇总数据后事件名称
+     */
+    public static $EVENT_AFTER_SUMMARY = 'afterSummary';
+
+    /**
+     * 用于查询的数据模型缓存
      */
     private $_searchModels;
     
     /**
-     * ID分组数据集字段
+     * 用于汇总数据模型缓存
      */
-    private $_id_columns;
+    private $_summaryModels;
     
     /**
-     * 别名分组数据集字段
+     * 用于分组数据集字段/报表字段的缓存
      */
-    private $_alias_columns;
+    private $_groupColumns;
     
     /**
-     * 合并数据集
+     * 合并数据集缓存
      */
-    private $_union_sets = [];
-        
+    private $_unionSets = [];
+    
     /**
-     * 初始化分组字段
+     * 计算公式模板
      */
-    private function initColumns()
+    private $_replace_params;
+    
+    /**
+     * 初始化
+     */
+    public function init()
     {
-        // 取出字段
-        if($this->_alias_columns===null || $this->_id_columns===null){
-            $this->_alias_columns = $this->_id_columns = [];
-            foreach($this->sets['columns'] as $column){
-                $this->_alias_columns[$column['v_alias']] = $this->_id_columns[$column['id']] = $column;
-            }
-        }
-        return [$this->_id_columns, $this->_alias_columns];
     }
     
     /**
-     * 获取字段
+     * 初始化ID/别名分组字段
+     */
+    protected function initColumns($key=null)
+    {
+        if($this->_groupColumns===null){
+            $labels2 = $alias2 = $ids2 = $labels1 = $alias1 = $ids1 = $labels = $alias = $ids = [];
+            foreach($this->sets['columns'] as $column){
+                $labels[$column['v_label']] = $alias[$column['v_alias']] = $ids[$column['id']] = $column;
+            }
+            
+            if($this->report){
+                foreach($this->report['columns'] as $column){
+                    $labels1[$column['v_label']] = $alias1[$column['v_alias']] = $ids1[$column['id']] = $column;
+                }
+            }
+            
+            if($this->forReport){
+                foreach($this->forReport['columns'] as $column){
+                    $labels2[$column['v_label']] = $alias2[$column['v_alias']] = $ids2[$column['id']] = $column;
+                }
+            }
+            
+            $this->_groupColumns = [
+                'setIdCols' => $ids,
+                'setAliasCols' => $alias,
+                'setLabelCols' => $labels,
+                'reportIdCols' => $ids1,
+                'reportAliasCols' => $alias1,
+                'reportLabelCols' => $labels1,
+                'forIdCols' => $ids2,
+                'forAliasCols' => $alias2,
+                'forLabelCols' => $labels2,
+            ];
+        }
+        if($key && isset($this->_groupColumns[$key])) return $this->_groupColumns[$key];
+        return $this->_groupColumns;
+    }
+    
+    /**
+     * 根据ID或别名字段获取数据集字段
+     * 参数：别名或ID；值：传值时根据字段进行编排值；是否输出as别名的字段
      */
     public function getColumns($columns, &$values = null, $isAs = false)
     {
@@ -81,18 +150,18 @@ trait ReportDataProviderTrait
                     }
                 }
             }else{
-                list($idColumns, $aliasColumns) = $this->initColumns();
+                $idColumns = $this->initColumns('setIdCols');
+                $aliasColumns = $this->initColumns('setAliasCols');
                 if($idColumns && isset($idColumns[$columns])){
-                    if($this->sets['set_type']=='model'){
-                        $columns = $idColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$idColumns[$columns]['v_alias']}" : '');
-                    }else{
-                        $columns = $idColumns[$columns]['name'];
-                    }
+                    $column = $idColumns[$columns];
                 }elseif($aliasColumns && isset($aliasColumns[$columns])){
+                    $column = $aliasColumns[$columns];
+                }
+                if(!empty($column)){
                     if($this->sets['set_type']=='model'){
-                        $columns = $aliasColumns[$columns]['v_fncolumn'] . ($isAs ? " as {$aliasColumns[$columns]['v_alias']}" : '');
+                        $columns = $column['v_fncolumn'] . ($isAs ? " as {$column['v_alias']}" : ''); // 模型输出v_fncolumn
                     }else{
-                        $columns = $idColumns[$columns]['name'];
+                        $columns = $column['name']; // 非模型输出name字段
                     }
                 }
             }
@@ -102,32 +171,12 @@ trait ReportDataProviderTrait
     }
     
     /**
-     * 设置总记录数
-     */
-    public function setPaginationTotalCount()
-    {
-        if($this->report){
-            $total = $this->sets->getTotalCount();
-            if($this->_union_sets){
-                foreach($this->_union_sets as $set){
-                    $total += $set->getTotalCount();
-                }
-                $this->setTotalCount($total);
-            }
-            $pagination = $this->getPagination();
-            if($pagination !== false) {
-                $pagination->totalCount = $total;
-            }
-        }
-    }
-    
-    /**
      * 返回数据查询条件的表单构建模型
      */
     public function getSearchModels()
     {
         if($this->_searchModels === null){
-         $list = [];
+            $list = [];
             $params = Yii::$app->request->get("SysConfig",[]);
             $columns = $this->report ? $this->report->columns : $this->sets->columns;
             foreach($columns as $item){
@@ -154,19 +203,11 @@ trait ReportDataProviderTrait
     }
     
     /**
-     * 设置数据查询条件的表单构建模型
-     */
-    public function setSearchModels($models)
-    {
-        $this->_searchModels = $models;
-    }
-    
-    /**
      * 应用过滤条件
      */
     public function applySearchModels($params = null)
     {
-        if($this->forReport && $params===false) return;
+        if($this->forReport && $params===false) return; // 属于数据集初始化的应用条件跳过
         if($params === false){
             // 默认条件
             $searchModels = $this->getSearchModels();
@@ -177,7 +218,7 @@ trait ReportDataProviderTrait
                 }
             }
         }
-
+        
         if($params && ($colnmns = $this->report ? $this->report->columns : $this->sets->columns)){
             if($this->report){
                 // 报表条件
@@ -266,6 +307,36 @@ trait ReportDataProviderTrait
     }
     
     /**
+     * 返回数据汇总的字段
+     */
+    public function getSummaryModels()
+    {
+        if($this->_summaryModels === null){
+            $list = [];
+            $columns = $this->report ? $this->report->columns : $this->sets->columns;
+            foreach($columns as $item){
+                $colnmn = $this->report ? $item['setsCol'] : $item;
+                if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
+                
+                if($colnmn && $colnmn['is_summary'] && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')){
+                    $v_column = $colnmn->v_fncolumn;
+                    if($colnmn->fun){
+                        $list[] = new \yii\db\Expression("{$v_column} as {$colnmn->v_alias}");
+                    }elseif(
+                        !in_array(strtolower(substr($v_column,-2)), ['id','no'])
+                        && !in_array(strtolower(substr($v_column,-4)), ['type','flag'])
+                    ){
+                        $list[] = "SUM({$v_column}) as {$colnmn->v_alias}";
+                    }
+                }
+            }
+            $this->_summaryModels = $list;
+        }
+        
+        return $this->_summaryModels;
+    }
+    
+    /**
      * 过滤出报表的字段
      */
     public function filterColumns($values)
@@ -282,8 +353,8 @@ trait ReportDataProviderTrait
                 if($groupCols && is_array($groupCols)){
                     foreach($groupCols as $k=>$v){
                         $data[$col['v_alias'].'_'.$k] = isset($values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']])
-                            ? $values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']]
-                            : $col['v_default_value'];
+                        ? $values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']]
+                        : $col['v_default_value'];
                     }
                 }
             }else{
@@ -300,10 +371,10 @@ trait ReportDataProviderTrait
                 if(strlen($data[$labelColmns[$col['v_label']]])<=0){
                     $data[$labelColmns[$col['v_label']]] = $data[$col['v_alias']];
                 }
-                $this->_union_sets[$set['id']] = $set;
+                $this->_unionSets[$set['id']] = $set;
             }
         }
-        return $data;
+        return $this->formatValue($data);
     }
     
     /**
@@ -312,13 +383,99 @@ trait ReportDataProviderTrait
     public function filterSetsColumns($values)
     {
         if(!$this->sets) return $values;
+        
         $data = [];
+        list($formatFormulas, $formatLabels, $formatDd) = $this->formatValueTpl();
         foreach($this->sets->columns as $col){
-            $data[$col['v_alias']] = isset($values[$col['v_alias']])
-                ? $values[$col['v_alias']]
+            $key = $col['v_alias'];
+            $v = isset($values[$key])
+                ? $values[$key]
                 : (isset($values[$col['name']]) ? $values[$col['name']] : $col['v_default_value']);
+            
+            if(isset($formatDd[$key]) && isset($formatDd[$key]['type']) && strlen($v)>0){
+                switch($formatDd[$key]['type']){
+                    // 数据字典
+                    case 'dd':
+                    case 'ddmulti':
+                    case 'ddselect2':
+                    case 'ddselect2multi':
+                        $value = !empty($formatDd[$key]['search_params']) ? \webadmin\modules\config\models\SysLdItem::dd($formatDd[$key]['search_params'],$v) : null;
+                        $v = $value!==null ? $value : $v;
+                        break;
+                        // 下拉选项
+                    case 'select':
+                    case 'selectmult':
+                    case 'select2':
+                    case 'select2mult':
+                        $v_search_params = $formatDd[$key]['v_search_params'];
+                        $value = is_array($v_search_params)&&isset($v_search_params[$v]) ? $v_search_params[$v] : null;
+                        $v = $value!==null ? $value : $v;
+                        break;
+                }
+            }elseif(strlen($v)<=0){
+                $v = '&nbsp;';
+            }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && (substr($v,0,2)=='0.' || substr($v,0,1)!='0')){
+                $v = floatval($v);
+            }
+            $data[$key] = $v;
         }
-        return $data;
+        
+        return $this->formatValue($data);
+    }
+    
+    // 返回格式化计算公式参数
+    public function formatValueTpl()
+    {
+        // 一次性匹配出模板
+        if($this->_replace_params === null
+            || !isset($this->_replace_params['format_formulas'])
+            || !isset($this->_replace_params['format_labels'])
+            || !isset($this->_replace_params['format_dd'])
+        ){
+                $formatDd = $formatLabels = $formatFormulas = [];
+                $columns = $this->report ? $this->report->columns : $this->sets->columns;
+                foreach($columns as $col){
+                    if($col['formula']){
+                        $formatFormulas[$col['v_alias']] = $col['formula'];
+                    }
+                    if(isset($col['type']) && in_array($col['type'],['dd', 'ddmulti', 'select', 'selectmult', 'select2', 'select2mult', 'ddselect2', 'ddselect2multi'])){
+                        $formatDd[$col['v_alias']] = $col;
+                    }
+                    
+                    $formatLabels[$col['v_format_label']] = "\${$col['v_alias']}";
+                }
+                $this->_replace_params['format_formulas'] = $formatFormulas;
+                $this->_replace_params['format_labels'] = $formatLabels;
+                $this->_replace_params['format_dd'] = $formatDd;
+        }
+        return [$this->_replace_params['format_formulas'],$this->_replace_params['format_labels'],$this->_replace_params['format_dd']];
+    }
+    
+    // 格式化计算公式字符串
+    public function formatValue($values)
+    {
+        list($formatFormulas, $formatLabels, $formatDd) = $this->formatValueTpl();
+        
+        // 公式数据
+        if($formatFormulas && is_array($formatFormulas)){
+            $search = $formatLabels ? array_keys($formatLabels) : [];
+            $replace = $formatLabels ? array_values($formatLabels) : [];
+            foreach($formatFormulas as $key=>$formula){
+                try {
+                    $values[$key] = '';
+                    $formula = str_replace($search, $replace, $formula);
+                    extract($values, EXTR_OVERWRITE);
+                    $formula = preg_replace('/[{][^}]*?[}]/','$null',$formula);
+                    //var_dump('$values[$key] = '.$formula.';');
+                    eval('$values[$key] = '.$formula.';');
+                    $values[$key] = (string)$values[$key];
+                    if(strlen($values[$key])<=0) $values[$key] = '&nbsp;';
+                }catch(\Exception $e) {
+                }
+            }
+        }
+        
+        return $values;
     }
     
     /**
@@ -349,6 +506,10 @@ trait ReportDataProviderTrait
             if (!$this->beforeModel()) {
                 return false;
             }
+            if($this->report){
+                $this->sets->setPagination($this->getPagination());
+                $this->sets->setSort($this->getSort());
+            }
             $this->_models = $this->prepareModels();
             $this->afterModel();
         }
@@ -359,32 +520,11 @@ trait ReportDataProviderTrait
     }
     
     /**
-     * 处理汇总数据
-     */
-    public function prepareSummary($forcePrepare = false)
-    {
-        if ($forcePrepare || $this->_summarys === null) {
-            $this->_summarys = $this->summaryModels();
-        }
-    }
-    
-    /**
-     * 获取汇总数据，预留
-     */
-    public function getSummary()
-    {
-        $this->prepareSummary();
-        
-        return $this->_summarys;
-    }
-    
-    /**
      * 获取数据
      */
     public function getModels()
     {
         $this->prepare();
-        
         return $this->_models;
     }
     
@@ -394,6 +534,83 @@ trait ReportDataProviderTrait
     public function setModels($models)
     {
         $this->_models = $models;
+    }
+    
+    /**
+     * 处理汇总数据前触发事件
+     */
+    public function beforeSummary()
+    {
+        $event = new ModelEvent();
+        $this->sets->trigger(self::$EVENT_BEFORE_SUMMARY, $event);
+        
+        return $event->isValid;
+    }
+    
+    /**
+     * 处理汇总数据后触发事件
+     */
+    public function afterSummary()
+    {
+        $this->sets->trigger(self::$EVENT_AFTER_SUMMARY, new ModelEvent());
+    }
+    
+    /**
+     * 处理汇总数据
+     */
+    public function prepareSummary($forcePrepare = false)
+    {
+        if ($forcePrepare || $this->_summarys === null) {
+            if (!$this->beforeSummary()) {
+                return false;
+            }
+            $this->_summarys = $this->summaryModels();
+            $this->afterSummary();
+        }
+    }
+    
+    /**
+     * 计算汇总数据
+     */
+    protected function summaryModels()
+    {
+        return [];
+    }
+    
+    /**
+     * 获取汇总数据
+     */
+    public function getSummary()
+    {
+        $this->prepareSummary();
+        return $this->_summarys;
+    }
+    
+    /**
+     * 设置汇总数据
+     */
+    public function setSummary($value)
+    {
+        $this->_summarys = $value;
+    }
+    
+    /**
+     * 获取总的记录数
+     */
+    protected function prepareTotalCount()
+    {
+        if($this->report){
+            $total = $this->sets->getTotalCount();
+            // 包含合并的数据集，进行累加
+            if($this->_unionSets){
+                foreach($this->_unionSets as $set){
+                    $total += $set->getTotalCount();
+                }
+            }
+            return $total;
+        }
+        
+        return parent::prepareTotalCount();
     }
     
     /**
@@ -422,5 +639,67 @@ trait ReportDataProviderTrait
         $this->setTotalCount(null);
         $this->_models = null;
         $this->_keys = null;
+    }
+    
+    /**
+     * 添加查询字段
+     */
+    public function select($columns)
+    {
+        return $this;
+    }
+    
+    /**
+     * 添加查询条件
+     */
+    public function where($columns, $values, $op = false)
+    {
+        return $this;
+    }
+    
+    /**
+     * 添加过滤值查询条件
+     */
+    public function filterWhere($columns, $values, $op = false)
+    {
+        if(is_array($values) || strlen($values)){
+            return $this->where($columns, $values, $op);
+        }
+        return $this;
+    }
+    
+    /**
+     * 添加分组条件
+     */
+    public function having($columns, $values, $op = false)
+    {
+        return $this;
+    }
+    
+    /**
+     * 添加过滤值分组查询条件
+     */
+    public function filterHaving($columns, $values, $op = false)
+    {        
+        if(is_array($values) || strlen($values)){
+            return $this->having($columns, $values, $op);
+        }
+        return $this;
+    }
+    
+    /**
+     * 添加分组
+     */
+    public function group($columns)
+    {
+        return $this;
+    }
+    
+    /**
+     * 添加排序
+     */
+    public function order($columns)
+    {
+        return $this;
     }
 }

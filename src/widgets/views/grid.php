@@ -30,7 +30,7 @@ $twoCols = $model->getV_twoCols();
     		?>
     	</thead>
     	<tbody></tbody>
-    	<?php if(($totalRow = $model['v_summary']) && !empty($columns)):?>
+    	<?php if(($totalRow = $model->getSummary()) && !empty($columns)):?>
     	<tfoot>
     		<tr class="success">
     		<?php foreach($columns as $col):?>

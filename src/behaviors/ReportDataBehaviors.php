@@ -41,15 +41,6 @@ class ReportDataBehaviors extends \yii\base\Behavior
     }
     
     /**
-     * 返回基础的处理数据处理器
-     */
-    public function prepareDataProvider()
-    {
-        $dataProvider = new \datacenter\base\ExcelDataProvider();
-        return $dataProvider;
-    }
-    
-    /**
      * 设置数据处理器
      */
     public function setDataProvider($value)
@@ -60,9 +51,17 @@ class ReportDataBehaviors extends \yii\base\Behavior
     /**
      * 获取汇总数据
      */
-    public function getV_summary()
+    public function getSummary()
     {
         return $this->getDataProvider()->getSummary();
+    }
+    
+    /**
+     * 设置汇总数据
+     */
+    public function setSummary($value)
+    {
+        return $this->getDataProvider()->setSummary($value);
     }
     
     /**
@@ -232,15 +231,7 @@ class ReportDataBehaviors extends \yii\base\Behavior
     {
         return $this->getDataProvider()->getSearchModels();
     }
-    
-    /**
-     * 设置数据查询条件的表单构建模型
-     */
-    public function setSearchModels($value)
-    {
-        return $this->getDataProvider()->setSearchModels($value);
-    }
-    
+        
     /**
      * 应用过滤条件
      */

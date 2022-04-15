@@ -33,6 +33,8 @@ use webadmin\widgets\ActiveForm;
 
 				<?= $form->field($model, 'is_search')->searchInput()->dropDownList($model->getV_is_search(false),['prompt'=>'请选择']) ?>
 
+				<?= $form->field($model, 'is_summary')->searchInput()->dropDownList($model->getV_is_summary(false),['prompt'=>'请选择']) ?>
+
 				<?= $form->field($model, 'type')->searchInput()->dropDownList($model->getV_type(false),['prompt'=>'请选择']) ?>
 
 				<?= $form->field($model, 'fun')->searchInput()->dropDownList($model->getV_fun(false),['prompt'=>'请选择']) ?>

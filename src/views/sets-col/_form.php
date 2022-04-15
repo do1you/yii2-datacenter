@@ -69,6 +69,8 @@ use webadmin\widgets\ActiveForm;
             
             <?= $form->field($model, 'is_frozen')->textInput()->dropDownList($model->getV_is_frozen(false), []) ?>
             
+            <?= $form->field($model, 'is_summary')->textInput()->dropDownList($model->getV_is_summary(false), []) ?>
+            
             <?= $form->field($model, 'is_search')->textInput()->dropDownList($model->getV_is_search(false), []) ?>
             
             <?= $form->field($model, 'type')->textInput(['maxlength' => true])->dropDownList($model->getV_type(false), ['prompt'=>'请选择']) ?>

@@ -64,6 +64,11 @@ use yii\helpers\Url;
                 	         'filter' => false,
                 	     ],
                 	     [
+                	         'attribute' => 'is_summary',
+                	         'value' => 'v_is_summary',
+                	         'filter' => false,
+                	     ],
+                	     [
                 	         'attribute' => 'type',
                 	         'value' => 'v_type',
                 	         'filter' => false,

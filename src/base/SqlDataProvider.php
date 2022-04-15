@@ -6,19 +6,27 @@ namespace datacenter\base;
 
 use Yii;
 
-class SqlDataProvider extends \yii\data\SqlDataProvider implements ReportDataInterface
+class SqlDataProvider extends BaseDataProvider
 {
-    use \datacenter\base\ReportDataProviderTrait;
+    /**
+     * 数据库连接
+     */
+    public $db = 'db';
     
     /**
-     * 数据集
+     * SQL
      */
-    public $sets;
+    public $sql;
     
     /**
-     * 数据报表
+     * 动态参数
      */
-    public $report;
+    public $params = [];
+    
+    /**
+     * 主键
+     */
+    public $key;
     
     /**
      * 过滤条件数组
@@ -68,21 +76,83 @@ class SqlDataProvider extends \yii\data\SqlDataProvider implements ReportDataInt
     protected function prepareModels()
     {
         if($this->report){
-            $callModel = new \datacenter\models\DcSets();
-            $list = $this->sets->getModels();
-            foreach($list as $key=>$item){
-                $list[$key] = call_user_func_array([$callModel, 'formatValue'], [$this->filterColumns($item), $this->report->columns]);
+            $models = $this->sets->getModels();
+            foreach($models as $key=>$item){
+                $models[$key] = $this->filterColumns($item);
             }
-            $this->setPaginationTotalCount();
         }else{
             $this->filterAllModels();
-            $list = parent::prepareModels();
-            foreach($list as $key=>$item){
-                $list[$key] = $this->sets->formatValue($this->filterSetsColumns($item), $this->sets->columns); // 格式化数据
+            $sort = $this->getSort();
+            $pagination = $this->getPagination();
+            if ($pagination === false && $sort === false) {
+                return $this->db->createCommand($this->sql, $this->params)->queryAll();
+            }
+            
+            $sql = $this->sql;
+            $orders = [];
+            $limit = $offset = null;
+            
+            if ($sort !== false) {
+                $orders = $sort->getOrders();
+                $pattern = '/\s+order\s+by\s+([\w\s,\.]+)$/i';
+                if (preg_match($pattern, $sql, $matches)) {
+                    array_unshift($orders, new Expression($matches[1]));
+                    $sql = preg_replace($pattern, '', $sql);
+                }
+            }
+            
+            if ($pagination !== false) {
+                $pagination->totalCount = $this->getTotalCount();
+                $limit = $pagination->getLimit();
+                $offset = $pagination->getOffset();
+            }
+            
+            $sql = $this->db->getQueryBuilder()->buildOrderByAndLimit($sql, $orders, $limit, $offset);
+            
+            $models = $this->db->createCommand($sql, $this->params)->queryAll();
+            foreach($models as $key=>$item){
+                $models[$key] = $this->filterSetsColumns($item); // 格式化数据
             }
         }
-        return $list;
+        return $models;
     }
+    
+    /**
+     * 获取主键
+     */
+    protected function prepareKeys($models)
+    {
+        $keys = [];
+        if ($this->key !== null) {
+            foreach ($models as $model) {
+                if (is_string($this->key)) {
+                    $keys[] = $model[$this->key];
+                } else {
+                    $keys[] = call_user_func($this->key, $model);
+                }
+            }
+            
+            return $keys;
+        }
+        
+        return array_keys($models);
+    }
+    
+    /**
+     * 获取总记录数年
+     */
+    protected function prepareTotalCount()
+    {
+        if($this->report){
+            return parent::prepareTotalCount();
+        }else{
+            return (new \yii\db\Query([
+                'from' => ['sub' => "({$this->sql})"],
+                'params' => $this->params,
+            ]))->count('*', $this->db);
+        }
+    }
+    
     
     /**
      * 汇总数据
@@ -91,15 +161,7 @@ class SqlDataProvider extends \yii\data\SqlDataProvider implements ReportDataInt
     {
         return [];
     }
-    
-    /**
-     * 添加查询字段
-     */
-    public function select($columns)
-    {
-        return $this;
-    }
-    
+        
     /**
      * 添加查询条件
      */
@@ -114,52 +176,7 @@ class SqlDataProvider extends \yii\data\SqlDataProvider implements ReportDataInt
         }
         return $this;
     }
-    
-    /**
-     * 添加过滤值查询条件
-     */
-    public function filterWhere($columns, $values, $op = false)
-    {
-        $columns = $this->getColumns($columns, $values);
-        $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
-        if(is_array($values) || strlen($values)) $this->_wheres[] = [$op, $columns, $values];
-        return $this;
-    }
-    
-    /**
-     * 添加分组条件
-     */
-    public function having($columns, $values, $op = false)
-    {
         
-        return $this;
-    }
-    
-    /**
-     * 添加过滤值分组查询条件
-     */
-    public function filterHaving($columns, $values, $op = false)
-    {
-        
-        return $this;
-    }
-    
-    /**
-     * 添加分组
-     */
-    public function group($columns)
-    {
-        return $this;
-    }
-    
-    /**
-     * 添加排序
-     */
-    public function order($columns)
-    {
-        return $this;
-    }
-    
     /**
      * 过滤条件数据
      */

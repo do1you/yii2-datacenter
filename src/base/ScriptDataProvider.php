@@ -6,19 +6,17 @@ namespace datacenter\base;
 
 use Yii;
 
-class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDataInterface
+class ScriptDataProvider extends BaseDataProvider
 {
-    use \datacenter\base\ReportDataProviderTrait;
+    /**
+     * 主键
+     */
+    public $key;
     
     /**
-     * 数据集
+     * 数组数据
      */
-    public $sets;
-    
-    /**
-     * 数据报表
-     */
-    public $report;
+    public $allModels;
     
     /**
      * 脚本实例对象
@@ -80,20 +78,78 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
     protected function prepareModels()
     {
         if($this->report){
-            $callModel = new \datacenter\models\DcSets();
-            $list = $this->sets->getModels();
-            foreach($list as $key=>$item){
-                $list[$key] = call_user_func_array([$callModel, 'formatValue'], [$this->filterColumns($item), $this->report->columns]);
+            $models = $this->sets->getModels();
+            foreach($models as $key=>$item){
+                $models[$key] = $this->filterColumns($item);
             }
-            $this->setPaginationTotalCount();
         }else{
-            $this->filterAllModels();
-            $list = parent::prepareModels();
-            foreach($list as $key=>$item){
-                $list[$key] = $this->sets->formatValue($this->filterSetsColumns($item), $this->sets->columns); // 格式化数据
+            if (($models = $this->filterAllModels()) === null) {
+                return [];
+            }
+            
+            if (($sort = $this->getSort()) !== false) {
+                $models = $this->sortModels($models, $sort);
+            }
+            
+            if (($pagination = $this->getPagination()) !== false) {
+                $pagination->totalCount = $this->getTotalCount();
+                
+                if($pagination->getPageSize() > 0) {
+                    $models = array_slice($models, $pagination->getOffset(), $pagination->getLimit(), true);
+                }
+            }
+            
+            foreach($models as $key=>$item){
+                $models[$key] = $this->filterSetsColumns($item);
             }
         }
-        return $list;
+        return $models;
+    }
+    
+    /**
+     * 获取主键
+     */
+    protected function prepareKeys($models)
+    {
+        if ($this->key !== null) {
+            $keys = [];
+            foreach ($models as $model) {
+                if (is_string($this->key)) {
+                    $keys[] = $model[$this->key];
+                } else {
+                    $keys[] = call_user_func($this->key, $model);
+                }
+            }
+            
+            return $keys;
+        }
+        
+        return array_keys($models);
+    }
+    
+    /**
+     * 总记录数
+     */
+    protected function prepareTotalCount()
+    {
+        if($this->report){
+            return parent::prepareTotalCount();
+        }else{
+            return is_array($this->allModels) ? count($this->allModels) : 0;
+        }
+    }
+    
+    /**
+     * 排序
+     */
+    protected function sortModels($models, $sort)
+    {
+        $orders = $sort->getOrders();
+        if (!empty($orders)) {
+            \yii\helpers\ArrayHelper::multisort($models, array_keys($orders), array_values($orders));
+        }
+        
+        return $models;
     }
     
     /**
@@ -103,15 +159,7 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
     {
         return [];
     }
-    
-    /**
-     * 添加查询字段
-     */
-    public function select($columns)
-    {
-        return $this;
-    }
-    
+        
     /**
      * 添加查询条件
      */
@@ -126,50 +174,7 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
         }
         return $this;
     }
-    
-    /**
-     * 添加过滤值查询条件
-     */
-    public function filterWhere($columns, $values, $op = false)
-    {
-        $columns = $this->getColumns($columns, $values);
-        $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
-        if(is_array($values) || strlen($values)) $this->_wheres[] = [$op, $columns, $values];
-        return $this;
-    }
-    
-    /**
-     * 添加分组条件
-     */
-    public function having($columns, $values, $op = false)
-    {
-        return $this;
-    }
-    
-    /**
-     * 添加过滤值分组查询条件
-     */
-    public function filterHaving($columns, $values, $op = false)
-    {
-        return $this;
-    }    
-    
-    /**
-     * 添加分组
-     */
-    public function group($columns)
-    {
-        return $this;
-    }
-    
-    /**
-     * 添加排序
-     */
-    public function order($columns)
-    {
-        return $this;
-    }
-    
+      
     /**
      * 过滤条件数据
      */
@@ -254,6 +259,8 @@ class ScriptDataProvider extends \yii\data\ArrayDataProvider implements ReportDa
         }else{
             $this->allModels = $this->sets->set_type=='script' ? $this->scriptObj->getModels() : $this->allModels;
         }
+        
+        return $this->allModels;
     }
     
 }

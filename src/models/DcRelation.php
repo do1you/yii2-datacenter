@@ -88,14 +88,12 @@ class DcRelation extends \webadmin\ModelCAR
     // 返回源属性关系
     public function getV_source_col()
     {
-        $this->arrangement_col();
         return (is_array($this->source_col) ? $this->source_col : ($this->source_col ? json_decode($this->source_col,true) : []));
     }
     
     // 返回目标属性关系
     public function getV_target_col()
     {
-        $this->arrangement_col();
         return (is_array($this->target_col) ? $this->target_col : ($this->target_col ? json_decode($this->target_col,true) : []));
     }
     

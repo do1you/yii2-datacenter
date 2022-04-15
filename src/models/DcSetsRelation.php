@@ -307,7 +307,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
     }
         
     // 从源数据集写入目标数据集关联条件
-    public function joinWhere(DcSets $source, DcSets $target, $reverse = false)
+    public function joinWhere(DcSets $source, DcSets $target, $reverse = false, $summary = false)
     {
         $source = ($source && ($source instanceof DcSets) )? $source : $this->sourceSets;
         $target = ($target && ($target instanceof DcSets) )? $target : $this->targetSets;
@@ -345,28 +345,37 @@ class DcSetsRelation extends \webadmin\ModelCAR
             $target->select($columns);
         }
         
-        $values = [];
-        $list = $reverse ? $target->getModels() : $source->getModels();
-        foreach($list as $item){
-            if(is_array($keys)){
-                $data = [];
-                foreach($keys as $k){
-                    $data[] = isset($item[$k]) ? $item[$k] : '';
+        if($summary){
+            // 写入汇总条件
+            $columns = $this->getV_target_columns($target);
+            $keys = $this->getV_source_columns($source);
+            $source->select(false)->select($keys);
+            $target->select(false)->group(false)->select($this['v_group_col']);
+            $target->where($columns, $source);
+        }else{
+            $values = [];
+            $list = $reverse ? $target->getModels() : $source->getModels();
+            foreach($list as $item){
+                if(is_array($keys)){
+                    $data = [];
+                    foreach($keys as $k){
+                        $data[] = isset($item[$k]) ? $item[$k] : '';
+                    }
+                }else{
+                    $data = isset($item[$keys]) ? $item[$keys] : '';
                 }
-            }else{
-                $data = isset($item[$keys]) ? $item[$keys] : '';
+                
+                if($data && !in_array($data,$values)){
+                    $values[] = $data;
+                }
             }
             
-            if($data && !in_array($data,$values)){
-                $values[] = $data;
+            // 写入条件
+            if($values){
+                $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
+            }else{
+                $reverse ? $source->setModels([]) : $target->setModels([]);
             }
-        }
-        
-        // 写入条件
-        if($values){
-            $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
-        }else{
-            $reverse ? $source->setModels([]) : $target->setModels([]);
         }
         
         // 分组写入

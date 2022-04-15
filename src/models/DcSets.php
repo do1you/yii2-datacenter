@@ -430,91 +430,6 @@ class DcSets extends \webadmin\ModelCAR
         return str_replace($search, $replace, $str);
     }
     
-    // 返回格式化计算公式参数
-    public function formatValueTpl($columns)
-    {
-        // 一次性匹配出模板
-        if($this->_replace_params === null
-            || !isset($this->_replace_params['format_formulas'])
-            || !isset($this->_replace_params['format_labels'])
-            || !isset($this->_replace_params['format_dd'])
-        ){
-            $formatDd = $formatLabels = $formatFormulas = [];
-            foreach($columns as $col){
-                if($col['formula']){
-                    $formatFormulas[$col['v_alias']] = $col['formula'];
-                }
-                if(isset($col['type']) && in_array($col['type'],['dd', 'ddmulti', 'select', 'selectmult', 'select2', 'select2mult', 'ddselect2', 'ddselect2multi'])){
-                    $formatDd[$col['v_alias']] = $col;
-                }
-                
-                $formatLabels[$col['v_format_label']] = "\${$col['v_alias']}";
-            }
-            $this->_replace_params['format_formulas'] = $formatFormulas;
-            $this->_replace_params['format_labels'] = $formatLabels;
-            $this->_replace_params['format_dd'] = $formatDd;
-        }
-        return [$this->_replace_params['format_formulas'],$this->_replace_params['format_labels'],$this->_replace_params['format_dd']];
-    }
-    
-    // 格式化计算公式字符串
-    public function formatValue($values, $columns)
-    {
-        list($formatFormulas, $formatLabels, $formatDd) = $this->formatValueTpl($columns);
-        
-        // 公式数据
-        if($formatFormulas && is_array($formatFormulas)){
-            $search = $formatLabels ? array_keys($formatLabels) : [];
-            $replace = $formatLabels ? array_values($formatLabels) : [];
-            foreach($formatFormulas as $key=>$formula){
-                try {
-                    $values[$key] = '';
-                    $formula = str_replace($search, $replace, $formula);
-                    extract($values, EXTR_OVERWRITE);
-                    $formula = preg_replace('/[{][^}]*?[}]/','$null',$formula);
-                    //var_dump('$values[$key] = '.$formula.';');
-                    eval('$values[$key] = '.$formula.';');
-                    $values[$key] = (string)$values[$key];
-                    if(strlen($values[$key])<=0) $values[$key] = '&nbsp;';
-                }catch(\Exception $e) {
-                }
-            }
-        }
-        
-        // 选项数据
-        if($this->id){
-            foreach($values as $key=>$v){
-                if(isset($formatDd[$key]) && isset($formatDd[$key]['type']) && strlen($v)>0){
-                    switch($formatDd[$key]['type']){
-                        // 数据字典
-                        case 'dd':
-                        case 'ddmulti':
-                        case 'ddselect2':
-                        case 'ddselect2multi':
-                            $value = !empty($formatDd[$key]['search_params']) ? \webadmin\modules\config\models\SysLdItem::dd($formatDd[$key]['search_params'],$v) : null;
-                            $values[$key] = $value!==null ? $value : $v;
-                            break;
-                            // 下拉选项
-                        case 'select':
-                        case 'selectmult':
-                        case 'select2':
-                        case 'select2mult':
-                            $v_search_params = $formatDd[$key]['v_search_params'];
-                            $value = is_array($v_search_params)&&isset($v_search_params[$v]) ? $v_search_params[$v] : null;
-                            $values[$key] = $value!==null ? $value : $v;
-                            break;
-                    }
-                }elseif(strlen($v)<=0){
-                    $values[$key] = '&nbsp;';
-                }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && (substr($v,0,2)=='0.' || substr($v,0,1)!='0')){
-                    $values[$key] = floatval($v);
-                }
-            }
-        }
-        
-        return $values;
-    }
-    
     // 连接其他数据集
     public function joinSets(&$sets=[])
     {
@@ -529,7 +444,9 @@ class DcSets extends \webadmin\ModelCAR
                 $this->_relation_source[$set['id']] = [$relations[$set['id']], $set];
                 $set->_relation_target[$this['id']] = [$relations[$set['id']], $this];
                 $set->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
+                $set->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_SUMMARY, [$set, 'targetAfterFindSummary']);
                 $set->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
+                $set->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_SUMMARY, [$set, 'targetAfterFindSummary']);
                 if($relations[$set['id']]->rel_type=='union'){
                     $this->setPagination(false);
                     $set->setPagination(false);
@@ -548,28 +465,36 @@ class DcSets extends \webadmin\ModelCAR
                 }
             }
             $this->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$this, 'sourceAfterFindModels']);
+            $this->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_SUMMARY, [$this, 'sourceAfterFindSummary']);
             $this->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$this, 'sourceAfterFindModels']);
+            $this->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_SUMMARY, [$this, 'sourceAfterFindSummary']);
         }
         
         return $this;
     }
     
     // 同时匹配查询关联数据集合
-    public function sourceAfterFindModels($summary = null)
+    public function sourceAfterFindModels()
     {
         if($this->_relation_source){
             foreach($this->_relation_source as $key=>$item){
                 list($relation, $target) = $item;
-                if(is_array($summary)){
-                    $summary = \yii\helpers\ArrayHelper::merge($target->getV_summary(), $summary);
-                    $summary = $target->sourceAfterFindModels($summary);
-                }else{
-                    $relation->joinWhere($this, $target);
-                    $target->getModels();
-                }
+                $relation->joinWhere($this, $target);
+                $target->getModels();
             }
         }
-        return $summary;
+    }
+    
+    // 同时匹配出汇总数据集合
+    public function sourceAfterFindSummary()
+    {
+        if($this->_relation_source){
+            foreach($this->_relation_source as $key=>$item){
+                list($relation, $target) = $item;
+                $relation->joinWhere($this, $target, false, true);
+                $target->getSummary();
+            }
+        }
     }
     
     // 数据结果集合匹配
@@ -594,7 +519,7 @@ class DcSets extends \webadmin\ModelCAR
                     }
                     foreach($targetList as $model){
                         $k = $this->getModelKey($model, $columns);
-                        if($relation['rel_type']=='group' && $groupCols){
+                        if($relation['rel_type']=='group' && !empty($groupCols)){
                             $gk = $this->getModelKey($model, $groupCols);
                             $buckets[$k][$gk] = $model;
                         }else{
@@ -612,6 +537,36 @@ class DcSets extends \webadmin\ModelCAR
                     
                     $source->setModels($sourceList);
                 }
+            }
+        }
+    }
+    
+    //　汇总数据集合匹配
+    public function targetAfterFindSummary()
+    {
+        if($this->_relation_target){
+            $target = $this;
+            foreach($this->_relation_target as $key=>$item){
+                list($relation, $source) = $item;
+                $buckets = [];
+                
+                // 目标数据汇总
+                $targetList = $target->getSummary();
+                if($relation['rel_type']=='group'){
+                    $groupCols = $relation->getV_source_columns($target, true, $relation['v_group_col']);
+                }
+                if($relation['rel_type']=='group' && !empty($groupCols)){
+                    foreach($targetList as $model){
+                        $gk = $this->getModelKey($model, $groupCols);
+                        $buckets[$gk] = $model;
+                    }
+                }else{
+                    $buckets = $targetList;
+                }
+                
+                $sourceList = $source->getSummary();
+                $sourceList['_'][$target['id']] = $buckets;
+                $source->setSummary($sourceList);
             }
         }
     }

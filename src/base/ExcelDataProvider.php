@@ -6,7 +6,7 @@ namespace datacenter\base;
 
 use Yii;
 
-class ExcelDataProvider extends ScriptDataProvider implements ReportDataInterface
+class ExcelDataProvider extends ScriptDataProvider
 {
     
     /**
