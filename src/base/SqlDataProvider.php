@@ -19,6 +19,11 @@ class SqlDataProvider extends BaseDataProvider
     public $sql;
     
     /**
+     * 源SQL
+     */
+    public $sourceSql;
+    
+    /**
      * 动态参数
      */
     public $params = [];
@@ -45,7 +50,7 @@ class SqlDataProvider extends BaseDataProvider
         // 默认数据
         Yii::configure($this,[
             'db' => $db,
-            'sql' => $this->sets['run_sql'],
+            'sourceSql' => $this->sets['run_sql'],
             'pagination' => ['pageSizeLimit' => [1, 500]],
         ]);
         
@@ -159,7 +164,24 @@ class SqlDataProvider extends BaseDataProvider
      */
     protected function summaryModels()
     {
-        return [];
+        $row = [];
+        if($this->report){
+            $row = $this->sets->getSummary();
+            $row = $this->filterColumns($row);
+        }else{
+            if(($summaryColumns = $this->getSummaryModels())){
+                $this->filterAllModels();
+                $query = new \yii\db\Query([
+                    'from' => ['sub' => "({$this->sql})"],
+                    'params' => $this->params,
+                ]);
+                foreach($summaryColumns as $item){
+                    $query->addSelect($item);
+                }
+                $row = $query->groupBy ? array_map([$this, 'filterSetsColumns'], $query->all($this->db)) : $this->filterSetsColumns($query->one($this->db));
+            }
+        }
+        return $row;   
     }
         
     /**
@@ -184,7 +206,7 @@ class SqlDataProvider extends BaseDataProvider
     {
         if($this->_wheres){
             $query = new \yii\db\Query([
-                'from' => ['sub' => "({$this->sql})"],
+                'from' => ['sub' => "({$this->sourceSql})"],
                 'params' => $this->params,
             ]);
             foreach($this->_wheres as $item){
@@ -196,6 +218,8 @@ class SqlDataProvider extends BaseDataProvider
             $command = $query->createCommand($this->db);
             $this->sql = $command->sql;
             $this->params = $command->params;
+        }else{
+            $this->sql = $this->sourceSql;
         }
     }
     

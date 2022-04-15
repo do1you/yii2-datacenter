@@ -319,7 +319,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
                 
                 if($colnmn && $colnmn['is_summary'] && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')){
-                    $v_column = $colnmn->v_fncolumn;
+                    $v_column = $colnmn['sets']['set_type']!='model' ? $colnmn->name : $colnmn->v_fncolumn;
                     if($colnmn->fun){
                         $list[] = new \yii\db\Expression("{$v_column} as {$colnmn->v_alias}");
                     }elseif(
