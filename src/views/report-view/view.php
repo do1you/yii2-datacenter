@@ -23,6 +23,7 @@ if($count>1){ // 瀑布流
 	<?php foreach($list as $key=>$model):?>
     	<div class="col-xs-12 col-md-<?php echo $col?> data-report-index" rid="<?php echo $model['id']?>">
         	<?= \datacenter\widgets\Grid::widget([
+        	    'reportList' => $list,
                 'reportModel' => $model,
         	    'isCache' => (!isset($cache) ? true : $cache),
             ]); ?>

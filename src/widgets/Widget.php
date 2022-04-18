@@ -15,6 +15,11 @@ class Widget extends \yii\base\Widget
     public $reportModel;
     
     /**
+     * 数据报表模型列表
+     */
+    public $reportList;
+    
+    /**
      * 布局视图
      */
     public $layout = 'layout';

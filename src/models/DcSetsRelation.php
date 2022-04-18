@@ -349,8 +349,8 @@ class DcSetsRelation extends \webadmin\ModelCAR
             // 写入汇总条件
             $columns = $this->getV_target_columns($target);
             $keys = $this->getV_source_columns($source);
-            $source->select(false)->select($keys);
-            $target->select(false)->group(false)->select($this['v_group_col']);
+            $source->select(false)->order(false)->select($keys);
+            $target->select(false)->group(false)->order(false)->select($this['v_group_col']);
             $target->where($columns, $source);
         }else{
             $values = [];

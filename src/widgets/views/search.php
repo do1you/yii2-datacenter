@@ -3,6 +3,7 @@ use yii\helpers\Html;
 use webadmin\widgets\ActiveForm;
 
 $searchList = $model->getSearchModels();
+$count = $this->context->reportList ? count($this->context->reportList) : 0;
 ?>
 <?php if(!empty($searchList)):?>
     <div class="row dataconter-search" style="display:none;">
@@ -41,7 +42,7 @@ $searchList = $model->getSearchModels();
                         $this->registerJs("$('.report_search_btn,.report_export_btn').off('click').on('click',function(){
                             var form = $(this).closest('form');
                             form.find('input[name=is_export]').val($(this).is('.report_export_btn') ? '1' : '');
-                            if($(this).is('button[type=button].report_search_btn')){ // 异步加载数据
+                            if('{$count}'>1 && $(this).is('button[type=button].report_search_btn')){ // 异步加载数据
                                 var box = $(this).closest('.report-item-box'),
                                     table = box.find('.dataTable[id]').eq(0),
                                     ajax = $(table).dataTable().api().ajax,

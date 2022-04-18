@@ -104,6 +104,7 @@ class ActiveDataProvider extends BaseDataProvider
         }else{
             if(($summaryColumns = $this->getSummaryModels())){
                 $query = $this->query;
+                $query->orderBy([]);
                 if($query->having){
                     $newQuery = new \yii\db\Query([
                         'from' => ['sub' => $query],
@@ -122,6 +123,7 @@ class ActiveDataProvider extends BaseDataProvider
                     foreach($summaryColumns as $select){
                         $query->addSelect($select);
                     }
+                    
                     $newQuery = $query;
                 }
                 
@@ -156,8 +158,13 @@ class ActiveDataProvider extends BaseDataProvider
             $columns = $this->getColumns($columns, $values);
             $op = $op ? $op : ((is_array($columns) || is_array($values) || is_object($values)) ? 'in' : '=');
             if(is_object($values)){
-                if($values instanceof \datacenter\models\DcSets){
+                if($values instanceof \datacenter\models\DcSets 
+                    && in_array($values['set_type'], ['model','sql'])
+                    && $this->db==$values->getDataProvider()->db
+                ){
                     $values = $values->getDataProvider()->query;
+                }else{
+                    return $this;
                 }
             }
             $this->query->andWhere([$op, $columns, $values]);

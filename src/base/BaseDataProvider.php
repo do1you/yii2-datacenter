@@ -327,7 +327,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         && !in_array(strtolower(substr($v_column,-4)), ['type','flag'])
                     ){
                         if(in_array($colnmn['sets']['set_type'],['sql','model'])){
-                            $list[] = "SUM({$v_column}) as {$colnmn->v_alias}";
+                            $list[] = new \yii\db\Expression("SUM({$v_column}) as {$colnmn->v_alias}");
                         }else{
                             $list[] = $v_column;
                         }                        
@@ -569,6 +569,11 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 return false;
             }
             $this->_summarys = $this->summaryModels();
+            foreach($this->_summarys as $key=>$val){
+                if(empty($val) || $val=='&nbsp;' || !is_numeric($val)){
+                    unset($this->_summarys[$key]);
+                }
+            }
             $this->afterSummary();
         }
     }
