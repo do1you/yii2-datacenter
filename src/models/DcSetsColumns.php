@@ -187,6 +187,15 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return $this->label;
     }
     
+    // 是否函数表达式
+    public function getV_isfn()
+    {
+        if($this->fun || preg_match("/(sum|count|avg|min|max|group\_concat)\(.*\)/i",$this->v_fncolumn)){
+            return true;
+        }
+        return false;
+    }
+    
     // 是否允许排序
     public function getV_order()
     {

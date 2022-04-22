@@ -245,7 +245,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 // 数据集条件
                 foreach($colnmns as $col){
                     if($col['formula']) continue;
-                    $callFn = $col['fun'] ? 'having' : 'where';
+                    $callFn = $col['v_isfn'] ? 'having' : 'where';
                     if(isset($params[$col['v_alias']]) && (is_array($params[$col['v_alias']]) || strlen($params[$col['v_alias']])>0) && ($col['model_id'] || $this->sets['set_type']!='model')){
                         switch($col['type'])
                         {

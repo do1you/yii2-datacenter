@@ -317,7 +317,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
             $target->setPagination(false);
             return $this;
         }
-        
+
         if($reverse){
             // 被关联的数据集不分页
             $pagination = $target->getPagination();
@@ -334,6 +334,8 @@ class DcSetsRelation extends \webadmin\ModelCAR
             // 反向时需要关闭事件处理
             $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']);
             if(($count = $target->getTotalCount())>2000){
+                $_POST['SysConfig'] = $_GET['SysConfig'] = null;
+                \Yii::$app->controller->beforeAction(Yii::$app->controller->action);
                 throw new \yii\web\HttpException(200, Yii::t('datacenter','请缩小过滤条件范围，辅助二次查询的数据量较多').$count);
             }
         }else{
