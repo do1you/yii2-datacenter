@@ -100,7 +100,7 @@ class ActiveDataProvider extends BaseDataProvider
         $row = [];
         if($this->report){
             $row = $this->sets->getSummary();
-            $row = $this->filterColumns($row);
+            $row = $this->filterColumns($row, true);
         }else{
             if(($summaryColumns = $this->getSummaryModels())){
                 $query = $this->query;
@@ -127,7 +127,18 @@ class ActiveDataProvider extends BaseDataProvider
                     $newQuery = $query;
                 }
                 
-                $row = $newQuery->groupBy ? array_map([$this, 'filterSetsColumns'], $newQuery->all($this->db)) : $this->filterSetsColumns($newQuery->one($this->db));
+                if($newQuery->where && preg_match('/\s+\(?0\=1\)\s*?/', $newQuery->createCommand($this->db)->sql)){
+                    $row = [];
+                }else{
+                    if($newQuery->groupBy){
+                        $list = $newQuery->all($this->db);
+                        foreach($list as $key=>$item){
+                            $list[$key] = $this->filterSetsColumns($item, true);
+                        }
+                    }else{
+                        $row = $this->filterSetsColumns($newQuery->one($this->db), true);
+                    }
+                }
             }
         }
         return $row;        
@@ -164,6 +175,8 @@ class ActiveDataProvider extends BaseDataProvider
                 ){
                     $values = $values->getDataProvider()->query;
                 }else{
+                    // 跨数据库无法提取汇总
+                    $this->query->andWhere("0=1"); 
                     return $this;
                 }
             }

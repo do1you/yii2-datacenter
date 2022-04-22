@@ -320,7 +320,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 
                 if($colnmn && $colnmn['is_summary'] && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')){
                     $v_column = $colnmn['sets']['set_type']!='model' ? $colnmn->name : $colnmn->v_fncolumn;
-                    if($colnmn->fun){
+                    if($colnmn->v_isfn){
                         $list[] = new \yii\db\Expression("{$v_column} as {$colnmn->v_alias}");
                     }elseif(
                         !in_array(strtolower(substr($v_column,-2)), ['id','no'])
@@ -343,7 +343,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     /**
      * 过滤出报表的字段
      */
-    public function filterColumns($values)
+    public function filterColumns($values, $isSummery = false)
     {
         if(!$this->report) return $values;
         $data = [];
@@ -358,7 +358,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     foreach($groupCols as $k=>$v){
                         $data[$col['v_alias'].'_'.$k] = isset($values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']])
                         ? $values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']]
-                        : $col['v_default_value'];
+                        : ($isSummery ? '' : $col['v_default_value']);
                     }
                 }
             }else{
@@ -367,7 +367,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     : (
                         isset($values['_'][$col['set_id']][$col['setsCol']['v_alias']])
                         ? $values['_'][$col['set_id']][$col['setsCol']['v_alias']]
-                        : $col['v_default_value']
+                        : ($isSummery ? '' : $col['v_default_value'])
                     );
             }
             
@@ -384,7 +384,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     /**
      * 过滤出数据集的字段
      */
-    public function filterSetsColumns($values)
+    public function filterSetsColumns($values, $isSummery = false)
     {
         if(!$this->sets) return $values;
         
@@ -394,7 +394,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             $key = $col['v_alias'];
             $v = isset($values[$key])
                 ? $values[$key]
-                : (isset($values[$col['name']]) ? $values[$col['name']] : $col['v_default_value']);
+                : (isset($values[$col['name']]) ? $values[$col['name']] : ($isSummery ? '' : $col['v_default_value']));
             
             if(isset($formatDd[$key]) && isset($formatDd[$key]['type']) && strlen($v)>0){
                 switch($formatDd[$key]['type']){

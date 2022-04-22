@@ -131,8 +131,8 @@ trait ReportOrmTrait
                     if(!isset($labelList[$col['v_label']])){
                         $data = [
                             'id' => $col['id'],
-                            'name' => $col['v_alias'],
-                            'label' => $col['v_label'],
+                            'name' => (string)$col['v_alias'],
+                            'label' => (string)$col['v_label'],
                             'order' => $col['v_order'],
                         ];
                         $list[] = $data;
@@ -151,7 +151,7 @@ trait ReportOrmTrait
                                     $data = [
                                         'id' => $c['id'],
                                         'name' => $c['v_alias'].'_'.$k,
-                                        'label' => ($count>1 ? $c['v_label'] : $v),
+                                        'label' => (string)($count>1 ? $c['v_label'] : $v),
                                         'order' => false,
                                     ];
                                     $list[] = $data;
@@ -182,8 +182,8 @@ trait ReportOrmTrait
                 }else{
                     $data = [
                         'id' => $col['id'],
-                        'name' => $col['v_alias'],
-                        'label' => $col['v_label'],
+                        'name' => (string)$col['v_alias'],
+                        'label' => (string)$col['v_label'],
                         'order' => $col['v_order'],
                     ];
                     $list[] = $data;

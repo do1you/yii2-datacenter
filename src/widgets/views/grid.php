@@ -2,6 +2,7 @@
 $columns = $model->getV_columns();
 $oneCols = $model->getV_oneCols();
 $twoCols = $model->getV_twoCols();
+$count = $this->context->reportList ? count($this->context->reportList) : 0;
 ?>
 <div class="table-scrollable-debug">
     <table class="table table-striped table-bordered table-hover table-nowrap notFix" id="<?php echo $id?>">
@@ -30,7 +31,7 @@ $twoCols = $model->getV_twoCols();
     		?>
     	</thead>
     	<tbody></tbody>
-    	<?php if(($totalRow = $model->getSummary()) && !empty($columns)):?>
+    	<?php if($count<=1 && ($totalRow = $model->getSummary()) && !empty($columns)):?>
     	<tfoot>
     		<tr class="success">
     		<?php foreach($columns as $col):?>
