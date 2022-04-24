@@ -33,7 +33,7 @@ class ActiveDataProvider extends BaseDataProvider
         $sets->rel_where && $query->andWhere($sets->formatSql($sets->rel_where));
         $sets->rel_group && $query->addGroupBy(new \yii\db\Expression(($gSql = $sets->formatSql($sets->rel_group)))); 
         $sets->rel_having && $query->andHaving($sets->formatSql($sets->rel_having));
-        $sets->rel_order && $query->addOrderBy($sets->formatSql($sets->rel_order));
+        $sets->rel_order && $query->addOrderBy(new \yii\db\Expression($sets->formatSql($sets->rel_order)));
         
         // 默认数据源
         Yii::configure($this,[
@@ -59,11 +59,7 @@ class ActiveDataProvider extends BaseDataProvider
                     // 添加查询
                     if(!$item->formula && !$col->formula && (!$this->report || $this->sets['id']==$col['set_id'])){
                         $v_column = $col->v_fncolumn;
-                        if($col->fun){
-                            $query->addSelect([new \yii\db\Expression("{$v_column} as {$col->v_alias}")]);
-                        }else{
-                            $query->addSelect(["{$v_column} as {$col->v_alias}"]);
-                        }
+                        $query->addSelect([new \yii\db\Expression("{$v_column} as {$col->v_alias}")]);
                     }
                 }
             }
@@ -127,7 +123,7 @@ class ActiveDataProvider extends BaseDataProvider
                     $newQuery = $query;
                 }
                 
-                if($newQuery->where && preg_match('/\s+\(?0\=1\)\s*?/', $newQuery->createCommand($this->db)->sql)){
+                if($newQuery->where && preg_match('/\s+\(?0\=1\)?\s*?/', $newQuery->createCommand($this->db)->sql)){
                     $row = [];
                 }else{
                     if($newQuery->groupBy){
@@ -153,7 +149,11 @@ class ActiveDataProvider extends BaseDataProvider
             $this->query->select([]);
         }else{
             $values = null;
-            $this->query->addSelect($this->getColumns($columns, $values, true));
+            $columns = $this->getColumns($columns, $values, true);
+            $columns = is_array($columns) ? $columns : [$columns];
+            foreach($columns as $select){
+                $select && $this->query->addSelect(new \yii\db\Expression($select));
+            }
         }
         return $this;
     }
@@ -208,7 +208,11 @@ class ActiveDataProvider extends BaseDataProvider
         if($columns===false){
             $this->query->groupBy([]);
         }else{
-            $this->query->addGroupBy($this->getColumns($columns));
+            $columns = $this->getColumns($columns);
+            $columns = is_array($columns) ? $columns : [$columns];
+            foreach($columns as $select){
+                $select && $this->query->addGroupBy(new \yii\db\Expression($select));
+            }
         }
         return $this;
     }
@@ -222,12 +226,9 @@ class ActiveDataProvider extends BaseDataProvider
             $this->query->orderBy([]);
         }else{
             $columns = $this->getColumns($columns);
-            if(is_array($columns)){
-                foreach($columns as $col){
-                    $this->query->addOrderBy($col);
-                }
-            }else{
-                $this->query->addOrderBy($columns);
+            $columns = is_array($columns) ? $columns : [$columns];
+            foreach($columns as $select){
+                $select && $this->query->addOrderBy(new \yii\db\Expression($select));
             }
         }
         return $this;
