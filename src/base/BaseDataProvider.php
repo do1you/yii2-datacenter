@@ -350,6 +350,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         $setLists = $this->report->v_sets;
         $labelColmns = \yii\helpers\ArrayHelper::map($this->report->getV_columns(), 'label', 'name');
         foreach($this->report->columns as $col){
+            if($isSummery && $col['setsCol'] && $col['setsCol']['is_summary']!='1') continue;
             $set = isset($setLists[$col['set_id']]) ? $setLists[$col['set_id']] : null;
             $relation = $set ? $set['v_relation'] : null;
             if($set && $relation && $relation['rel_type']=='group'){
@@ -570,7 +571,16 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             }
             $this->_summarys = $this->summaryModels();
             foreach($this->_summarys as $key=>$val){
-                if(empty($val) || $val=='&nbsp;' || !is_numeric($val)){
+                if(is_array($val)){
+                    foreach($val as $k=>$v){
+                        if(empty($v) || $v=='&nbsp;' || !is_numeric($v)){
+                            unset($val[$k]);
+                        }
+                    }
+                    if(empty($val)){
+                        unset($this->_summarys[$key]);
+                    }
+                }elseif(empty($val) || $val=='&nbsp;' || !is_numeric($val)){
                     unset($this->_summarys[$key]);
                 }
             }

@@ -127,9 +127,9 @@ class ActiveDataProvider extends BaseDataProvider
                     $row = [];
                 }else{
                     if($newQuery->groupBy){
-                        $list = $newQuery->all($this->db);
-                        foreach($list as $key=>$item){
-                            $list[$key] = $this->filterSetsColumns($item, true);
+                        $row = $newQuery->all($this->db);
+                        foreach($row as $key=>$item){
+                            $row[$key] = $this->filterSetsColumns($item, true);
                         }
                     }else{
                         $row = $this->filterSetsColumns($newQuery->one($this->db), true);
