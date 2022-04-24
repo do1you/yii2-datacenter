@@ -6,7 +6,7 @@ $searchList = $model->getSearchModels();
 $count = $this->context->reportList ? count($this->context->reportList) : 0;
 ?>
 <?php if(!empty($searchList)):?>
-    <div class="row dataconter-search" style="display:none;">
+    <div class="row dataconter-search">
     	<div class="col-xs-12">
     		<div class="widget margin-bottom-20">
     			<div class="widget-body bordered-left bordered-themeprimary">
@@ -55,7 +55,7 @@ $count = $this->context->reportList ? count($this->context->reportList) : 0;
                             }else{
                                 form.submit();
                             }
-                        });", 4, 'report.search.submit');
+                        });$('.dataconter-search').hide()", 4, 'report.search.submit');
                         ?>
                     </div>
                     
