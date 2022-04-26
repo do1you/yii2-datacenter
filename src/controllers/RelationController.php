@@ -42,7 +42,7 @@ class RelationController extends \webadmin\BController
                 'class' => '\webadmin\actions\Select2Action',
                 'className' => '\datacenter\models\DcAttribute',
                 'col_id' => 'name',
-                'col_text' => 'name',
+                'col_text' => ['name','label'],
                 'col_v_text' => 'v_name',
                 'col_where' => ["model_id"=>$mId],
             ],
