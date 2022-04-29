@@ -28,5 +28,40 @@ class DefaultController extends \webadmin\BController
         return $this->render('index', [
         ]);
     }
+    
+    /**
+     * 下拉数据源
+     */
+    public function actionSelect2()
+    {
+        $id = Yii::$app->request->post('id',Yii::$app->request->get('id'));
+        $k = Yii::$app->request->post('key',Yii::$app->request->get('key'));
+        $q = Yii::$app->request->post('q',Yii::$app->request->get('q'));
+        $source = Yii::$app->request->post('q',Yii::$app->request->get('s'));
+        $source = $source ? \datacenter\models\DcSource::findOne($source) : null;
+        $result = ['items'=>[], 'total_count' => 0,];
+        if((($arr=explode('.', $k)) && count($arr)==3) && ($db = $source->getSourceDb())){
+            list($table,$key,$text) = $arr;
+            if($table && $key && $text){
+                $limit = 20;
+                $query = new \yii\db\Query();
+                $query->select(["{$key} as id","{$text} as text"])
+                ->from($table)
+                ->andFilterWhere(['like',$text,$q])
+                ->andFilterWhere([$key=>$id]);
+                
+                $dataProvider = new \yii\data\ActiveDataProvider([
+                    'query' => $query,
+                    'db' => $db,
+                ]);
+                
+                $id && $dataProvider->setPagination(false);
+                
+                $result['items'] = $dataProvider->getModels();
+                $result['total_page'] = $id ? 1 : $dataProvider->getPagination()->pageCount;
+            }
+        }
+        return $result;
+    }
 }
     

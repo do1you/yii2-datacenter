@@ -248,8 +248,12 @@ class DcSetsColumns extends \webadmin\ModelCAR
     {
         $search_params = $this->search_params ? $this->search_params : "";
         if(stripos($search_params, '.')!==false){
-            return \yii\helpers\Url::to(['/config/sys-config/select2','key'=>$this->key]);
-        }else{
+            if(substr($search_params,0,1)=='/'){
+                return \yii\helpers\Url::to(['default/select2','s'=>$this->sets['mainModel']['source_db'],'key'=>trim($search_params,'/')]);
+            }else{
+                return \yii\helpers\Url::to(['/config/sys-config/select2','key'=>$search_params]);
+            }
+        }elseif($search_params){
             return \yii\helpers\Url::to($search_params);
         }
     }
