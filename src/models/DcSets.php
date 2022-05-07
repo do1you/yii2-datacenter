@@ -397,6 +397,7 @@ class DcSets extends \webadmin\ModelCAR
             'columns.model.columns.model',
             'columns.model.source',
             'mainModel.source',
+            'columns.sets.mainModel',
             'mainModel.sourceRelation.sourceModel',
             'mainModel.sourceRelation.targetModel',
         ]);

@@ -101,6 +101,7 @@ class ActiveDataProvider extends BaseDataProvider
             if(($summaryColumns = $this->getSummaryModels())){
                 $query = $this->query;
                 $query->orderBy([]);
+                if(!$this->forReport) $query->groupBy([]);
                 if($query->having){
                     $newQuery = new \yii\db\Query([
                         'from' => ['sub' => $query],

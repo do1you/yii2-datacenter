@@ -253,6 +253,7 @@ class DcReport extends \webadmin\ModelCAR
             'columns.sets.mainModel.sourceRelation.targetModel',
             'columns.setsCol.column',
             'columns.setsCol.model',
+            'columns.setsCol.sets.mainModel',
             'columns.sets.source',
             'columns.sets.columns.sets.columns.model',
             'columns.setsCol.sets.columns.model',
