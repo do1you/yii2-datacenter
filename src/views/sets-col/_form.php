@@ -73,6 +73,10 @@ use webadmin\widgets\ActiveForm;
             
             <?= $form->field($model, 'is_search')->textInput()->dropDownList($model->getV_is_search(false), []) ?>
             
+            <?php if(in_array($model['sets']['set_type'], ['model','sql'])):?>
+            	<?= $form->field($model, 'is_back_search')->textInput()->dropDownList($model->getV_is_back_search(false), []) ?>
+            <?php endif;?>
+            
             <?= $form->field($model, 'type')->textInput(['maxlength' => true])->dropDownList($model->getV_type(false), ['prompt'=>'请选择']) ?>
             
             <?= $form->field($model, 'search_value')->textInput(['maxlength' => true])->dropDownList($model->getV_search_value(false), ['prompt'=>'请选择']) ?>

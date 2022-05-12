@@ -38,7 +38,7 @@ class DefaultController extends \webadmin\BController
         $k = Yii::$app->request->post('key',Yii::$app->request->get('key'));
         $q = Yii::$app->request->post('q',Yii::$app->request->get('q'));
         $source = Yii::$app->request->post('q',Yii::$app->request->get('s'));
-        $source = $source ? \datacenter\models\DcSource::findOne($source) : null;
+        $source = $source ? \datacenter\models\DcSource::model()->getCache('findModel',[['id'=>$source], false]) : null;
         $result = ['items'=>[], 'total_count' => 0,];
         if((($arr=explode('.', $k)) && count($arr)==3) && ($db = $source->getSourceDb())){
             list($table,$key,$text) = $arr;

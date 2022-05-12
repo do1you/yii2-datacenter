@@ -283,6 +283,14 @@ class DcSource extends \webadmin\ModelCAR
         return parent::delete();
     }
     
+    // 预处理数据
+    public function findModel($condition, $muli = false)
+    {
+        $query = parent::findByCondition($condition);
+        
+        return ($muli ? $query->all() : $query->one());
+    }
+    
     // 将表和字段进行保存为数据模型
     public function initDataSet()
     {

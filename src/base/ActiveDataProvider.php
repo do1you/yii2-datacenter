@@ -162,26 +162,30 @@ class ActiveDataProvider extends BaseDataProvider
     /**
      * 添加查询条件
      */
-    public function where($columns, $values, $op = false)
+    public function where($columns, $values = false, $op = false)
     {
         if($columns===false){
             $this->query->where([]);
         }else{
-            $columns = $this->getColumns($columns, $values);
-            $op = $op ? $op : ((is_array($columns) || is_array($values) || is_object($values)) ? 'in' : '=');
-            if(is_object($values)){
-                if($values instanceof \datacenter\models\DcSets 
-                    && in_array($values['set_type'], ['model','sql'])
-                    && $this->db==$values->getDataProvider()->db
-                ){
-                    $values = $values->getDataProvider()->query;
-                }else{
-                    // 跨数据库无法提取汇总
-                    $this->query->andWhere("0=1"); 
-                    return $this;
+            if($values===false && is_array($columns)){
+                $this->query->andWhere($this->formatColumns($columns));
+            }else{
+                $columns = $this->getColumns($columns, $values);
+                $op = $op ? $op : ((is_array($columns) || is_array($values) || is_object($values)) ? 'in' : '=');
+                if(is_object($values)){
+                    if($values instanceof \datacenter\models\DcSets 
+                        && in_array($values['set_type'], ['model','sql'])
+                        && $this->db==$values->getDataProvider()->db
+                    ){
+                        $values = $values->getDataProvider()->query;
+                    }else{
+                        // 跨数据库无法提取汇总
+                        $this->query->andWhere("0=1"); 
+                        return $this;
+                    }
                 }
+                $this->query->andWhere([$op, $columns, $values]);
             }
-            $this->query->andWhere([$op, $columns, $values]);
         }
         return $this;
     }
@@ -189,14 +193,18 @@ class ActiveDataProvider extends BaseDataProvider
     /**
      * 添加分组条件
      */
-    public function having($columns, $values, $op = false)
+    public function having($columns, $values = false, $op = false)
     {
         if($columns===false){
             $this->query->having([]);
         }else{
-            $columns = $this->getColumns($columns, $values);
-            $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
-            $this->query->andHaving([$op, $columns, $values]);
+            if($values===false && is_array($columns)){
+                $this->query->andHaving($this->formatColumns($columns));
+            }else{
+                $columns = $this->getColumns($columns, $values);
+                $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
+                $this->query->andHaving([$op, $columns, $values]);
+            }
         }
         return $this;
     }

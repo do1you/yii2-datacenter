@@ -194,6 +194,21 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         'v_config_ajax' => $colnmn['v_search_ajax'],
                     ];
                     $list[] = $_;
+                    // 反向查询
+                    if($colnmn['is_back_search']){
+                        $attribute = '-'.$item['v_alias'];
+                        $label = "不含{$colnmn['v_label']}";
+                        $_ = [
+                            'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
+                            'value' => (isset($params[$attribute]) ? $params[$attribute] : ''), // $colnmn['v_search_defval']
+                            'attribute' => $attribute,
+                            'label_name' => $label,
+                            'config_params' => $colnmn['search_params'],
+                            'v_config_params' => $colnmn['v_search_params'],
+                            'v_config_ajax' => $colnmn['v_search_ajax'],
+                        ];
+                        $list[] = $_;
+                    }
                 }
             }
             $this->_searchModels = $list;
@@ -245,58 +260,104 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 // 数据集条件
                 foreach($colnmns as $col){
                     if($col['formula']) continue;
-                    $callFn = $col['v_isfn'] ? 'having' : 'where';
-                    if(isset($params[$col['v_alias']]) && (is_array($params[$col['v_alias']]) || strlen($params[$col['v_alias']])>0) && ($col['model_id'] || $this->sets['set_type']!='model')){
-                        switch($col['type'])
-                        {
-                            case 'date': // 日期
-                                $this->$callFn($col['id'], $params[$col['v_alias']], '>=');
-                                $this->$callFn($col['id'], $params[$col['v_alias']].' 23:59:59', '<=');
-                                break;
-                            case 'daterange': // 日期范围
-                            case 'datetimerange': // 日期时间范围
-                                if(strpos($params[$col['v_alias']], '至')!==false){
-                                    list($startTime, $endTime) = explode('至', $params[$col['v_alias']]);
-                                    if($col['type']=='daterange'){
-                                        $startTime = trim($startTime);
-                                        $endTime = trim($endTime).' 23:59:59';
+                    foreach([$col['v_alias'],'-'.$col['v_alias']] as $attribute){
+                        $is_back_search = substr($attribute,0,1)=='-';
+                        if(empty($col['is_back_search']) && $is_back_search) continue; // 没有反向查询的跳过
+                        
+                        $callFn = $col['v_isfn'] ? 'having' : 'where';
+                        if(isset($params[$attribute]) && (is_array($params[$attribute]) || strlen($params[$attribute])>0) && ($col['model_id'] || $this->sets['set_type']!='model')){
+                            switch($col['type'])
+                            {
+                                case 'date': // 日期
+                                    if($is_back_search){
+                                        $this->$callFn(['or',
+                                            [$col['id'], $params[$attribute], '<'],
+                                            [$col['id'], $params[$attribute].' 23:59:59', '>'],
+                                        ]);
+                                    }else{
+                                        $this->$callFn($col['id'], $params[$attribute], '>=');
+                                        $this->$callFn($col['id'], $params[$attribute].' 23:59:59', '<=');
                                     }
-                                    $this->$callFn($col['id'], trim($startTime), '>=');
-                                    $this->$callFn($col['id'], trim($endTime), '<=');
-                                }
-                                break;
-                            case 'time': // 时间
-                            case 'datetime': // 日期时间
-                            case 'dateyear': // 年份
-                            case 'checkbox': // 复选框
-                            case 'select': // 下拉框
-                            case 'selectmult': // 下拉多选框
-                            case 'select2': // 升级下拉框
-                            case 'select2mult': // 升级下拉框多选
-                            case 'ddselect2': // 数据字典
-                            case 'ddmulti': // 数据字典多选
-                            case 'dd': // 数据字典
-                            case 'ddselect2multi': // 数据字典多选
-                            case 'selectajax': // 下拉异步
-                            case 'selectajaxmult': // 下拉异步多选框
-                                $this->$callFn($col['id'], $params[$col['v_alias']]); // 直接匹配
-                                break;
-                            case 'text': // 文本框
-                            case 'textarea': //  多行文本框
-                            case 'mask': //  格式化文本
-                            default: // 默认文本框
-                                if(strpos($params[$col['v_alias']], '~')!==false){ // 范围查询
-                                    list($start, $end) = explode('~', $params[$col['v_alias']]);
-                                    $this->$callFn($col['id'], trim($start), '>=');
-                                    $this->$callFn($col['id'], trim($end), '<=');
-                                }elseif(preg_match('/^(<>|>=|>|<=|<|=)/', $params[$col['v_alias']], $matches)){
-                                    $operator = $matches[1];
-                                    $value = substr($params[$col['v_alias']], strlen($operator));
-                                    $this->$callFn($col['id'], $value, $operator); // 指定操作
-                                }else{
-                                    $this->$callFn($col['id'], $params[$col['v_alias']], 'like'); // 模糊查询
-                                }
-                                break;
+                                    break;
+                                case 'daterange': // 日期范围
+                                case 'datetimerange': // 日期时间范围
+                                    if(strpos($params[$attribute], '至')!==false){
+                                        list($startTime, $endTime) = explode('至', $params[$attribute]);
+                                        if($col['type']=='daterange'){
+                                            $startTime = trim($startTime);
+                                            $endTime = trim($endTime).' 23:59:59';
+                                        }
+                                        if($is_back_search){
+                                            $this->$callFn(['or',
+                                                [$col['id'], trim($startTime), '<'],
+                                                [$col['id'], trim($endTime), '>'],
+                                            ]);
+                                        }else{
+                                            $this->$callFn($col['id'], trim($startTime), '>=');
+                                            $this->$callFn($col['id'], trim($endTime), '<=');
+                                        }
+                                    }
+                                    break;
+                                case 'time': // 时间
+                                case 'datetime': // 日期时间
+                                case 'dateyear': // 年份
+                                case 'checkbox': // 复选框
+                                case 'select': // 下拉框
+                                case 'selectmult': // 下拉多选框
+                                case 'select2': // 升级下拉框
+                                case 'select2mult': // 升级下拉框多选
+                                case 'ddselect2': // 数据字典
+                                case 'ddmulti': // 数据字典多选
+                                case 'dd': // 数据字典
+                                case 'ddselect2multi': // 数据字典多选
+                                case 'selectajax': // 下拉异步
+                                case 'selectajaxmult': // 下拉异步多选框
+                                    if(is_array($params[$attribute]) || is_array($col['id']) || is_object($params[$attribute])){
+                                        $this->$callFn($col['id'], $params[$attribute], ($is_back_search ? 'not in' : 'in')); // 直接匹配
+                                    }else{
+                                        $this->$callFn($col['id'], $params[$attribute], ($is_back_search ? '!=' : '=')); // 直接匹配
+                                    }
+                                    
+                                    break;
+                                case 'text': // 文本框
+                                case 'textarea': //  多行文本框
+                                case 'mask': //  格式化文本
+                                default: // 默认文本框
+                                    if(strpos($params[$attribute], '~')!==false){ // 范围查询
+                                        list($start, $end) = explode('~', $params[$attribute]);
+                                        if($is_back_search){
+                                            $this->$callFn(['or',
+                                                [$col['id'], trim($start), '<'],
+                                                [$col['id'], trim($end), '>'],
+                                            ]);
+                                        }else{
+                                            $this->$callFn($col['id'], trim($start), '>=');
+                                            $this->$callFn($col['id'], trim($end), '<=');
+                                        }
+                                    }elseif(preg_match('/^(<>|!=|>=|>|<=|<|=)/', $params[$attribute], $matches)){
+                                        $operator = $matches[1];
+                                        $value = substr($params[$attribute], strlen($operator));
+                                        if($is_back_search){
+                                            $notOperators = [
+                                                '<>' => '=',
+                                                '!=' => '=',
+                                                '>' => '<=',
+                                                '>=' => '<',
+                                                '<' => '>=',
+                                                '<=' => '>',
+                                                '=' => '!=',
+                                            ];
+                                            if(isset($notOperators[$operator])){
+                                                $this->$callFn($col['id'], $value, $notOperators[$operator]); // 指定操作
+                                            }
+                                        }else{
+                                            $this->$callFn($col['id'], $value, $operator); // 指定操作
+                                        }
+                                    }else{
+                                        $this->$callFn($col['id'], $params[$attribute], ($is_back_search ? 'not like' : 'like')); // 模糊查询
+                                    }
+                                    break;
+                            }
                         }
                     }
                 }
@@ -481,6 +542,21 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         }
         
         return $values;
+    }
+    
+    // 格式化字段查询数据
+    protected function formatColumns($columns)
+    {
+        foreach($columns as $key=>$items){
+            if(is_array($items) && !empty($items[0]) && isset($items[1])){
+                $columns[$key] = [
+                    (isset($items[2]) ? $items[2] : '='),
+                    $this->getColumns($items[0]),
+                    $items[1],
+                ];
+            }
+        }
+        return $columns;
     }
     
     /**

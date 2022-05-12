@@ -608,7 +608,8 @@ class DcSets extends \webadmin\ModelCAR
                     $columnsMap[$col['id']] = $colModel['id'];
                 }
             }
-            
+
+            /* 复制数据集不复制关系
             if($this->sourceRelation){
                 // 复制主动关系
                 foreach($this->sourceRelation as $item){
@@ -638,6 +639,7 @@ class DcSets extends \webadmin\ModelCAR
                     $relModel->save(false);
                 }
             }
+            */
             return true;
         }else{
             return false;

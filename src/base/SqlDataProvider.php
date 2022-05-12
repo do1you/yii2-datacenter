@@ -187,14 +187,18 @@ class SqlDataProvider extends BaseDataProvider
     /**
      * 添加查询条件
      */
-    public function where($columns, $values, $op = false)
+    public function where($columns, $values = false, $op = false)
     {
         if($columns===false){
             $this->_wheres = [];
         }else{
-            $columns = $this->getColumns($columns, $values);
-            $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
-            $this->_wheres[] = [$op, $columns, $values];
+            if($values===false && is_array($columns)){
+                $this->_wheres[] = $this->formatColumns($columns);
+            }else{
+                $columns = $this->getColumns($columns, $values);
+                $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
+                $this->_wheres[] = [$op, $columns, $values];
+            }
         }
         return $this;
     }

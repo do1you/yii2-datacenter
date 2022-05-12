@@ -186,9 +186,13 @@ class ScriptDataProvider extends BaseDataProvider
         if($columns===false){
             $this->_wheres = [];
         }else{
-            $columns = $this->getColumns($columns, $values);
-            $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
-            $this->_wheres[] = [$op, $columns, $values];
+            if($values===false && is_array($columns)){
+                
+            }else{
+                $columns = $this->getColumns($columns, $values);
+                $op = $op ? $op : ((is_array($columns) || is_array($values)) ? 'in' : '=');
+                $this->_wheres[] = [$op, $columns, $values];
+            }
         }
         return $this;
     }

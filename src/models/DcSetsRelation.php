@@ -328,8 +328,6 @@ class DcSetsRelation extends \webadmin\ModelCAR
             
             $columns = $this->getV_source_columns($source, false);
             $keys = $this->getV_target_columns($target);
-            $source->select($columns);
-            $target->select($keys);
             
             // 反向时需要关闭事件处理
             $target->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$target, 'targetAfterFindModels']);
@@ -338,6 +336,8 @@ class DcSetsRelation extends \webadmin\ModelCAR
                 \Yii::$app->controller->beforeAction(Yii::$app->controller->action);
                 throw new \yii\web\HttpException(200, Yii::t('datacenter','请缩小过滤条件范围，辅助二次查询的数据量较多').$count);
             }
+            $source->select($columns);
+            $target->select($keys);
         }else{
             $target->setPagination(false); // 不分页
             

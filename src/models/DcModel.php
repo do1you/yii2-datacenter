@@ -273,6 +273,7 @@ class DcModel extends \webadmin\ModelCAR
                 }
             }
             
+            /* 复制模型不复制关系
             if($this->sourceRelation){
                 // 复制主动关系
                 foreach($this->sourceRelation as $item){
@@ -304,6 +305,7 @@ class DcModel extends \webadmin\ModelCAR
                     $relModel->save(false);
                 }
             }
+            */
             return true;
         }else{
             return false;
