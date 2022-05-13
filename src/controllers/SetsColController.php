@@ -8,6 +8,7 @@ use Yii;
 use datacenter\models\DcSetsColumns;
 use datacenter\models\DcRoleAuthority;
 use yii\data\ActiveDataProvider;
+use datacenter\models\DcSets;
 
 class SetsColController extends \webadmin\BController
 {
@@ -25,6 +26,9 @@ class SetsColController extends \webadmin\BController
      */
     public function actions()
     {
+        $fId = Yii::$app->request->get('fId');
+        $fModel = $fId ? DcSets::findOne($fId) : null;
+        $mModel = $fModel ? $fModel['mainModel'] : null;
         return [
             // 数据模型查询
             'model' => [
@@ -56,14 +60,10 @@ class SetsColController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
-                'col_where' => (Yii::$app->user->id=='1' ? [
-                    'set_type' => 'model',
-                    'id' => \yii\helpers\ArrayHelper::map(\datacenter\models\DcSetsRelation::findAll(['source_sets'=>Yii::$app->request->get('fId','-999')]), 'target_sets', 'target_sets'),
-                ] : [
-                    'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
-                    'set_type' => 'model',
-                    'id' => \yii\helpers\ArrayHelper::map(\datacenter\models\DcSetsRelation::findAll(['source_sets'=>Yii::$app->request->get('fId','-999')]), 'target_sets', 'target_sets'),
-                ]),
+                'join_withs' => ['mainModel','sourceRelation'],
+                'col_where' => ['and',(Yii::$app->user->id=='1' ? [] : [
+                    'dc_sets.id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+                ]),"dc_model.source_db='{$mModel['source_db']}' and dc_sets.set_type='model' and dc_sets_relation.target_sets='{$fId}'"],
             ],
             // 数据字典
             'dd' => [
