@@ -49,6 +49,22 @@ class SetsColController extends \webadmin\BController
                     'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
                 ]),
             ],
+            // 归属数据集查询
+            'forsets' => [
+                'class' => '\webadmin\actions\Select2Action',
+                'className' => '\datacenter\models\DcSets',
+                'col_id' => 'id',
+                'col_text' => 'title',
+                'col_v_text' => 'v_title',
+                'col_where' => (Yii::$app->user->id=='1' ? [
+                    'set_type' => 'model',
+                    'id' => \yii\helpers\ArrayHelper::map(\datacenter\models\DcSetsRelation::findAll(['source_sets'=>Yii::$app->request->get('fId','-999')]), 'target_sets', 'target_sets'),
+                ] : [
+                    'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+                    'set_type' => 'model',
+                    'id' => \yii\helpers\ArrayHelper::map(\datacenter\models\DcSetsRelation::findAll(['source_sets'=>Yii::$app->request->get('fId','-999')]), 'target_sets', 'target_sets'),
+                ]),
+            ],
             // 数据字典
             'dd' => [
                 'class' => '\webadmin\actions\Select2Action',
@@ -73,7 +89,7 @@ class SetsColController extends \webadmin\BController
             Yii::$app->user->id=='1' ? null : [
                 'set_id'=>DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
             ]
-        ),['sets','model.source']);
+        ),['sets','model.source','forSets']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 
@@ -121,7 +137,7 @@ class SetsColController extends \webadmin\BController
     /**
      * 添加模型
      */
-    public function actionCreate($sId='',$mId='',$cName='')
+    public function actionCreate($sId='',$mId='',$fId='',$cName='')
     {
         $model = new DcSetsColumns();
         $model->loadDefaultValues();
@@ -129,6 +145,7 @@ class SetsColController extends \webadmin\BController
         
         if($sId) $model->set_id = $sId;
         if($mId) $model->model_id = $mId;
+        if($fId) $model->for_set_id = $fId;
         if($cName) $model->name = $cName;
 
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
@@ -144,7 +161,7 @@ class SetsColController extends \webadmin\BController
     /**
      * 批量添加模型
      */
-    public function actionBatchCreate($sId='',$mId='')
+    public function actionBatchCreate($sId='',$mId='',$fId='')
     {
         $model = new DcSetsColumns();
         $model->loadDefaultValues();
@@ -152,6 +169,7 @@ class SetsColController extends \webadmin\BController
         
         if($sId) $model->set_id = $sId;
         if($mId) $model->model_id = $mId;
+        if($fId) $model->for_set_id = $fId;
         
         if($model['sets']['set_type']!='model'){
             throw new \yii\web\HttpException(200, Yii::t('datacenter','只有数据集类型为模型的数据集才允许批量添加字段'));
@@ -160,7 +178,8 @@ class SetsColController extends \webadmin\BController
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->name && is_array($model->name)) {
             $transaction = DcSetsColumns::getDb()->beginTransaction(); // 使用事务关联
             
-            $labels = $model['model'] ? \yii\helpers\ArrayHelper::map($model['model']['columns'], 'name', 'label') : [];
+            $fModel = $model['switch_type']==2 ? $model['forSets'] : $model['model'];
+            $labels = $fModel ? \yii\helpers\ArrayHelper::map($fModel['columns'], 'name', 'label') : [];
             foreach($model->name as $name){
                 $newModel = clone $model;
                 $newModel->name = $name;
@@ -185,13 +204,14 @@ class SetsColController extends \webadmin\BController
     /**
      * 修改模型
      */
-    public function actionUpdate($id,$sId='',$mId='',$cName='')
+    public function actionUpdate($id,$sId='',$mId='',$fId='',$cName='')
     {
         $model = $this->findModel($id);
         $model->setScenario('updateForm');
         
         if($sId) $model->set_id = $sId;
         if($mId) $model->model_id = $mId;
+        if($fId) $model->for_set_id = $fId;
         if($cName) $model->name = $cName;
 
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {

@@ -26,7 +26,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     /**
      * 表单扩展
      */
-    public $search_params_text,$search_params_dd,$search_value_text;
+    public $search_params_text,$search_params_dd,$search_value_text,$switch_type;
     
     /**
      * 返回数据库表名称
@@ -44,7 +44,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return [
             [['name', 'label', 'set_id'], 'required'],
             [['set_id', 'is_search', 'is_summary', 'paixu', 'is_back_search'], 'integer'],
-            [['name', 'label', 'type', 'model_id', 'formula', 'fun', 'is_frozen', 'search_params'], 'safe'],
+            [['name', 'label', 'type', 'model_id', 'for_set_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type'], 'safe'],
             [['name', 'label', 'type', 'fun', 'search_value'], 'string', 'max' => 50],
             [['formula', 'sql_formula'], 'string', 'max' => 255],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
@@ -62,6 +62,8 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'id' => Yii::t('datacenter', '流水号'),
             'set_id' => Yii::t('datacenter', '数据集'),
             'model_id' => Yii::t('datacenter', '归属模型'),
+            'for_set_id' => Yii::t('datacenter', '归属数据集'),
+            'switch_source' => Yii::t('datacenter', '归属模型/数据集'),
             'name' => Yii::t('datacenter', '名称'),
             'label' => Yii::t('datacenter', '标签'),
             'is_search' => Yii::t('datacenter', '是否可查'),
@@ -78,6 +80,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'search_params_text' => Yii::t('datacenter', '查询参数'),
             'search_params_dd' => Yii::t('datacenter', '查询字典'),
             'search_value_text' => Yii::t('datacenter', '查询默认值'),
+            'switch_type' => Yii::t('datacenter', '归属类型'),
         ];
     }
     
@@ -91,9 +94,19 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return $this->hasOne(DcModel::className(), ['id'=>'model_id']);
     }
     
+    // 获取数据数据集关系
+    public function getForSets(){
+        return $this->hasOne(DcSets::className(), ['id'=>'for_set_id']);
+    }
+    
     // 获取数据模型字段关系
     public function getColumn(){
         return $this->hasOne(DcAttribute::className(), ['model_id'=>'model_id', 'name'=>'name']);
+    }
+    
+    // 获取数据模型字段关系
+    public function getSetColumn(){
+        return $this->hasOne(DcSetsColumns::className(), ['set_id'=>'for_set_id','name'=>'name']);
     }
     
     // 获取数据报表字段属性关系
@@ -105,6 +118,12 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function getV_type($val = null)
     {
         return \webadmin\modules\config\models\SysLdItem::dd('config_type', ($val !== null ? $val : $this->type));
+    }
+    
+    // 获取归属类型
+    public function getV_switch_type($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('dc_switch_type', ($val !== null ? $val : $this->switch_type));
     }
     
     // 获取数据集类型
@@ -366,6 +385,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             $this->search_value_text =  $this->search_value;
         }
         
+        $this->switch_type = $this->for_set_id>0 ? 2 : 1;
         return parent::afterFind();
     }
     
@@ -373,11 +393,17 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public static $_updateModelIds = [];
     public function beforeSave($insert)
     {
+        // 判断归属类型
+        if($this->switch_type==2){
+            $this->model_id = 0;
+        }elseif($this->switch_type==1){
+            $this->for_set_id = 0;
+        }
+        
         // 验证模型是否可保存
         if($this->model_id && !in_array($this->model_id, DcSetsColumns::$_updateModelIds) 
             && $this->sets && $this->sets['set_type']=='model' && $this->sets->mainModel
         ){
-            //$models = \yii\helpers\ArrayHelper::map($this->sets['columns'], 'model_id', 'model');
             $models = $this->sets->getV_relation_models();
             $models[$this->model_id] = $this->model;
             unset($models[$this->sets['mainModel']['id']]);

@@ -5,6 +5,7 @@ use yii\helpers\Url;
 use yii\widgets\Pjax;
 use webadmin\widgets\ActiveForm;
 
+$model->afterFind();
 Yii::$app->controller->currNav[] = Yii::t('common','批量添加');
 
 ?>
@@ -26,13 +27,17 @@ Yii::$app->controller->currNav[] = Yii::t('common','批量添加');
             <?= $form->field($model, 'set_id')->textInput()->selectajax(\yii\helpers\Url::toRoute('sets'),[]) ?>
 
 			<?php if($model['sets']['set_type']=='model'):?>
+				<?= $form->field($model, 'switch_type')->textInput()->dropDownList($model->getV_switch_type(false), []) ?>
+				
             	<?= $form->field($model, 'model_id',['options'=>['class'=>'form-group box_form box_model']])->textInput()->selectajax(\yii\helpers\Url::toRoute('model'),[]) ?>
+            	
+            	<?= $form->field($model, 'for_set_id',['options'=>['class'=>'form-group box_form box_sets']])->textInput()->selectajax(\yii\helpers\Url::toRoute(['forsets','fId'=>$model['set_id']]),[]) ?>
   			<?php endif;?>
             
-        	<?php if($model['model']):?>
+        	<?php if(($fModel = $model['switch_type']==2 ? $model['forSets'] : $model['model'])):?>
         		<?php 
-        		$list = \yii\helpers\ArrayHelper::map($model['model']['columns'], 'name', 'v_name');
-        		$labels = \yii\helpers\ArrayHelper::map($model['model']['columns'], 'name', 'label');
+        		$list = \yii\helpers\ArrayHelper::map($fModel['columns'], 'name', 'v_name');
+        		$labels = \yii\helpers\ArrayHelper::map($fModel['columns'], 'name', 'label');
         		$model->label = $model->label ? $model->label : $labels[$model['name']];
         		?>
         		
@@ -81,19 +86,30 @@ Yii::$app->controller->currNav[] = Yii::t('common','批量添加');
 </div>
 
 <?php
-$url = Url::to([Yii::$app->controller->action->id,'id'=>$model['id'],'mId'=>$model['model_id']]);
+$url = Url::to([Yii::$app->controller->action->id,'id'=>$model['id'],'mId'=>$model['model_id'],'fId'=>$model['for_set_id']]);
 $url1 = Url::to([Yii::$app->controller->action->id,'id'=>$model['id'],'sId'=>$model['set_id']]);
-$url2 = Url::to([Yii::$app->controller->action->id,'id'=>$model['id'],'sId'=>$model['set_id'],'mId'=>$model['model_id']]);
+$url2 = Url::to([Yii::$app->controller->action->id,'id'=>$model['id'],'sId'=>$model['set_id'],'mId'=>$model['model_id'],'fId'=>$model['for_set_id']]);
 $this->registerJs("
 // 选择数据集
 $('#dcsetscolumns-set_id').on('change',function(){
     var value = $(this).val();
     location.href = '{$url}&sId=' + (value || '');
 });
+// 选择归属类型
+$('#dcsetscolumns-switch_type').on('change',function(){
+    var value = $(this).val();
+    $('.box_sets,.box_model').slideUp();
+    $(value == 1 ? '.box_model' : '.box_sets').slideDown();
+}).triggerHandler('change');
 // 选择数据模型
 $('#dcsetscolumns-model_id').on('change',function(){
     var value = $(this).val();
     location.href = '{$url1}&mId=' + (value || '');
+});
+// 选择归属数据集
+$('#dcsetscolumns-for_set_id').on('change',function(){
+    var value = $(this).val();
+    location.href = '{$url1}&fId=' + (value || '');
 });
 // 选择是否可查
 $('#dcsetscolumns-is_search').on('change',function(){

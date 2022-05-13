@@ -47,12 +47,14 @@ use yii\helpers\Url;
                 	     'id',
                 	     [
                 	         'attribute' => 'set_id',
-                	         'value' => 'sets.title',
+                	         'value' => 'sets.v_title',
                 	         'filter' => false,
                 	     ],
                 	     [
-                	         'attribute' => 'model_id',
-                	         'value' => 'model.v_tb_name',
+                	         'attribute' => 'switch_source',
+                	         'value' => function($model){
+                	             return ($model['switch_type']==2 ? $model['forSets']['v_title'] : $model['model']['v_tb_name']);
+                	         },
                 	         'filter' => false,
                 	     ],
                 	     'name',

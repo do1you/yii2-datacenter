@@ -46,12 +46,12 @@ use yii\helpers\Url;
                 	     'id',
                 	     [
                 	         'attribute' => 'source_sets',
-                	         'value' => 'sourceSets.title',
+                	         'value' => 'sourceSets.v_title',
                 	         'filter' => false,
                 	     ],
                 	     [
                 	         'attribute' => 'target_sets',
-                	         'value' => 'targetSets.title',
+                	         'value' => 'targetSets.v_title',
                 	         'filter' => false,
                 	     ],
                 	     [
