@@ -50,7 +50,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
             [['search_params_text', 'search_params_dd', 'search_value_text'], 'safe', 'on'=>['insertForm','batchInsertForm','updateForm']],
             [['model_id'], 'required', 'on'=>'batchInsertForm'],
-            [['name'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
+            //[['name'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
         ];
     }
 
