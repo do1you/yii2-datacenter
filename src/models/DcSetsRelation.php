@@ -212,16 +212,17 @@ class DcSetsRelation extends \webadmin\ModelCAR
         }
         
         if($isAlias){
+            $colName = $isAlias===true ? 'v_alias' : $isAlias;
             $colModels = \yii\helpers\ArrayHelper::map($source['columns'], 'id', 'v_self');
             if(is_array($columns)){
                 foreach($columns as $k=>$col){
                     if(isset($colModels[$col])){
-                        $columns[$k] = $colModels[$col]['v_alias'];
+                        $columns[$k] = $colModels[$col][$colName];
                     }
                 }
             }else{
                 if(isset($colModels[$columns])){
-                    $columns = $colModels[$columns]['v_alias'];
+                    $columns = $colModels[$columns][$colName];
                 }
             }
         }

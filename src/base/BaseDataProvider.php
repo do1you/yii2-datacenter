@@ -109,7 +109,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 }
             }
             
-            if($this->forReport){
+            if($this->forReport && $this->forReport!==true){
                 foreach($this->forReport['columns'] as $column){
                     $labels2[$column['v_label']] = $alias2[$column['v_alias']] = $ids2[$column['id']] = $column;
                 }

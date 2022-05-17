@@ -30,6 +30,11 @@ class DcSets extends \webadmin\ModelCAR
     private $_relation_models;
     
     /**
+     * 关联所有的归属数据集
+     */
+    private $_relation_sets;
+    
+    /**
      * 用于格式化SQL的替换字符
      */
     private $_replace_params;
@@ -200,6 +205,12 @@ class DcSets extends \webadmin\ModelCAR
         return "{$this->title}[{$this->id}]";
     }
     
+    // 返回数据集别名
+    public function getV_alias()
+    {
+        return "set_{$this->id}";
+    } 
+    
     // 返回运行脚本
     public function getV_run_script()
     {
@@ -211,16 +222,27 @@ class DcSets extends \webadmin\ModelCAR
     public function getV_relation_models()
     {
         if($this->_relation_models === null){
-            $list = \yii\helpers\ArrayHelper::map($this->columns, 'model_id', 'model');
-            if($list){
-                foreach($list as $k=>$model){
-                    if(!$model) unset($list[$k]);
+            $this->_relation_sets = $this->_relation_models = [];
+            foreach($this->columns as $item){
+                if($item['for_set_id'] && $item['forSets']){
+                    $this->_relation_sets[$item['for_set_id']] = $item['forSets'];
+                }elseif($item['model_id'] && $item['model']){
+                    $this->_relation_models[$item['model_id']] = $item['model'];
                 }
             }
-            $this->_relation_models = $list;
         }
         
         return $this->_relation_models;
+    }
+    
+    // 获取归属数据集匹配关系
+    public function getV_relation_sets()
+    {
+        if($this->_relation_sets === null){
+            $this->getV_relation_models();
+        }
+        
+        return $this->_relation_sets;
     }
     
     // 格式化显示模型匹配关系
@@ -392,6 +414,10 @@ class DcSets extends \webadmin\ModelCAR
             'source',
             'columns.column',
             'columns.sets.columns.model',
+            'columns.sets.columns.forSets',
+            'columns.forSets',
+            'columns.setColumn',
+            'sourceRelation',
             'columns.model.sourceRelation.sourceModel',
             'columns.model.sourceRelation.targetModel',
             'columns.model.columns.model',
@@ -431,7 +457,40 @@ class DcSets extends \webadmin\ModelCAR
         return str_replace($search, $replace, $str);
     }
     
-    // 连接其他数据集
+    // 通过子查询的方式连接其他数据集
+    public function joinQuerySets(\yii\db\Query $query, &$allSets = [])
+    {
+        if($allSets && $this->sourceRelation){
+            $relations = \yii\helpers\ArrayHelper::map($this->sourceRelation, 'target_sets', 'v_self');
+            $allSets = self::model()->getCache('findModel',[['id'=>\yii\helpers\ArrayHelper::map($allSets,'id','id')], true]);
+            foreach($allSets as $key=>$sModel){
+                if($sModel['set_type']=='model' && isset($relations[$sModel['id']])){
+                    $columns = $relations[$sModel['id']]->getV_source_columns($this, 'v_column');
+                    $keys = $relations[$sModel['id']]->getV_target_columns($sModel, true);
+                    $columns = is_array($columns) ? $columns : [$columns];
+                    $keys = is_array($keys) ? $keys : [$keys];
+                    $joinCols = [];
+                    foreach($columns as $k=>$v){
+                        $joinCols[] = "{$v} = {$sModel['v_alias']}.{$keys[$k]}";
+                    }
+                    if($joinCols){
+                        $sModel->report = true;
+                        if(($joinQuery = $sModel->getDataProvider()->query)){
+                            $joinQuery->orderBy([]);
+                            $query->leftJoin([
+                                $sModel['v_alias'] => $joinQuery
+                            ], implode(' and ', $joinCols));
+                            unset($allSets[$key]);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $this;
+    }
+    
+    // 连接其他数据集查询出数据
     public function joinSets(&$sets=[])
     {
         if(isset($sets[$this->id])) unset($sets[$this->id]);

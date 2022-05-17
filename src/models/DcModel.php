@@ -155,7 +155,7 @@ class DcModel extends \webadmin\ModelCAR
         return "{$this->tb_name}";
     }
     
-    // 返回字段别名
+    // 返回模型别名
     public function getV_alias()
     {
         return "mod_{$this->id}";

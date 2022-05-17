@@ -43,32 +43,30 @@ $source_col = array_merge([''=>''],$model['v_source_col']);
             
             <div class="form-group required">
                 <label class="col-sm-2 control-label no-padding-right" for="dcrelation-source_col">关联关系</label>
-                <div class="col-sm-7">
-                	<div class="row">
-                		<div class="col-sm-12">
-                			<?php foreach($source_col as $key=>$val):?>
-                				<?php 
-                				    if($val){
-                				        $model->source_col = $key;
-                				        $model->target_col = $val;
-                				    }
-                				?>
-                            	<div <?php echo ($val=='' ? 'class="input-group add_relation_el" style="display:none"' : 'class="input-group relation_el relation_val"')?>>
-                                    <?= $form->field($model, 'source_col', ['template'=>"{input}\n{error}",'options'=>['class'=>'form-control no-padding','style'=>'border:0px;']])
-                                    ->dropDownList(($val=='' ? [] : [$key=>$key]),['name'=>'DcRelation[source_col][]']) ?>
-                                    <span class="input-group-addon" style="width:auto;">
-                                        <i class="fa fa-arrows-h"></i>
-                                    </span>
-                                    <?= $form->field($model, 'target_col', ['template'=>"{input}",'options'=>['class'=>'form-control no-padding','style'=>'border:0px;']])
-                                    ->dropDownList(($val=='' ? [] : [$val=>$val]),['name'=>'DcRelation[target_col][]']) ?>
-                                </div>
-                            <?php endforeach;?>
-                        </div>
+                <div class="col-sm-10">
+                	<div class="no-padding">
+            			<?php foreach($source_col as $key=>$val):?>
+            				<?php 
+            				    if($val){
+            				        $model->source_col = $key;
+            				        $model->target_col = $val;
+            				    }
+            				?>
+                        	<div <?php echo ($val=='' ? 'class="input-group add_relation_el" style="display:none"' : 'class="input-group relation_el relation_val"')?>>
+                                <?= $form->field($model, 'source_col', ['template'=>"{input}\n{error}",'options'=>['class'=>'form-control no-padding','style'=>'border:0px;']])
+                                ->dropDownList(($val=='' ? [] : [$key=>$key]),['name'=>'DcRelation[source_col][]']) ?>
+                                <span class="input-group-addon" style="width:auto;">
+                                    <i class="fa fa-arrows-h"></i>
+                                </span>
+                                <?= $form->field($model, 'target_col', ['template'=>"{input}",'options'=>['class'=>'form-control no-padding','style'=>'border:0px;']])
+                                ->dropDownList(($val=='' ? [] : [$val=>$val]),['name'=>'DcRelation[target_col][]']) ?>
+                            </div>
+                        <?php endforeach;?>
                     </div>
-                </div>
-                <div class="col-sm-3">
-                	<?= Html::buttonInput(Yii::t('datacenter','添加'), ['class' => 'btn btn-primary', 'id'=>'add_relation_btn']) ?>
-                	<?= Html::buttonInput(Yii::t('datacenter','移除'), ['class' => 'btn btn-primary', 'id'=>'remove_relation_btn']) ?>
+                    <div class="padding-top-10">
+                    	<?= Html::buttonInput(Yii::t('datacenter','添加'), ['class' => 'btn btn-primary', 'id'=>'add_relation_btn']) ?>
+                    	<?= Html::buttonInput(Yii::t('datacenter','移除'), ['class' => 'btn btn-primary', 'id'=>'remove_relation_btn']) ?>
+                    </div>
                 </div>
             </div>
             

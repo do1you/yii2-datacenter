@@ -50,6 +50,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
             [['search_params_text', 'search_params_dd', 'search_value_text'], 'safe', 'on'=>['insertForm','batchInsertForm','updateForm']],
             [['model_id'], 'required', 'on'=>'batchInsertForm'],
+            [['name'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
         ];
     }
 
@@ -174,6 +175,8 @@ class DcSetsColumns extends \webadmin\ModelCAR
         if(strpos($column, '.')!==false || preg_match("/[\+\-\*\/]/",$column)){
             $column = $this->sets ? $this->sets->formatSql($column) : $column;
             return "({$column})";
+        }elseif($this->switch_type==2){
+            return "{$this->forSets['v_alias']}.{$this->setColumn['v_alias']}";
         }else{
             return "{$this->model['v_alias']}.{$column}";
         }

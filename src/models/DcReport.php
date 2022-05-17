@@ -243,6 +243,12 @@ class DcReport extends \webadmin\ModelCAR
         $query = parent::findByCondition($condition)->with([
             'columns.sets.sourceRelation',
             'columns.sets.columns.column',
+            
+            /*'columns.sets.columns.forSets',
+            'columns.forSets',
+            'columns.setColumn',
+            'sourceRelation',*/
+            
             'columns.sets.columns.model.sourceRelation.sourceModel',
             'columns.sets.columns.model.sourceRelation.targetModel',
             'columns.sets.sourceRelation.groupLabel.model',

@@ -22,11 +22,17 @@ class ActiveDataProvider extends BaseDataProvider
         
         // 关联模型
         $allModels = $models = $sets->getV_relation_models();
-        unset($models[$sets->mainModel['id']]);
+        $allSets = $setLists = $sets->getV_relation_sets();
+        unset($models[$sets->mainModel['id']],$allSets[$sets->id]);
         $sets->mainModel->joinModel($query, $models);
         if($models){
             $model = reset($models);
             throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的模型关系')."{$model['tb_label']}({$model['id']}.{$model['tb_name']})");
+        }
+        $sets->joinQuerySets($query, $setLists);
+        if($setLists){
+            $model = reset($setLists);
+            throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的数据集关系')."{$model['v_title']}");
         }
         
         // 默认条件、分组、排序
