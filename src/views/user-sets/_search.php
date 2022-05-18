@@ -5,7 +5,7 @@ use webadmin\widgets\ActiveForm;
 
 ?>
 
-<div class="row dc-user-report-search">
+<div class="row dc-user-sets-search">
 	<div class="col-xs-12">
 		<div class="widget margin-bottom-20">
 			<div class="widget-body bordered-left bordered-themeprimary">
@@ -22,12 +22,22 @@ use webadmin\widgets\ActiveForm;
                         'class' => 'form-inline'
                     ],
                 ]); ?>
-				
-				<?= $form->field($model, 'report_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('report'),['style'=>'width:200px;']) ?>
-				
-				<?= $form->field($model, 'user_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
-				
-				<?= $form->field($model, 'grant_user')->searchInput()->selectajax(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
+
+				<?= $form->field($model, 'id')->searchInput() ?>
+
+				<?= $form->field($model, 'user_id')->searchInput() ?>
+
+				<?= $form->field($model, 'set_id')->searchInput() ?>
+
+				<?= $form->field($model, 'search_values')->searchInput() ?>
+
+				<?= $form->field($model, 'paixu')->searchInput() ?>
+
+				<?= $form->field($model, 'alias_name')->searchInput() ?>
+
+				<?= $form->field($model, 'create_time')->searchInput() ?>
+
+				<?= $form->field($model, 'grant_user')->searchInput() ?>
 
                 <div class="form-group">
                     <?= Html::submitButton(Yii::t('common','查询'), ['class' => 'btn btn-primary', 'id'=>'search_btn']) ?>

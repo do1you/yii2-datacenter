@@ -1,9 +1,10 @@
 <?php
 /**
- * 数据库表 "dc_user_report" 的模型对象.
+ * 数据库表 "dc_user_sets" 的模型对象.
  * @property int $id 流水号
  * @property int $user_id 用户
- * @property int $report_id 报表
+ * @property int $set_id 数据集
+ * @property string $search_values 查询条件
  * @property int $paixu 排序
  * @property string $alias_name 别名
  * @property string $create_time 授权时间
@@ -14,14 +15,14 @@ namespace datacenter\models;
 
 use Yii;
 
-class DcUserReport extends \webadmin\ModelCAR
+class DcUserSets extends \webadmin\ModelCAR
 {
     /**
      * 返回数据库表名称
      */
     public static function tableName()
     {
-        return 'dc_user_report';
+        return 'dc_user_sets';
     }
 
     /**
@@ -30,10 +31,11 @@ class DcUserReport extends \webadmin\ModelCAR
     public function rules()
     {
         return [
-            [['user_id', 'report_id'], 'required'],
-            [['user_id', 'report_id', 'paixu', 'grant_user'], 'integer'],
-            [['alias_name', 'create_time'], 'safe'],
-            [['create_time', 'search_values'], 'safe'],
+            [['user_id', 'set_id'], 'required'],
+            [['user_id', 'set_id', 'paixu', 'grant_user'], 'integer'],
+            [['search_values', 'alias_name', 'create_time'], 'safe'],
+            [['search_values'], 'string'],
+            [['create_time'], 'safe'],
             [['alias_name'], 'string', 'max' => 70],
         ];
     }
@@ -46,12 +48,12 @@ class DcUserReport extends \webadmin\ModelCAR
         return [
             'id' => Yii::t('datacenter', '流水号'),
             'user_id' => Yii::t('datacenter', '用户'),
-            'report_id' => Yii::t('datacenter', '报表'),
+            'set_id' => Yii::t('datacenter', '数据集'),
+            'search_values' => Yii::t('datacenter', '查询条件'),
             'paixu' => Yii::t('datacenter', '排序'),
             'alias_name' => Yii::t('datacenter', '别名'),
             'create_time' => Yii::t('datacenter', '授权时间'),
             'grant_user' => Yii::t('datacenter', '授权用户'),
-            'search_values' => Yii::t('datacenter', '过滤条件'),
         ];
     }
     
@@ -67,9 +69,9 @@ class DcUserReport extends \webadmin\ModelCAR
         return parent::beforeSave($insert);
     }
     
-    // 获取报表关系
-    public function getReport(){
-        return $this->hasOne(DcReport::className(), ['id'=>'report_id']);
+    // 获取数据集关系
+    public function getSet(){
+        return $this->hasOne(DcSets::className(), ['id'=>'set_id']);
     }
     
     // 获取被授权用户关系
@@ -87,32 +89,12 @@ class DcUserReport extends \webadmin\ModelCAR
     // 返回报表名称
     public function getV_name()
     {
-        return ($this->alias_name ? $this->alias_name : $this->report['title']);
+        return ($this->alias_name ? $this->alias_name : $this->set['title']);
     }
     
     // 返回过滤条件
     public function getV_search_values()
     {
         return (is_array($this->search_values) ? $this->search_values : ($this->search_values ? json_decode($this->search_values,1) : []));
-    }
-    
-    // 获取用户包含权限的报表
-    public function allReport($userId='0',$where=[],$group=false)
-    {
-        $query = DcReport::authorityFind($userId);
-        $query->with(['cat.parent.parent.parent.parent','user'])->andWhere(['dc_report.state'=>'0'])->orderBy("dc_report.paixu desc,dc_report.id asc");
-        
-        if($where){
-            $query->joinWith(['userReport']);
-            $query->andWhere($where);
-        }
-        
-        $list = $query->all();
-        if($group){
-            $list = \yii\helpers\ArrayHelper::map($list, 'id', 'v_self', 'cat_id');
-        }else{
-            $list = \yii\helpers\ArrayHelper::map($list, 'id', 'v_self');
-        }
-        return $list;
     }
 }

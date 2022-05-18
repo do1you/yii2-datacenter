@@ -140,6 +140,7 @@ class ReportViewController extends \webadmin\BController
      */
     public function actionCollection($id,$show='')
     {
+        /*
         $result = [];
         $model = DcUserReport::find()->where(['report_id'=>$id,'user_id'=>Yii::$app->user->id])->one();
         if(empty($show)){
@@ -173,6 +174,7 @@ class ReportViewController extends \webadmin\BController
         }
         $result['state'] = $model['is_collection'];
         return $result;
+        */
     }
     
     /**

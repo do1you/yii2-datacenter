@@ -6,7 +6,7 @@ use yii\helpers\Url;
 
 ?>
 <?php Pjax::begin(['timeout'=>5000]); ?>
-<div class="row dc-user-report-index">
+<div class="row dc-user-sets-index">
 	<div class="col-xs-12 col-md-12">
 		<?php echo $this->render('_search', ['model' => $model]); ?>
     	<div class="widget flat radius-bordered">
@@ -44,39 +44,18 @@ use yii\helpers\Url;
                     	//['class' => '\yii\grid\SerialColumn'],
 
                 	     'id',
-                	     [
-                	         'attribute' => 'report_id',
-                	         'value' => 'report.v_title',
-                	         'filter' => false,
-                	     ],
-                	     'alias_name',
-                	     [
-                	         'attribute' => 'user_id',
-                	         'value' => 'user.name',
-                	         'filter' => false,
-                	     ],
-                	     [
-                	         'attribute' => 'grant_user',
-                	         'value' => 'grantUser.name',
-                	         'filter' => false,
-                	     ],
+                	     'user_id',
+                	     'set_id',
+                	     'search_values:ntext',
                 	     'paixu',
-                	     'create_time',
-                         [
+                	     //'alias_name',
+                	     //'create_time',
+                	     //'grant_user',
+
+                        [
                         	'class' => '\yii\grid\ActionColumn',
-                            'buttonOptions' => ['data-pjax'=>'0'],
-                            'headerOptions'=>['width'=>'120'],
-                            'template' => '{show} {view} {update} {delete}',
-                            'buttons'=>[
-                                'show'=>function($url,$model){
-                                    return Html::a('<span class="fa fa-navicon"></span>', ['report-view/view', 'id' => $model->report_id, 'vid' => $model->id], [
-                                        'title' => Yii::t('datacenter', '查看报表'),
-                                        'target' => '_blank',
-                                        'data-pjax'=>'0',
-                                    ]);
-                        	     },
-                	        ],
-                         ],
+                        	'buttonOptions' => ['data-pjax'=>'1'],
+                        ],
                     ],
                 ]); ?>
 

@@ -1,18 +1,18 @@
 <?php
 /**
- * 模型对象DcUserReport的增删改查控制器方法.
+ * 模型对象DcUserSets的增删改查控制器方法.
  */ 
 namespace datacenter\controllers;
 
 use Yii;
-use datacenter\models\DcUserReport;
+use datacenter\models\DcUserSets;
 use yii\data\ActiveDataProvider;
 
-class UserReportController extends \webadmin\BController
+class UserSetsController extends \webadmin\BController
 {
 	// 执行前
     public function beforeAction($action){
-        Yii::$app->controller->pageTitle = Yii::t('datacenter', '用户报表');
+        Yii::$app->controller->pageTitle = Yii::t('datacenter', 'Dc User Sets');
 		Yii::$app->controller->currNav[] = Yii::$app->controller->pageTitle;
 		
         return parent::beforeAction($action);
@@ -33,10 +33,10 @@ class UserReportController extends \webadmin\BController
                 'col_v_text' => 'name',
                 //'col_where' => [],
             ],
-            // 数据报表查询
-            'report' => [
+            // 数据集查询
+            'sets' => [
                 'class' => '\webadmin\actions\Select2Action',
-                'className' => '\datacenter\models\DcReport',
+                'className' => '\datacenter\models\DcSets',
                 'col_id' => 'id',
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
@@ -51,8 +51,8 @@ class UserReportController extends \webadmin\BController
     public function actionIndex()
     {
     	unset(Yii::$app->session[$this->id]);
-		$model = new DcUserReport();
-		$dataProvider = $model->search(Yii::$app->request->queryParams,null,['report.user','user','grantUser']);
+		$model = new DcUserSets();
+		$dataProvider = $model->search(Yii::$app->request->queryParams,null,['set.user','user','grantUser']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 
@@ -82,7 +82,7 @@ class UserReportController extends \webadmin\BController
     {
     	Yii::$app->session[$this->id] = [$this->action->id];
         return $this->render('tree', [
-            'treeData' => DcUserReport::treeData(),
+            'treeData' => DcUserSets::treeData(),
         ]);
     }
     */
@@ -102,9 +102,8 @@ class UserReportController extends \webadmin\BController
      */
     public function actionCreate()
     {
-        $model = new DcUserReport();
+        $model = new DcUserSets();
         $model->loadDefaultValues();
-        $model->grant_user = Yii::$app->user->id;
 
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));
@@ -139,8 +138,8 @@ class UserReportController extends \webadmin\BController
     public function actionDelete()
     {
         $id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
-        if($id && ($models = DcUserReport::findAll($id))){
-        	$transaction = DcUserReport::getDb()->beginTransaction(); // 使用事务关联
+        if($id && ($models = DcUserSets::findAll($id))){
+        	$transaction = DcUserSets::getDb()->beginTransaction(); // 使用事务关联
         	foreach($models as $model){
         		$model->delete();
         	}
@@ -158,7 +157,7 @@ class UserReportController extends \webadmin\BController
      */
     protected function findModel($id)
     {
-        if (($model = DcUserReport::findOne($id)) !== null) {
+        if (($model = DcUserSets::findOne($id)) !== null) {
             return $model;
         }
 

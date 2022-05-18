@@ -27,25 +27,24 @@ use webadmin\widgets\ActiveForm;
 
 <div class="form-title"></div>
 
-<div class="row dc-user-report-form">
+<div class="row dc-user-sets-form">
 	<?php $form = ActiveForm::begin(); ?>
 		<div class="col-lg-offset-3 col-sm-offset-1 col-lg-6 col-sm-10 col-xs-12">
             
-            <?= $form->field($model, 'user_id')->textInput()->selectajax(\yii\helpers\Url::toRoute('user'),[]) ?>
-            
-            <?= $form->field($model, 'report_id')->textInput()->selectajax(\yii\helpers\Url::toRoute('report'),[]) ?>
-            
-            <?= $form->field($model, 'alias_name')->textInput(['maxlength' => true]) ?>
-            
-            <?= $form->field($model, 'paixu')->textInput() ?>
-            
-            <?= $form->field($model, 'search_values')->textarea(['rows'=>20]) ?>
+            <?= $form->field($model, 'user_id')->textInput() ?>
 
-			<?php if(Yii::$app->controller->action->id!='create'):?>
-				<?= $form->field($model, 'grant_user')->textInput()->selectajax(\yii\helpers\Url::toRoute('user'),['disabled'=>'disabled','readonly'=>'readonly']) ?>
-				
-            	<?= $form->field($model, 'create_time')->textInput(['disabled'=>'disabled','readonly'=>'readonly']) ?>
-            <?php endif;?>
+            <?= $form->field($model, 'set_id')->textInput() ?>
+
+            <?= $form->field($model, 'search_values')->textarea(['rows' => 6]) ?>
+
+            <?= $form->field($model, 'paixu')->textInput() ?>
+
+            <?= $form->field($model, 'alias_name')->textInput(['maxlength' => true]) ?>
+
+            <?= $form->field($model, 'create_time')->textInput() ?>
+
+            <?= $form->field($model, 'grant_user')->textInput() ?>
+
 
             <?php if(Yii::$app->controller->action->id!='view'):?>
                 <div class="form-group">
