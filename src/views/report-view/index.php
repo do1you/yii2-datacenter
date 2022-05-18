@@ -86,5 +86,11 @@ $colors = explode('|','inverse|blue|palegreen|danger|warning|info|success|darkor
 <?php
 $this->registerJsFile('@assetUrl/js/nestable/jquery.nestable.min.js',['depends' => \webadmin\WebAdminAsset::className()]);
 $this->registerJs("$('.dd').nestable();$('.dd-handle a').on('mousedown', function (e) { e.stopPropagation(); });");
-
+// 瀑布流
+/*
+$this->registerJsFile("@assetUrl/js/masonry.pkgd.min.js",['depends' => \webadmin\WebAdminAsset::className()]);
+$this->registerJs("$('.reportview').on('relad.layout',function(){
+    $('.reportview').masonry({itemSelector:'.reportitem'});
+}).triggerHandler('relad.layout');", 4, 'report.index.masonry');
+*/
 ?>

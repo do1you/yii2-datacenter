@@ -242,8 +242,11 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 $setSearchParams = [];
                 foreach($colnmns as $col){
                     if($col['formula']) continue;
-                    if(isset($params[$col['v_alias']]) && (is_array($params[$col['v_alias']]) || strlen($params[$col['v_alias']])>0) && $col['setsCol']){
-                        $setSearchParams[$col['set_id']][$col['setsCol']['v_alias']] = $params[$col['v_alias']];
+                    foreach([$col['v_alias'],'-'.$col['v_alias']] as $attribute){
+                        if(isset($params[$attribute]) && (is_array($params[$attribute]) || strlen($params[$attribute])>0) && $col['setsCol']){
+                            $is_back_search = substr($attribute,0,1)=='-';
+                            $setSearchParams[$col['set_id']][($is_back_search ? '-' : '').$col['setsCol']['v_alias']] = $params[$attribute];
+                        }
                     }
                 }
                 

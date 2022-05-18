@@ -3,7 +3,7 @@ use yii\helpers\Html;
 use webadmin\widgets\ActiveForm;
 
 $searchList = $model->getSearchModels();
-$count = $this->context->reportList ? count($this->context->reportList) : 0;
+$count = !$this->context->isCache ? 2 : ($this->context->reportList ? count($this->context->reportList) : 0);
 ?>
 <?php if(!empty($searchList)):?>
     <div class="row dataconter-search">
