@@ -42,20 +42,40 @@ use yii\helpers\Url;
             	            },
             	        ],
                     	//['class' => '\yii\grid\SerialColumn'],
-
-                	     'id',
-                	     'user_id',
-                	     'set_id',
-                	     'search_values:ntext',
-                	     'paixu',
-                	     //'alias_name',
-                	     //'create_time',
-                	     //'grant_user',
-
-                        [
-                        	'class' => '\yii\grid\ActionColumn',
-                        	'buttonOptions' => ['data-pjax'=>'1'],
-                        ],
+        	            'id',
+        	            [
+        	                'attribute' => 'set_id',
+        	                'value' => 'set.v_title',
+        	                'filter' => false,
+        	            ],
+        	            'alias_name',
+        	            [
+        	                'attribute' => 'user_id',
+        	                'value' => 'user.name',
+        	                'filter' => false,
+        	            ],
+        	            [
+        	                'attribute' => 'grant_user',
+        	                'value' => 'grantUser.name',
+        	                'filter' => false,
+        	            ],
+        	            'paixu',
+        	            'create_time',
+        	            [
+        	                'class' => '\yii\grid\ActionColumn',
+        	                'buttonOptions' => ['data-pjax'=>'0'],
+        	                'headerOptions'=>['width'=>'120'],
+        	                'template' => '{show} {view} {update} {delete}',
+        	                'buttons'=>[
+        	                    'show'=>function($url,$model){
+        	                    return Html::a('<span class="fa fa-navicon"></span>', ['report-view/set-view', 'id' => $model->set_id, 'vid' => $model->id], [
+            	                        'title' => Yii::t('datacenter', '查看数据集'),
+            	                        'target' => '_blank',
+            	                        'data-pjax'=>'0',
+            	                    ]);
+            	               },
+        	               ],
+        	           ],
                     ],
                 ]); ?>
 

@@ -12,7 +12,7 @@ class UserSetsController extends \webadmin\BController
 {
 	// 执行前
     public function beforeAction($action){
-        Yii::$app->controller->pageTitle = Yii::t('datacenter', 'Dc User Sets');
+        Yii::$app->controller->pageTitle = Yii::t('datacenter', '用户数据集');
 		Yii::$app->controller->currNav[] = Yii::$app->controller->pageTitle;
 		
         return parent::beforeAction($action);

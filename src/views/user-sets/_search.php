@@ -23,21 +23,11 @@ use webadmin\widgets\ActiveForm;
                     ],
                 ]); ?>
 
-				<?= $form->field($model, 'id')->searchInput() ?>
-
-				<?= $form->field($model, 'user_id')->searchInput() ?>
-
-				<?= $form->field($model, 'set_id')->searchInput() ?>
-
-				<?= $form->field($model, 'search_values')->searchInput() ?>
-
-				<?= $form->field($model, 'paixu')->searchInput() ?>
-
-				<?= $form->field($model, 'alias_name')->searchInput() ?>
-
-				<?= $form->field($model, 'create_time')->searchInput() ?>
-
-				<?= $form->field($model, 'grant_user')->searchInput() ?>
+				<?= $form->field($model, 'set_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
+				
+				<?= $form->field($model, 'user_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
+				
+				<?= $form->field($model, 'grant_user')->searchInput()->selectajax(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
 
                 <div class="form-group">
                     <?= Html::submitButton(Yii::t('common','查询'), ['class' => 'btn btn-primary', 'id'=>'search_btn']) ?>
