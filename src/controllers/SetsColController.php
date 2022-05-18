@@ -50,8 +50,10 @@ class SetsColController extends \webadmin\BController
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
                 'col_where' => (Yii::$app->user->id=='1' ? [] : [
-                    'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
-                ]),
+					'or',
+					['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+					['=', 'dc_sets.create_user', Yii::$app->user->id],
+				]),
             ],
             // 归属数据集查询
             'forsets' => [
@@ -62,8 +64,10 @@ class SetsColController extends \webadmin\BController
                 'col_v_text' => 'v_title',
                 'join_withs' => ['mainModel','sourceRelation'],
                 'col_where' => ['and',(Yii::$app->user->id=='1' ? [] : [
-                    'dc_sets.id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
-                ]),"dc_model.source_db='{$mModel['source_db']}' and dc_sets.set_type='model' and dc_sets_relation.target_sets='{$fId}'"],
+					'or',
+					['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+					['=', 'dc_sets.create_user', Yii::$app->user->id],
+				]),"dc_model.source_db='{$mModel['source_db']}' and dc_sets.set_type='model' and dc_sets_relation.target_sets='{$fId}'"],
             ],
             // 数据字典
             'dd' => [
@@ -87,8 +91,10 @@ class SetsColController extends \webadmin\BController
 		$model = new DcSetsColumns();
         $dataProvider = $model->search(Yii::$app->request->queryParams,(
             Yii::$app->user->id=='1' ? null : [
-                'set_id'=>DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
-            ]
+				'or',
+				['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+				['=', 'dc_sets.create_user', Yii::$app->user->id],
+			]
         ),['sets','model.source','forSets']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);

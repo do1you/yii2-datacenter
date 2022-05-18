@@ -46,8 +46,10 @@ class SetsRelController extends \webadmin\BController
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
                 'col_where' => (Yii::$app->user->id=='1' ? [] : [
-                    'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
-                ]),
+					'or',
+					['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+					['=', 'dc_sets.create_user', Yii::$app->user->id],
+				]),
             ],
             // 数据集字段查询
             'column' => [
@@ -74,8 +76,10 @@ class SetsRelController extends \webadmin\BController
 		        'or',
 		        ['in', 'source_sets', DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
 		        ['in', 'target_sets', DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+		        ['=', 'sourceSets.create_user', Yii::$app->user->id],
+		        ['=', 'targetSets.create_user', Yii::$app->user->id],
 		    ]
-		    ),['sourceSets','targetSets']);
+	    ),['sourceSets','targetSets'],(Yii::$app->user->id=='1' ? [] : ['sourceSets','targetSets']));
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

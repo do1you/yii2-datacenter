@@ -59,7 +59,9 @@ class SetsController extends \webadmin\BController
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcSets();
 		$dataProvider = $model->search(Yii::$app->request->queryParams,(Yii::$app->user->id=='1' ? null : [
-		    'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+		    'or',
+		    ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+		    ['=', 'dc_sets.create_user', Yii::$app->user->id],
 		]),['cat.parent.parent.parent','mainModel.source','columns.model.source']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);

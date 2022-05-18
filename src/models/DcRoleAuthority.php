@@ -130,7 +130,7 @@ class DcRoleAuthority extends \webadmin\ModelCAR
             }
             return $list;
         }
-        return $ids;
+        return array_unique($ids);
     }
     
     // 保存角色权限

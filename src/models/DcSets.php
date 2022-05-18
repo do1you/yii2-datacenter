@@ -79,8 +79,8 @@ class DcSets extends \webadmin\ModelCAR
     {
         return [
             [['title', 'set_type', 'cat_id'], 'required'],
-            [['main_model', 'relation_models', 'run_script', 'run_sql', 'excel_file', 'rel_where', 'rel_group', 'rel_order', 'update_time'], 'safe'],
-            [['main_model', 'state', 'cat_id', 'source_id'], 'integer'],
+            [['main_model', 'relation_models', 'run_script', 'run_sql', 'excel_file', 'rel_where', 'rel_group', 'rel_order', 'update_time', 'create_user'], 'safe'],
+            [['main_model', 'state', 'cat_id', 'source_id', 'create_user'], 'integer'],
             [['run_sql'], 'string'],
             [['update_time'], 'safe'],
             [['title', 'set_type'], 'string', 'max' => 50],
@@ -122,6 +122,7 @@ class DcSets extends \webadmin\ModelCAR
             'rel_order' => Yii::t('datacenter', '排序'),
             'update_time' => Yii::t('datacenter', '更新时间'),
             'cat_id' => Yii::t('datacenter', '数据集分类'),
+            'create_user' => Yii::t('datacenter', '创建用户'),
         ];
     }
     
@@ -144,7 +145,16 @@ class DcSets extends \webadmin\ModelCAR
     {
         $this->update_time = date('Y-m-d H:i:s');
         
+        if($insert){
+            $this->create_user = Yii::$app->user->id;
+        }
+        
         return parent::beforeSave($insert);
+    }
+    
+    // 获取用户关系
+    public function getUser(){
+        return $this->hasOne(\webadmin\modules\authority\models\AuthUser::className(), ['id'=>'create_user']);
     }
     
     // 获取分类关系
@@ -430,7 +440,7 @@ class DcSets extends \webadmin\ModelCAR
         
         return ($muli ? $query->all() : $query->one());
     }
-    
+        
     // 返回格式化SQL的参数
     public function formatSqlTpl()
     {

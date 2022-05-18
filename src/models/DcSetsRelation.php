@@ -75,12 +75,12 @@ class DcSetsRelation extends \webadmin\ModelCAR
     
     // 获取源数据集关系
     public function getSourceSets(){
-        return $this->hasOne(DcSets::className(), ['id'=>'source_sets']);
+        return $this->hasOne(DcSets::className(), ['id'=>'source_sets'])->alias('sourceSets');
     }
     
     // 获取目标数据集关系
     public function getTargetSets(){
-        return $this->hasOne(DcSets::className(), ['id'=>'target_sets']);
+        return $this->hasOne(DcSets::className(), ['id'=>'target_sets'])->alias('targetSets');
     }
     
     // 获取分组标签关系

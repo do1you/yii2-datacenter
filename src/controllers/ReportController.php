@@ -63,8 +63,13 @@ class ReportController extends \webadmin\BController
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
                 'col_where' => (Yii::$app->user->id=='1' ? ["cat_id"=>$mId] : [
-                    "cat_id"=>$mId,
-                    'id'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4']),
+					'and',
+                    ['=', "dc_sets.cat_id", $mId],
+                    [
+						'or',
+						['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+						['=', 'dc_sets.create_user', Yii::$app->user->id],
+					]
                 ]),
             ],
             // 数据集字段查询
