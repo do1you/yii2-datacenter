@@ -42,15 +42,17 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function rules()
     {
         return [
-            [['name', 'label', 'set_id'], 'required'],
+            [['label', 'set_id'], 'required'],
+            [['column_id'], 'required', 'when'=>function($model){
+                return ($model->model_id>0 || $model->for_set_id>0);
+            }],
             [['set_id', 'is_search', 'is_summary', 'paixu', 'is_back_search'], 'integer'],
-            [['name', 'label', 'type', 'model_id', 'for_set_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type'], 'safe'],
+            [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type'], 'safe'],
             [['name', 'label', 'type', 'fun', 'search_value'], 'string', 'max' => 50],
             [['formula', 'sql_formula'], 'string', 'max' => 255],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
             [['search_params_text', 'search_params_dd', 'search_value_text'], 'safe', 'on'=>['insertForm','batchInsertForm','updateForm']],
             [['model_id'], 'required', 'on'=>'batchInsertForm'],
-            //[['name'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
         ];
     }
 
@@ -62,9 +64,10 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return [
             'id' => Yii::t('datacenter', '流水号'),
             'set_id' => Yii::t('datacenter', '数据集'),
-            'model_id' => Yii::t('datacenter', '归属模型'),
-            'for_set_id' => Yii::t('datacenter', '归属数据集'),
-            'switch_source' => Yii::t('datacenter', '归属模型/数据集'),
+            'model_id' => Yii::t('datacenter', '从属模型'),
+            'for_set_id' => Yii::t('datacenter', '从属数据集'),
+            'switch_source' => Yii::t('datacenter', '从属模型/数据集'),
+            'column_id' => Yii::t('datacenter', '字段'),
             'name' => Yii::t('datacenter', '名称'),
             'label' => Yii::t('datacenter', '标签'),
             'is_search' => Yii::t('datacenter', '是否可查'),
@@ -102,12 +105,12 @@ class DcSetsColumns extends \webadmin\ModelCAR
     
     // 获取数据模型字段关系
     public function getColumn(){
-        return $this->hasOne(DcAttribute::className(), ['model_id'=>'model_id', 'name'=>'name']);
+        return $this->hasOne(DcAttribute::className(), ['model_id'=>'model_id', 'id'=>'column_id']);
     }
     
     // 获取数据模型字段关系
     public function getSetColumn(){
-        return $this->hasOne(DcSetsColumns::className(), ['set_id'=>'for_set_id','name'=>'name']);
+        return $this->hasOne(DcSetsColumns::className(), ['set_id'=>'for_set_id','id'=>'column_id']);
     }
     
     // 获取数据报表字段属性关系
@@ -394,30 +397,48 @@ class DcSetsColumns extends \webadmin\ModelCAR
     
     // 保存前动作
     public static $_updateModelIds = [];
+    public static $_updateSetsIds = [];
     public function beforeSave($insert)
     {
         // 判断归属类型
         if($this->switch_type==2){
             $this->model_id = 0;
+            if($this->for_set_id>0 && $this->column_id>0 && $this->setColumn){
+                $this->name = $this->setColumn['name'];
+            }
         }elseif($this->switch_type==1){
             $this->for_set_id = 0;
+            if($this->model_id>0 && $this->column_id>0 && $this->column){
+                $this->name = $this->column['name'];
+            }
         }
         
-        // 验证模型是否可保存
-        if($this->model_id && !in_array($this->model_id, DcSetsColumns::$_updateModelIds) 
-            && $this->sets && $this->sets['set_type']=='model' && $this->sets->mainModel
-        ){
-            $models = $this->sets->getV_relation_models();
-            $models[$this->model_id] = $this->model;
-            unset($models[$this->sets['mainModel']['id']]);
-            $query = new \yii\db\Query();
-            $query->from("{$this->sets['mainModel']['v_model']} as {$this->sets['mainModel']['v_alias']}");
-            $this->sets->mainModel->joinModel($query, $models);
-            if($models){
-                $model = reset($models);
-                throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的模型关系')."{$model['tb_label']}({$model['id']}.{$model['tb_name']})");
-            }else{
-                self::$_updateModelIds[] = $this->model_id; // 记录已存在模型关系，不用多次更新
+        // 验证模型/数据集是否可保存
+        if($this->sets && $this->sets['set_type']=='model' && $this->sets->mainModel){
+            if($this->for_set_id && !in_array($this->for_set_id, DcSetsColumns::$_updateSetsIds)){
+                $setLists = $this->sets->getV_relation_sets();
+                $query = new \yii\db\Query();
+                $query->from("{$this->sets['mainModel']['v_model']} as {$this->sets['mainModel']['v_alias']}");
+                $this->sets->joinQuerySets($query, $setLists);
+                if($setLists){
+                    $model = reset($setLists);
+                    throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的数据集关系')."{$model['v_title']}");
+                }else{
+                    self::$_updateSetsIds[] = $this->for_set_id; // 记录已存在模型关系，不用多次更新
+                }
+            }elseif($this->model_id && !in_array($this->model_id, DcSetsColumns::$_updateModelIds)){
+                $models = $this->sets->getV_relation_models();
+                $models[$this->model_id] = $this->model;
+                unset($models[$this->sets['mainModel']['id']]);
+                $query = new \yii\db\Query();
+                $query->from("{$this->sets['mainModel']['v_model']} as {$this->sets['mainModel']['v_alias']}");
+                $this->sets->mainModel->joinModel($query, $models);
+                if($models){
+                    $model = reset($models);
+                    throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的模型关系')."{$model['tb_label']}({$model['id']}.{$model['tb_name']})");
+                }else{
+                    self::$_updateModelIds[] = $this->model_id; // 记录已存在模型关系，不用多次更新
+                }
             }
         }
         

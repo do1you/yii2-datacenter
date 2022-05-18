@@ -26,6 +26,8 @@ use webadmin\widgets\ActiveForm;
 				<?= $form->field($model, 'set_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
 
 				<?= $form->field($model, 'model_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('model'),['style'=>'width:200px;']) ?>
+				
+				<?= $form->field($model, 'for_set_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
 
 				<?= $form->field($model, 'name')->searchInput() ?>
 

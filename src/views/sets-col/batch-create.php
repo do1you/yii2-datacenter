@@ -36,12 +36,12 @@ Yii::$app->controller->currNav[] = Yii::t('common','批量添加');
             
         	<?php if(($fModel = $model['switch_type']==2 ? $model['forSets'] : $model['model'])):?>
         		<?php 
-        		$list = \yii\helpers\ArrayHelper::map($fModel['columns'], 'name', 'v_name');
-        		$labels = \yii\helpers\ArrayHelper::map($fModel['columns'], 'name', 'label');
-        		$model->label = $model->label ? $model->label : $labels[$model['name']];
+        		$list = \yii\helpers\ArrayHelper::map($fModel['columns'], 'id', 'v_name');
+        		$labels = \yii\helpers\ArrayHelper::map($fModel['columns'], 'id', 'label');
+        		$model->label = $model->label ? $model->label : $labels[$model['column_id']];
         		?>
         		
-        		<?= $form->field($model, 'name')->textInput(['maxlength' => true])->duallistbox($list, [])->label('字段') ?>
+        		<?= $form->field($model, 'column_id')->textInput(['maxlength' => true])->duallistbox($list, []) ?>
         		
         		<?= $form->field($model, 'fun')->textInput(['maxlength' => true])->dropDownList($model->getV_fun(false), ['prompt'=>'请选择']) ?>
         		

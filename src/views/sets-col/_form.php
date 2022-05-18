@@ -45,12 +45,12 @@ $model->afterFind();
             
         	<?php if($model['sets']['set_type']=='model' && ($fModel = $model['switch_type']==2 ? $model['forSets'] : $model['model'])):?>
         		<?php 
-        		$list = \yii\helpers\ArrayHelper::map($fModel['columns'], 'name', 'v_name');
-        		$labels = \yii\helpers\ArrayHelper::map($fModel['columns'], 'name', 'label');
-        		$model->label = $model->label ? $model->label : $labels[$model['name']];
+        		$list = \yii\helpers\ArrayHelper::map($fModel['columns'], 'id', 'v_name');
+        		$labels = \yii\helpers\ArrayHelper::map($fModel['columns'], 'id', 'label');
+        		$model->label = $model->label ? $model->label : $labels[$model['column_id']];
         		?>
         		
-        		<?= $form->field($model, 'name')->textInput(['maxlength' => true])->select2($list, ['prompt'=>'默认']) ?>
+        		<?= $form->field($model, 'column_id')->textInput(['maxlength' => true])->select2($list, ['prompt'=>'默认']) ?>
         		
         		<?= $form->field($model, 'label')->textInput(['maxlength' => true]) ?>
         		
@@ -135,10 +135,10 @@ $('#dcsetscolumns-for_set_id').on('change',function(){
     location.href = '{$url1}&fId=' + (value || '');
 });
 // 选择字段
-$('#dcsetscolumns-name').on('change',function(){
+$('#dcsetscolumns-column_id').on('change',function(){
     if($(this).is('select')){
         var value = $(this).val();
-        location.href = '{$url2}&cName=' + (value || '');
+        location.href = '{$url2}&cId=' + (value || '');
     }
 });
 // 选择是否可查

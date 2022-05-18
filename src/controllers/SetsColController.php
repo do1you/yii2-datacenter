@@ -57,7 +57,7 @@ class SetsColController extends \webadmin\BController
             'forsets' => [
                 'class' => '\webadmin\actions\Select2Action',
                 'className' => '\datacenter\models\DcSets',
-                'col_id' => 'id',
+                'col_id' => 'dc_sets.id',
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
                 'join_withs' => ['mainModel','sourceRelation'],
@@ -137,7 +137,7 @@ class SetsColController extends \webadmin\BController
     /**
      * 添加模型
      */
-    public function actionCreate($sId='',$mId='',$fId='',$cName='')
+    public function actionCreate($sId='',$mId='',$fId='',$cId='')
     {
         $model = new DcSetsColumns();
         $model->loadDefaultValues();
@@ -146,7 +146,7 @@ class SetsColController extends \webadmin\BController
         if($sId) $model->set_id = $sId;
         if($mId) $model->model_id = $mId;
         if($fId) $model->for_set_id = $fId;
-        if($cName) $model->name = $cName;
+        if($cId) $model->column_id = $cId;
 
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));
@@ -175,17 +175,18 @@ class SetsColController extends \webadmin\BController
             throw new \yii\web\HttpException(200, Yii::t('datacenter','只有数据集类型为模型的数据集才允许批量添加字段'));
         }
         
-        if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->name && is_array($model->name)) {
+        if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->column_id && is_array($model->column_id)) {
             $transaction = DcSetsColumns::getDb()->beginTransaction(); // 使用事务关联
             
             $fModel = $model['switch_type']==2 ? $model['forSets'] : $model['model'];
-            $labels = $fModel ? \yii\helpers\ArrayHelper::map($fModel['columns'], 'name', 'label') : [];
-            foreach($model->name as $name){
+            $labels = $fModel ? \yii\helpers\ArrayHelper::map($fModel['columns'], 'id', 'label') : [];
+            $names = $fModel ? \yii\helpers\ArrayHelper::map($fModel['columns'], 'id', 'name') : [];
+            foreach($model->column_id as $cid){
                 $newModel = clone $model;
-                $newModel->name = $name;
-                $newModel->label = isset($labels[$name]) ? $labels[$name] : $name;
-                if($newModel->sql_formula){
-                    $newModel->sql_formula = str_replace('{name}',$name,$newModel->sql_formula);
+                $newModel->column_id = $cid;
+                $newModel->label = isset($labels[$cid]) ? $labels[$cid] : $cid;
+                if($newModel->sql_formula && isset($names[$cid])){
+                    $newModel->sql_formula = str_replace('{name}',$names[$cid],$newModel->sql_formula);
                 }
                 $newModel->save(false);
             }
@@ -204,7 +205,7 @@ class SetsColController extends \webadmin\BController
     /**
      * 修改模型
      */
-    public function actionUpdate($id,$sId='',$mId='',$fId='',$cName='')
+    public function actionUpdate($id,$sId='',$mId='',$fId='',$cId='')
     {
         $model = $this->findModel($id);
         $model->setScenario('updateForm');
@@ -212,7 +213,7 @@ class SetsColController extends \webadmin\BController
         if($sId) $model->set_id = $sId;
         if($mId) $model->model_id = $mId;
         if($fId) $model->for_set_id = $fId;
-        if($cName) $model->name = $cName;
+        if($cId) $model->column_id = $cId;
 
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息修改成功'));
