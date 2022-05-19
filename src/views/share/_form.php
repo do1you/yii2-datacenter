@@ -66,7 +66,14 @@ use webadmin\widgets\ActiveForm;
 	<?php ActiveForm::end(); ?>
 </div>
 <?php 
-
+$this->registerJs("
+// 选择归属类型
+$('#dcshare-switch_type').on('change',function(){
+    var value = $(this).val();
+    $('.box_sets,.box_report').slideUp();
+    $(value == 1 ? '.box_report' : '.box_sets').slideDown();
+}).triggerHandler('change');
+");
 ?>
 <?php Pjax::end(); ?>
 
