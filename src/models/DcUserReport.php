@@ -95,24 +95,4 @@ class DcUserReport extends \webadmin\ModelCAR
     {
         return (is_array($this->search_values) ? $this->search_values : ($this->search_values ? json_decode($this->search_values,1) : []));
     }
-    
-    // 获取用户包含权限的报表
-    public function allReport($userId='0',$where=[],$group=false)
-    {
-        $query = DcReport::authorityFind($userId);
-        $query->with(['cat.parent.parent.parent.parent','user'])->andWhere(['dc_report.state'=>'0'])->orderBy("dc_report.paixu desc,dc_report.id asc");
-        
-        if($where){
-            $query->joinWith(['userReport']);
-            $query->andWhere($where);
-        }
-        
-        $list = $query->all();
-        if($group){
-            $list = \yii\helpers\ArrayHelper::map($list, 'id', 'v_self', 'cat_id');
-        }else{
-            $list = \yii\helpers\ArrayHelper::map($list, 'id', 'v_self');
-        }
-        return $list;
-    }
 }

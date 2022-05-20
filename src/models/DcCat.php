@@ -99,7 +99,13 @@ class DcCat extends \webadmin\ModelCAR
         return self::treeOptions($parentId, $wheres, $level, $reload, $isKey);
     }
     
-    
+    // 预处理数据
+    public function findModel($condition, $muli = false)
+    {
+        $query = parent::findByCondition($condition);
+        
+        return ($muli ? $query->all() : $query->one());
+    }
     
     
     

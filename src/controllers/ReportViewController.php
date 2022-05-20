@@ -113,25 +113,30 @@ class ReportViewController extends \webadmin\BController
      */
     public function actionIndex()
     {
-        $treeData = \datacenter\models\DcCat::authorityTreeData(Yii::$app->user->id); // 获取所有分类
-        $reportList = \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,null,1],7200);
-        $myreportList = \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,['is_collection'=>'1']],7200);
-        $haveCatIds = [];
-        foreach($reportList as $catId=>$reports){
-            if(is_array($reports)){
-                foreach($reports as $report){
-                    if(($parentIds = $report['cat']['parentIds'])){
-                        $haveCatIds = array_merge($haveCatIds,$parentIds);                        
-                    }
-                }
-            }
-        }
+        /*
+        $defSets = \datacenter\models\DcSets::model()->allDefSets(Yii::$app->user->id,null,1);
+        $userSets = \datacenter\models\DcSets::model()->allUserSets(Yii::$app->user->id,null,1);
+        $defReport = \datacenter\models\DcReport::model()->allDefReport(Yii::$app->user->id,null,1);
+        $userReport = \datacenter\models\DcReport::model()->allUserReport(Yii::$app->user->id,null,1);
+        */
         
+        $defSets = \datacenter\models\DcSets::model()->getCache('allDefSets',[Yii::$app->user->id,null,1]);
+        $userSets = \datacenter\models\DcSets::model()->getCache('allUserSets',[Yii::$app->user->id,null,1]);
+        $defReport = \datacenter\models\DcReport::model()->getCache('allDefReport',[Yii::$app->user->id,null,1]);
+        $userReport = \datacenter\models\DcReport::model()->getCache('allUserReport',[Yii::$app->user->id,null,1]);
+        
+        $catIds = array_merge(array_keys($defSets),array_keys($userSets),array_keys($defReport),array_keys($userReport));
+        $catIds = array_unique($catIds);
+        //$catList = $catIds ? \datacenter\models\DcCat::model()->findModel(['id'=>$catIds],1) : [];
+        $catList = $catIds ? \datacenter\models\DcCat::model()->getCache('findModel',[['id'=>$catIds],1]) : [];
+
         return $this->render('index', [
-            'treeData' => $treeData,
-            'reportList' => $reportList,
-            'haveCatIds' => $haveCatIds,
-            'myreportList' => $myreportList,
+            'defSets' => $defSets,
+            'userSets' => $userSets,
+            'defReport' => $defReport,
+            'userReport' => $userReport,
+            'catIds' => $catIds,
+            'catList' => $catList,
         ]);
     }
     

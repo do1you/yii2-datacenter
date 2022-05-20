@@ -668,6 +668,51 @@ class DcSets extends \webadmin\ModelCAR
         return $this;
     }
     
+    // 获取用户包含权限的默认数据集
+    public function allDefSets($userId='0',$where=[],$group=false)
+    {
+        $query = self::find();
+        $query->where($userId=='1' ? [] : [
+            'or',
+            ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'4'])],
+            ['=', 'dc_sets.create_user', $userId],
+        ])->andWhere(['dc_sets.state'=>'0']);
+        if($where){
+            $query->andWhere($where);
+        }
+        
+        $query->orderBy("dc_sets.title")->with(['cat']);
+        $query->limit = 1000;
+        $list = $query->all();
+        if($group){
+            $list = \yii\helpers\ArrayHelper::map($list, 'id', 'v_self', 'cat_id');
+        }
+        
+        return $list;
+    }
+    
+    // 获取用户保存的条件数据集
+    public function allUserSets($userId='0',$where=[],$group=false)
+    {
+        $query = DcUserSets::find()->joinWith(['set']);
+        $query->where([
+            'dc_sets.state'=>'0',
+            'dc_user_sets.user_id'=>$userId,
+        ]);
+        if($where){
+            $query->andWhere($where);
+        }
+        
+        $query->orderBy("dc_user_sets.paixu desc,dc_user_sets.id")->with(['set.cat']);
+        $query->limit = 1000;
+        $list = $query->all();
+        if($group){
+            $list = \yii\helpers\ArrayHelper::map($list, 'id', 'v_self', 'set.cat_id');
+        }
+        
+        return $list;
+    }
+    
     // 复制数据集
     public function copySets()
     {

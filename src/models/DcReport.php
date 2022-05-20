@@ -237,6 +237,19 @@ class DcReport extends \webadmin\ModelCAR
         return $this->_mainSet;
     }
     
+    // 返回API请求地址
+    public function getV_apiurl($cache='1')
+    {
+        $params = Yii::$app->request->post("SysConfig",Yii::$app->request->get("SysConfig",[]));
+        $arr = [
+            'report-api/data',
+            'cache'=>$cache,
+            'id'=>$this['id'],
+        ];
+        $params && ($arr['SysConfig'] = $params);
+        return \yii\helpers\Url::to($arr);
+    }
+    
     // 预处理数据
     public function findModel($condition, $muli = false)
     {
@@ -292,17 +305,49 @@ class DcReport extends \webadmin\ModelCAR
         return parent::delete();
     }
     
-    // 返回API请求地址
-    public function getV_apiurl($cache='1')
+    // 获取用户包含权限的默认报表
+    public function allDefReport($userId='0',$where=[],$group=false)
     {
-        $params = Yii::$app->request->post("SysConfig",Yii::$app->request->get("SysConfig",[]));
-        $arr = [
-            'report-api/data',
-            'cache'=>$cache,
-            'id'=>$this['id'],
-        ];
-        $params && ($arr['SysConfig'] = $params);
-        return \yii\helpers\Url::to($arr);
+        $query = self::find();
+        $query->where($userId=='1' ? [] : [
+            'or',
+            ['in', 'dc_report.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'5'])],
+            ['=', 'dc_report.create_user', $userId],
+        ])->andWhere(['dc_report.state'=>'0']);
+        if($where){
+            $query->andWhere($where);
+        }
+        
+        $query->orderBy("dc_report.paixu desc,dc_report.id")->with(['cat']);
+        $query->limit = 1000;
+        $list = $query->all();
+        if($group){
+            $list = \yii\helpers\ArrayHelper::map($list, 'id', 'v_self', 'cat_id');
+        }
+        
+        return $list;
+    }
+    
+    // 获取用户保存的条件报表
+    public function allUserReport($userId='0',$where=[],$group=false)
+    {
+        $query = DcUserReport::find()->joinWith(['report']);
+        $query->where([
+            'dc_report.state'=>'0',
+            'dc_user_report.user_id'=>$userId,
+        ]);
+        if($where){
+            $query->andWhere($where);
+        }
+        
+        $query->orderBy("dc_user_report.paixu desc,dc_user_report.id")->with(['report.cat']);
+        $query->limit = 1000;
+        $list = $query->all();
+        if($group){
+            $list = \yii\helpers\ArrayHelper::map($list, 'id', 'v_self', 'report.cat_id');
+        }
+        
+        return $list;
     }
     
     /**
