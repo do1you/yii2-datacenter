@@ -157,6 +157,11 @@ class DcSets extends \webadmin\ModelCAR
         return $this->hasOne(\webadmin\modules\authority\models\AuthUser::className(), ['id'=>'create_user']);
     }
     
+    // 获取用户数据集关系
+    public function getUserSets(){
+        return $this->hasMany(DcUserSets::className(), ['set_id' => 'id'])->addOrderBy("dc_user_sets.paixu desc,dc_user_sets.id asc");
+    }
+    
     // 获取分类关系
     public function getCat(){
         return $this->hasOne(DcCat::className(), ['id'=>'cat_id']);
@@ -394,6 +399,12 @@ class DcSets extends \webadmin\ModelCAR
         
         if($this->id<0){
             throw new \yii\web\HttpException(200, Yii::t('datacenter', '系统内置数据集，禁止删除！'));
+        }
+        
+        if($this->userSets){
+            foreach($this->userSets as $item){
+                $item->delete();
+            }
         }
         
         if($this->columns){

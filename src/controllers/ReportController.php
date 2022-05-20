@@ -312,8 +312,11 @@ class ReportController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcReport();
-        $dataProvider = $model->search(Yii::$app->request->queryParams,null,['columns.sets','user','cat.parent.parent.parent']);        
-        $dataProvider->query = DcReport::authorityFind(Yii::$app->user->id, $dataProvider->query); // 加入权限命名空间
+		$dataProvider = $model->search(Yii::$app->request->queryParams,(Yii::$app->user->id=='1' ? null : [
+		    'or',
+		    ['in', 'dc_report.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'5'])],
+		    ['=', 'dc_report.create_user', Yii::$app->user->id],
+		]),['columns.sets','user','cat.parent.parent.parent']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

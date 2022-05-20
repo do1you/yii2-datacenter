@@ -305,28 +305,6 @@ class DcReport extends \webadmin\ModelCAR
         return \yii\helpers\Url::to($arr);
     }
     
-    
-    // 返回报表权限条件Query
-    public static function authorityFind($userId='0', $query = null)
-    {
-        $query = $query ? $query : self::find();
-        
-        if($userId!='1'){
-            //取角色和用户包含的报表权限
-            $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>$userId]), 'role_id', 'role_id');
-            
-            $query->joinWith(['userReport','roleReport']);
-            $where = ['or',
-                ['=','dc_report.create_user',$userId],
-                ['=','dc_user_report.user_id',$userId],
-                ['in','dc_role_authority.role_id',$roleIds],
-            ];
-            $query->where($where);
-        }
-        
-        return $query;
-    }
-    
     /**
      * 初始化数据集关联
      */
