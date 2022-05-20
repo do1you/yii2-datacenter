@@ -35,7 +35,7 @@ class DcShare extends \webadmin\ModelCAR
     public function rules()
     {
         return [
-            [['share_user'], 'required'],
+            [['share_user', 'invalid_time'], 'required'],
             [['report_id'], 'required', 'when'=>function($model){
                 return empty($model->set_id);
             }],
@@ -48,6 +48,7 @@ class DcShare extends \webadmin\ModelCAR
             [['invalid_time', 'create_time'], 'safe'],
             [['alias_name'], 'string', 'max' => 150],
             [['hash_key'], 'string', 'max' => 50],
+            [['hash_key'], 'unique', 'filter' => "invalid_time>='".date('Y-m-d H:i:s')."'"],
         ];
     }
 
@@ -81,6 +82,10 @@ class DcShare extends \webadmin\ModelCAR
         
         if(is_array($this->user_ids)){
             $this->user_ids = implode(',',$this->user_ids);
+        }
+        
+        if(!$this->hash_key){
+            $this->hash_key = substr(md5(microtime(true)),-8);
         }
         
         return parent::beforeSave($insert);

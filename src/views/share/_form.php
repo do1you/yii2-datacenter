@@ -35,9 +35,9 @@ use webadmin\widgets\ActiveForm;
             
             <?= $form->field($model, 'switch_type')->textInput()->dropDownList($model->getV_switch_type(false), []) ?>
             
-            <?= $form->field($model, 'report_id')->textInput()->selectajax(\yii\helpers\Url::toRoute('report'),[]) ?>
+            <?= $form->field($model, 'report_id',['options'=>['class'=>'form-group box_report']])->textInput()->selectajax(\yii\helpers\Url::toRoute('report'),[]) ?>
 
-            <?= $form->field($model, 'set_id')->textInput()->selectajax(\yii\helpers\Url::toRoute('sets'),[]) ?>
+            <?= $form->field($model, 'set_id',['options'=>['class'=>'form-group box_sets']])->textInput()->selectajax(\yii\helpers\Url::toRoute('sets'),[]) ?>
 
             <?= $form->field($model, 'alias_name')->textInput(['maxlength' => true]) ?>
 
@@ -45,13 +45,13 @@ use webadmin\widgets\ActiveForm;
 
             <?= $form->field($model, 'invalid_time')->datetime([]) ?>
             
-            <?= $form->field($model, 'search_values')->textarea(['rows' => 6]) ?>
-
 			<?php if(Yii::$app->controller->action->id!='create'):?>
 				<?= $form->field($model, 'hash_key')->textInput(['disabled'=>'disabled','readonly'=>'readonly']) ?>
 				
             	<?= $form->field($model, 'create_time')->textInput(['disabled'=>'disabled','readonly'=>'readonly']) ?>
             <?php endif;?>
+            
+            <?= $form->field($model, 'search_values')->textarea(['rows' => 6]) ?>
 
 
             <?php if(Yii::$app->controller->action->id!='view'):?>

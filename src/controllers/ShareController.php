@@ -113,6 +113,7 @@ class ShareController extends \webadmin\BController
     {
         $model = new DcShare();
         $model->loadDefaultValues();
+        $model->invalid_time = date('Y-m-d 00:00:00', strtotime('+6 month'));
 
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));
