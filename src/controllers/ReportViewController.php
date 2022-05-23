@@ -9,13 +9,14 @@ use datacenter\models\DcReport;
 use datacenter\models\DcSets;
 use datacenter\models\DcUserReport;
 use datacenter\models\DcRoleAuthority;
+use datacenter\models\DcUserSets;
 
 class ReportViewController extends \webadmin\BController
 {
     /**
      * 当前控制器中需要缓存查询条件的方法
      */
-    public $searchCacheActions = ['index', 'list', 'tree', 'view', 'set-view'];
+    public $searchCacheActions = ['index', 'list', 'tree', 'view', 'set-view', 'collection', 'set-collection'];
     
     // 初始化
     public function init()
@@ -73,8 +74,10 @@ class ReportViewController extends \webadmin\BController
             'class' => \webadmin\behaviors\SearchBehaviors::className(),
             'searchCacheActions' => $this->searchCacheActions,
             'cacheKey' => Yii::$app->session->id.'/datacenter/report-api/'.
-                ($this->action ? (in_array($this->action->id,['view','set-view']) ? str_replace('view','data',$this->action->id) : $this->action->id) : 'index'),
-        ];
+                ($this->action 
+                    ? (in_array($this->action->id,['view','set-view','collection','set-collection']) ? str_replace(['collection','view'],'data',$this->action->id) : $this->action->id)
+                    : 'index'),
+        ];   
         
         // 已登录用户免判断
         if(!Yii::$app->user->isGuest || !Yii::$app->request->get('access-token')){
@@ -143,43 +146,73 @@ class ReportViewController extends \webadmin\BController
     /**
      * 收藏报表
      */
-    public function actionCollection($id,$show='')
+    public function actionCollection()
     {
-        /*
+        $reportId = Yii::$app->request->getBodyParam('reportId',Yii::$app->getRequest()->getQueryParam('reportId'));
+        $setId = Yii::$app->request->getBodyParam('setId',Yii::$app->getRequest()->getQueryParam('setId'));
+        $userReportId = Yii::$app->request->getBodyParam('userReportId',Yii::$app->getRequest()->getQueryParam('userReportId'));
+        $userSetId = Yii::$app->request->getBodyParam('userSetId',Yii::$app->getRequest()->getQueryParam('userSetId'));
+        $searchValues = Yii::$app->request->getBodyParam('SysConfig',Yii::$app->getRequest()->getQueryParam('SysConfig',''));
+        $searchValues = is_array($searchValues) ? json_encode($searchValues,302) : $searchValues;
+        $paixu = 0;
+        $aliasName = '';
+
         $result = [];
-        $model = DcUserReport::find()->where(['report_id'=>$id,'user_id'=>Yii::$app->user->id])->one();
-        if(empty($show)){
-            $report = DcReport::findOne($id);
-            if(empty($model)){
-                if($report['create_user']==Yii::$app->user->id 
-                    || ($roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>Yii::$app->user->id]), 'role_id', 'role_id')
-                        && DcRoleAuthority::findOne(['source_type'=>'5','role_id'=>$roleIds,'source_id'=>$id]))
-                ){
-                    $model = new DcUserReport;
-                    $model->loadDefaultValues();
-                }
-            }
-            
-            if($model){
-                $model->load([
-                    'report_id'     =>  $id,
-                    'user_id'       =>  Yii::$app->user->id,
-                    'is_collection' =>  ($model['is_collection']=='0' ? '1' : '0'),
-                ],'');
-                $model->save(false);
+        if($reportId){
+            $model = new DcUserReport;
+            $model->loadDefaultValues();
+            if($model->load([
+                'report_id' => $reportId,
+                'search_values' => $searchValues,
+                'paixu' => $paixu,
+                'alias_name' => $aliasName,
+            ],'') && $model->save()){
                 $result['success'] = true;
-                
-                // 清除缓存
-                \datacenter\models\DcUserReport::model()->getCache('allReport',[Yii::$app->user->id,['is_collection'=>'1']],7200,true);                
             }else{
-                $result['msg'] = "您没有权限收藏该报表";
+                $result['msg'] = implode("；",$model->getErrorSummary(true));
             }
-        }else{
-            $result['success'] = true;
         }
-        $result['state'] = $model['is_collection'];
+        if($setId){
+            $model = new DcUserSets;
+            $model->loadDefaultValues();
+            if($model->load([
+                'set_id' => $setId,
+                'search_values' => $searchValues,
+                'paixu' => $paixu,
+                'alias_name' => $aliasName,
+            ],'') && $model->save()){
+                $result['success'] = true;
+            }else{
+                $result['msg'] = implode("；",$model->getErrorSummary(true));
+            }
+        }
+        if($userReportId){
+            $model = DcUserReport::findOne($userReportId);
+            if($model){
+                $model->delete();
+                $result['success'] = true;
+            }else{
+                $result['msg'] = "参数有误";
+            }
+        }
+        if($userSetId){
+            $model = DcUserSets::findOne($userSetId);
+            if($model){
+                $model->delete();
+                $result['success'] = true;
+            }else{
+                $result['msg'] = "参数有误";
+            }
+        }
         return $result;
-        */
+    }
+    
+    /**
+     * 收藏数据集
+     */
+    public function actionSetCollection()
+    {
+        return $this->actionCollection();
     }
     
     /**
@@ -188,7 +221,8 @@ class ReportViewController extends \webadmin\BController
     public function actionView()
     {
         $id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
-        $list = $this->findModel(is_array($id) ? $id : ($id ? explode(',',$id) : []));
+        $vid = Yii::$app->request->getBodyParam('vid',Yii::$app->getRequest()->getQueryParam('vid'));
+        $list = $this->findModel((is_array($id) ? $id : ($id ? explode(',',$id) : [])),(is_array($vid) ? $vid : ($vid ? explode(',',$vid) : [])));
         if(!empty(Yii::$app->request->get('is_export'))) return $this->exportExcel($list);
         
         return $this->render('display', [
@@ -202,7 +236,8 @@ class ReportViewController extends \webadmin\BController
     public function actionSetView()
     {
         $id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
-        $list = $this->findSetModel(is_array($id) ? $id : ($id ? explode(',',$id) : []));
+        $vid = Yii::$app->request->getBodyParam('vid',Yii::$app->getRequest()->getQueryParam('vid'));
+        $list = $this->findSetModel((is_array($id) ? $id : ($id ? explode(',',$id) : [])),(is_array($vid) ? $vid : ($vid ? explode(',',$vid) : [])));
         if(!empty(Yii::$app->request->get('is_export'))) return $this->exportExcel($list);
         
         return $this->render('display', [
@@ -242,14 +277,24 @@ class ReportViewController extends \webadmin\BController
     /**
      * 查找模型
      */
-    protected function findModel($id)
+    protected function findModel($id,$vid=[])
     {
-        if(is_array($id)){
-            if(($list = DcReport::model()->getCache('findModel',[['id'=>$id], true]))){
-                return $list;
+        if($vid){
+            if(is_array($vid)){
+                if(($list = DcUserReport::model()->getCache('findModel',[['id'=>$vid], true]))){
+                    return $list;
+                }
+            }elseif(($model = DcUserReport::model()->getCache('findModel',[$vid])) !== null) {
+                return $model;
             }
-        }elseif(($model = DcReport::model()->getCache('findModel',[$id])) !== null) {
-            return $model;
+        }else{
+            if(is_array($id)){
+                if(($list = DcReport::model()->getCache('findModel',[['id'=>$id], true]))){
+                    return $list;
+                }
+            }elseif(($model = DcReport::model()->getCache('findModel',[$id])) !== null) {
+                return $model;
+            }
         }
         
         throw new \yii\web\NotFoundHttpException(Yii::t('common','您查询的模型对象不存在'));
@@ -258,14 +303,24 @@ class ReportViewController extends \webadmin\BController
     /**
      * 查找数据集模型
      */
-    protected function findSetModel($id)
+    protected function findSetModel($id,$vid=[])
     {
-        if(is_array($id)){
-            if(($list = DcSets::model()->getCache('findModel',[['id'=>$id], true]))){
-                return $list;
+        if($vid){
+            if(is_array($vid)){
+                if(($list = DcUserSets::model()->getCache('findModel',[['id'=>$vid], true]))){
+                    return $list;
+                }
+            }elseif(($model = DcUserSets::model()->getCache('findModel',[$vid])) !== null) {
+                return $model;
             }
-        }elseif(($model = DcSets::model()->getCache('findModel',[$id])) !== null) {
-            return $model;
+        }else{
+            if(is_array($id)){
+                if(($list = DcSets::model()->getCache('findModel',[['id'=>$id], true]))){
+                    return $list;
+                }
+            }elseif(($model = DcSets::model()->getCache('findModel',[$id])) !== null) {
+                return $model;
+            }
         }
         
         throw new \yii\web\NotFoundHttpException(Yii::t('common','您查询的模型对象不存在'));

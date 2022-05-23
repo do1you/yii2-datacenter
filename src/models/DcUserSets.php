@@ -102,4 +102,27 @@ class DcUserSets extends \webadmin\ModelCAR
     {
         return (is_array($this->search_values) ? $this->search_values : ($this->search_values ? json_decode($this->search_values,1) : []));
     }
+    
+    // 预处理数据
+    public function findModel($condition, $muli = false)
+    {
+        $list = parent::findByCondition($condition)->all();
+        $ids = \yii\helpers\ArrayHelper::map($list, 'set_id', 'set_id');
+        $setList = DcSets::model()->getCache('findModel',[['id'=>$ids], true]);
+        $setList = \yii\helpers\ArrayHelper::map($setList, 'id', 'v_self');
+        $result = [];
+        foreach($list as $key=>$item){
+            if(isset($setList[$item['set_id']])){
+                if($setList[$item['set_id']]->forUserModel){
+                    $model = clone $setList[$item['set_id']];
+                }else{
+                    $model = $setList[$item['set_id']];
+                }
+                $model->forUserModel = $item;
+                $result[] = $model;
+            }
+        }
+        
+        return ($muli ? $result : reset($result));
+    }
 }

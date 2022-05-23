@@ -95,4 +95,27 @@ class DcUserReport extends \webadmin\ModelCAR
     {
         return (is_array($this->search_values) ? $this->search_values : ($this->search_values ? json_decode($this->search_values,1) : []));
     }
+    
+    // 预处理数据
+    public function findModel($condition, $muli = false)
+    {
+        $list = parent::findByCondition($condition)->all();
+        $ids = \yii\helpers\ArrayHelper::map($list, 'report_id', 'report_id');
+        $reportList = DcReport::model()->getCache('findModel',[['id'=>$ids], true]);
+        $reportList = \yii\helpers\ArrayHelper::map($reportList, 'id', 'v_self');
+        $result = [];
+        foreach($list as $key=>$item){
+            if(isset($reportList[$item['report_id']])){
+                if($reportList[$item['report_id']]->forUserModel){
+                    $model = clone $reportList[$item['report_id']];
+                }else{
+                    $model = $reportList[$item['report_id']];
+                }
+                $model->forUserModel = $item;
+                $result[] = $model;
+            }
+        }
+        
+        return ($muli ? $result : reset($result));
+    }
 }

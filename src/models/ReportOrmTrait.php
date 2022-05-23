@@ -47,6 +47,11 @@ trait ReportOrmTrait
     public $set_source;
     
     /**
+     * 用户数据关系
+     */
+    public $forUserModel;
+    
+    /**
      * 返回缓存主键值
      */
     public function getV_cache_key()
