@@ -1,6 +1,3 @@
-<?php
-$colors = explode('|','inverse|blue|palegreen|danger|warning|info|success|darkorange|magenta|purple|maroon');
-?>
 <div class="row data-report-row">
 	<?php if(empty($catList)):?>
 		<div class="col-xs-12 col-md-2">您暂时还没有任何报表可以查看...</div>
@@ -17,12 +14,12 @@ $colors = explode('|','inverse|blue|palegreen|danger|warning|info|success|darkor
                                 <ol class="dd-list">
                                 	<?php if(isset($userReport[$cat['id']])):foreach($userReport[$cat['id']] as $item):?>
                                 		<li class="dd-item">
-                                			<a class="dd2-content well bordered-left bordered-success" href="<?php echo \yii\helpers\Url::to(['view','id'=>$item['report_id'],'vid'=>$item['id']])?>"><?php echo $item['report']['v_title']?></a>
+                                			<a class="dd2-content well bordered-left bordered-success" target="_blank" href="<?php echo \yii\helpers\Url::to(['view','id'=>$item['report_id'],'vid'=>$item['id']])?>"><?php echo $item['report']['v_title']?></a>
                                 		</li>
                                 	<?php endforeach;endif;?>
                                 	<?php if(isset($userSets[$cat['id']])):foreach($userSets[$cat['id']] as $item):?>
                                 		<li class="dd-item">
-                                			<a class="dd2-content well bordered-left bordered-yellow" href="<?php echo \yii\helpers\Url::to(['set-view','id'=>$item['set_id'],'vid'=>$item['id']])?>"><?php echo $item['set']['v_title']?></a>
+                                			<a class="dd2-content well bordered-left bordered-yellow" target="_blank" href="<?php echo \yii\helpers\Url::to(['set-view','id'=>$item['set_id'],'vid'=>$item['id']])?>"><?php echo $item['set']['v_title']?></a>
                                 		</li>
                                 	<?php endforeach;endif;?>
                                 </ol>
@@ -44,12 +41,12 @@ $colors = explode('|','inverse|blue|palegreen|danger|warning|info|success|darkor
                                 <ol class="dd-list">
                                 	<?php if(isset($defReport[$cat['id']])):foreach($defReport[$cat['id']] as $item):?>
                                 		<li class="dd-item">
-                                			<a class="dd2-content well bordered-left bordered-success" href="<?php echo \yii\helpers\Url::to(['view','id'=>$item['id']])?>"><?php echo $item['v_title']?></a>
+                                			<a class="dd2-content well bordered-left bordered-success" target="_blank" href="<?php echo \yii\helpers\Url::to(['view','id'=>$item['id']])?>"><?php echo $item['v_title']?></a>
                                 		</li>
                                 	<?php endforeach;endif;?>
                                 	<?php if(isset($defSets[$cat['id']])):foreach($defSets[$cat['id']] as $item):?>
                                 		<li class="dd-item">
-                                			<a class="dd2-content well bordered-left bordered-yellow" href="<?php echo \yii\helpers\Url::to(['set-view','id'=>$item['id']])?>"><?php echo $item['v_title']?></a>
+                                			<a class="dd2-content well bordered-left bordered-yellow" target="_blank" href="<?php echo \yii\helpers\Url::to(['set-view','id'=>$item['id']])?>"><?php echo $item['v_title']?></a>
                                 		</li>
                                 	<?php endforeach;endif;?>
                                 </ol>

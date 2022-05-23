@@ -18,6 +18,11 @@ use Yii;
 class DcUserSets extends \webadmin\ModelCAR
 {
     /**
+     * 数据集所属的报表实例
+     */
+    public $report;
+    
+    /**
      * 返回数据库表名称
      */
     public static function tableName()
@@ -89,7 +94,7 @@ class DcUserSets extends \webadmin\ModelCAR
     // 返回报表名称
     public function getV_name()
     {
-        return ($this->alias_name ? $this->alias_name : $this->set['title']);
+        return ($this->alias_name ? $this->alias_name : $this->set['v_title']);
     }
     
     // 返回过滤条件

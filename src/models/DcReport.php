@@ -26,6 +26,11 @@ class DcReport extends \webadmin\ModelCAR
     private $_setsList;
     
     /**
+     * 关联的所有用户数据集
+     */
+    private $_userSetsList;
+    
+    /**
      * 关联的主数据集
      */
     private $_mainSet;
@@ -180,8 +185,8 @@ class DcReport extends \webadmin\ModelCAR
     // 数据集合显示
     public function getV_sets_str()
     {
-        $setList = $this->v_sets;
-        $names = \yii\helpers\ArrayHelper::map($setList, 'id', 'title');
+        $names = \yii\helpers\ArrayHelper::map($this->v_userSets, 'id', 'v_name');
+        $names += \yii\helpers\ArrayHelper::map($this->v_sets, 'id', 'v_title');
         return implode(",",$names);
     }
     
@@ -189,20 +194,31 @@ class DcReport extends \webadmin\ModelCAR
     public function getV_sets()
     {
         if($this->_setsList === null){
-            $list = \yii\helpers\ArrayHelper::map($this->columns, 'set_id', 'sets');
-            if($list){
-                foreach($list as $k=>$model){
-                    if(!$model){
-                        unset($list[$k]);
-                    }else{
-                        $model->report = $this;
+            $this->_setsList = $this->_userSetsList = [];
+            foreach($this->columns as $col){
+                if($col['set_id']){
+                    if($col['user_set_id'] && $col['userSets']){
+                        $col['userSets']['report'] = $this;
+                        $this->_userSetsList[$col['user_set_id']] = $col['userSets'];
+                    }elseif($col['sets']){
+                        $col['sets']['report'] = $this;
+                        $this->_setsList[$col['set_id']] = $col['sets'];
                     }
                 }
             }
-            $this->_setsList = $list;
         }
         
         return $this->_setsList;
+    }
+    
+    // 返回用户数据集合
+    public function getV_userSets()
+    {
+        if($this->_userSetsList === null){
+            $this->getV_sets();
+        }
+        
+        return $this->_userSetsList;
     }
     
     // 返回主数据集

@@ -86,6 +86,52 @@ class ReportController extends \webadmin\BController
     }
     
     /**
+     * 获取用户数据集
+     */
+    public function actionUserSets()
+    {
+        $mId = Yii::$app->request->post('mId',Yii::$app->request->get('mId'));
+        $defSets = \datacenter\models\DcSets::find()
+        ->where((Yii::$app->user->id=='1' ? ["dc_sets.cat_id"=>$mId,"dc_sets.state"=>'0'] : [
+            'and',
+            ['=', "dc_sets.cat_id", $mId],
+            ['=', "dc_sets.state", '0'],
+            [
+                'or',
+                ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                ['=', 'dc_sets.create_user', Yii::$app->user->id],
+            ]
+        ]))
+        ->orderBy("dc_sets.title")
+        ->all();
+        
+        $userSets = \datacenter\models\DcUserSets::find()->joinWith(['set'])
+        ->where([
+            'dc_sets.state'=>'0',
+            "dc_sets.cat_id"=>$mId,
+            'dc_user_sets.user_id'=>Yii::$app->user->id,
+        ])
+        ->orderBy("dc_user_sets.paixu desc,dc_user_sets.id")
+        ->all();
+        
+        $result = ['items'=>[]];
+        foreach($userSets as $item){
+            $result['items'][] = [
+                'id' => $item['set_id'],
+                'text' => $item['v_name'],
+                'vid' => $item['id'],
+            ];
+        }
+        foreach($defSets as $item){
+            $result['items'][] = [
+                'id' => $item['id'],
+                'text' => $item['v_title'],
+            ];
+        }
+        return $result;
+    }
+    
+    /**
      * 构建报表
      */
     public function actionBuild($id=null)
@@ -294,6 +340,7 @@ class ReportController extends \webadmin\BController
                     'label' => $column->label,
                     'report_id' => $model->id,
                     'set_id' => $column->set_id,
+                    'user_set_id' => Yii::$app->request->post('vid',Yii::$app->request->get('vid','0')),
                     'col_id' => $column->id,
                 ],'');
                 $colModel->save(false);

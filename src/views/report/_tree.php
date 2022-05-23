@@ -32,7 +32,7 @@ use datacenter\models\DcRoleAuthority;
 <?php 
 
 $treeData = \datacenter\models\DcCat::authorityTreeData(Yii::$app->user->id);
-$url = \yii\helpers\Url::to(['sets']);
+$url = \yii\helpers\Url::to(['user-sets']);
 $url1 = \yii\helpers\Url::to(['column']);
 $url2 = \yii\helpers\Url::to(['save','act'=>Yii::$app->controller->action->id]);
 $url3 = \yii\helpers\Url::to(['report','act'=>Yii::$app->controller->action->id,'id'=>$id]);
@@ -57,7 +57,8 @@ $('#report_tree').tree({
                             children.push({
                                 id : item.id,
                                 name : item.text,
-                                'icon-class':(isSets ? '' : 'themeprimary set-folder'),
+                                vid : (item.vid || options.vid || ''),
+                                'icon-class':(isSets ? '' : (item.vid ? 'purple set-folder' : 'info set-folder')),
                                 sid : (isSets ? '2' : '1'),
                                 type : (isSets ? 'item' : 'folder')
                             });
@@ -83,7 +84,7 @@ var hasTouch = 'ontouchstart' in document,
     onStartEvent = function(e){ // 拖动前
         var target = $(e.target).closest('.tree-item,.tree-folder-header');
         isFolder = target.is('.tree-folder-header');
-        itemData = target.data();
+        itemData = target.data();console.log(itemData);
         if(target && target.length && !$(e.target).is('.set-folder') && (!isFolder || target.find('.set-folder').length) && itemData && itemData.id){
             moveStatus = target;
             moveEl = target.clone();
@@ -118,7 +119,7 @@ var hasTouch = 'ontouchstart' in document,
             var boxEl = pointEl.closest('.data-report-index');
             boxEl = boxEl.length>0 ? boxEl : pointEl.closest('.report_box_right');
             if(boxEl && boxEl.length>0){
-                $.getJSON('{$url2}',{rid:(boxEl.attr('rid') || ''),type:itemData.sid,id:itemData.id},function(json){
+                $.getJSON('{$url2}',{rid:(boxEl.attr('rid') || ''),type:itemData.sid,id:itemData.id,vid:(itemData.vid||'')},function(json){
                     if(json.success){
                         $('#report_div').load('{$url3}');
                     }else{

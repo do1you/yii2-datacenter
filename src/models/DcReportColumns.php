@@ -28,7 +28,7 @@ class DcReportColumns extends \webadmin\ModelCAR
     public function rules()
     {
         return [
-            [['report_id', 'set_id', 'col_id', 'paixu', 'is_frozen'], 'safe'],
+            [['report_id', 'set_id', 'col_id', 'paixu', 'is_frozen', 'user_set_id'], 'safe'],
             [['formula'], 'string', 'max' => 255],
             [['label'], 'string', 'max' => 50],
         ];
@@ -44,6 +44,7 @@ class DcReportColumns extends \webadmin\ModelCAR
             'label' => Yii::t('datacenter', '标签'),
             'report_id' => Yii::t('datacenter', '报表'),
             'set_id' => Yii::t('datacenter', '数据集'),
+            'user_set_id' => Yii::t('datacenter', '用户数据集'),
             'col_id' => Yii::t('datacenter', '数据集字段'),
             'paixu' => Yii::t('datacenter', '排序'),
             'formula' => Yii::t('datacenter', '计算公式'),
@@ -61,6 +62,12 @@ class DcReportColumns extends \webadmin\ModelCAR
     public function getSets()
     {
         return $this->hasOne(DcSets::className(), ['id'=>'set_id']);
+    }
+    
+    // 获取用户数据集关系
+    public function getUserSets()
+    {
+        return $this->hasOne(DcUserSets::className(), ['id'=>'user_set_id']);
     }
     
     // 获取数据集字段关系
