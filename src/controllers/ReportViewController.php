@@ -16,7 +16,7 @@ class ReportViewController extends \webadmin\BController
     /**
      * 当前控制器中需要缓存查询条件的方法
      */
-    public $searchCacheActions = ['index', 'list', 'tree', 'view', 'set-view', 'collection', 'set-collection'];
+    public $searchCacheActions = ['index', 'list', 'tree', 'view', 'set-view']; // , 'collection', 'set-collection'
     
     // 初始化
     public function init()
@@ -154,8 +154,9 @@ class ReportViewController extends \webadmin\BController
         $userSetId = Yii::$app->request->getBodyParam('userSetId',Yii::$app->getRequest()->getQueryParam('userSetId'));
         $searchValues = Yii::$app->request->getBodyParam('SysConfig',Yii::$app->getRequest()->getQueryParam('SysConfig',''));
         $searchValues = is_array($searchValues) ? json_encode($searchValues,302) : $searchValues;
-        $paixu = 0;
-        $aliasName = '';
+        $modelParams = Yii::$app->request->getBodyParam('DcUserReport',Yii::$app->getRequest()->getQueryParam('DcUserReport',[]));
+        $paixu = isset($modelParams['paixu']) ? $modelParams['paixu'] : '';
+        $aliasName = isset($modelParams['alias_name']) ? $modelParams['alias_name'] : '';
 
         $result = [];
         if($reportId){
