@@ -6,6 +6,7 @@ use webadmin\widgets\ActiveForm;
     //'cache' => false,
 ]);
 $rmodel = new \datacenter\models\DcUserReport;
+$rmodel->loadDefaultValues();
 ?>
 
 <div id="saveReportDiv" style="display:none;">

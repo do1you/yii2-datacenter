@@ -703,7 +703,7 @@ class DcSets extends \webadmin\ModelCAR
             $query->andWhere($where);
         }
         
-        $query->orderBy("dc_user_sets.paixu desc,dc_user_sets.id")->with(['set.cat']);
+        $query->orderBy("dc_user_sets.paixu desc,dc_user_sets.id desc")->with(['set.cat']);
         $query->limit = 1000;
         $list = $query->all();
         if($group){

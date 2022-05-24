@@ -356,7 +356,7 @@ class DcReport extends \webadmin\ModelCAR
             $query->andWhere($where);
         }
         
-        $query->orderBy("dc_user_report.paixu desc,dc_user_report.id")->with(['report.cat']);
+        $query->orderBy("dc_user_report.paixu desc,dc_user_report.id desc")->with(['report.cat']);
         $query->limit = 1000;
         $list = $query->all();
         if($group){

@@ -155,20 +155,18 @@ class ReportViewController extends \webadmin\BController
         $searchValues = Yii::$app->request->getBodyParam('SysConfig',Yii::$app->getRequest()->getQueryParam('SysConfig',''));
         $searchValues = is_array($searchValues) ? json_encode($searchValues,302) : $searchValues;
         $modelParams = Yii::$app->request->getBodyParam('DcUserReport',Yii::$app->getRequest()->getQueryParam('DcUserReport',[]));
-        $paixu = isset($modelParams['paixu']) ? $modelParams['paixu'] : '';
-        $aliasName = isset($modelParams['alias_name']) ? $modelParams['alias_name'] : '';
 
         $result = [];
         if($reportId){
             $model = new DcUserReport;
             $model->loadDefaultValues();
+            $model->load($modelParams,'');
             if($model->load([
                 'report_id' => $reportId,
                 'search_values' => $searchValues,
-                'paixu' => $paixu,
-                'alias_name' => $aliasName,
             ],'') && $model->save()){
                 $result['success'] = true;
+                \datacenter\models\DcReport::model()->getCache('allUserReport',[Yii::$app->user->id,null,1],86400,true);
             }else{
                 $result['msg'] = implode("；",$model->getErrorSummary(true));
             }
@@ -176,13 +174,13 @@ class ReportViewController extends \webadmin\BController
         if($setId){
             $model = new DcUserSets;
             $model->loadDefaultValues();
+            $model->load($modelParams,'');
             if($model->load([
                 'set_id' => $setId,
                 'search_values' => $searchValues,
-                'paixu' => $paixu,
-                'alias_name' => $aliasName,
             ],'') && $model->save()){
                 $result['success'] = true;
+                \datacenter\models\DcSets::model()->getCache('allUserSets',[Yii::$app->user->id,null,1],86400,true);
             }else{
                 $result['msg'] = implode("；",$model->getErrorSummary(true));
             }
@@ -192,6 +190,7 @@ class ReportViewController extends \webadmin\BController
             if($model){
                 $model->delete();
                 $result['success'] = true;
+                \datacenter\models\DcReport::model()->getCache('allUserReport',[Yii::$app->user->id,null,1],86400,true);
             }else{
                 $result['msg'] = "参数有误";
             }
@@ -201,6 +200,7 @@ class ReportViewController extends \webadmin\BController
             if($model){
                 $model->delete();
                 $result['success'] = true;
+                \datacenter\models\DcSets::model()->getCache('allUserSets',[Yii::$app->user->id,null,1],86400,true);
             }else{
                 $result['msg'] = "参数有误";
             }
