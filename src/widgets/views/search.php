@@ -4,6 +4,7 @@ use webadmin\widgets\ActiveForm;
 
 $searchList = $model->getSearchModels();
 $count = !$this->context->isCache ? 2 : ($this->context->reportList ? count($this->context->reportList) : 0);
+$url = $model['forUserModel'] ? [Yii::$app->controller->action->id,'id'=>$model['id'],'vid'=>$model['forUserModel']['id']] : [Yii::$app->controller->action->id,'id'=>$model['id']];
 ?>
 <?php if(!empty($searchList)):?>
     <div class="row dataconter-search">
@@ -11,7 +12,7 @@ $count = !$this->context->isCache ? 2 : ($this->context->reportList ? count($thi
     		<div class="widget margin-bottom-20">
     			<div class="widget-body bordered-left bordered-themeprimary">
                     <?php $form = ActiveForm::begin([
-                        'action' => [Yii::$app->controller->action->id,'id'=>$model['id']],
+                        'action' => $url,
                         'method' => 'get',
                         'enableClientScript' => false,
                         'enableClientValidation' => false,

@@ -178,6 +178,10 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         if($this->_searchModels === null){
             $list = [];
             $params = Yii::$app->request->get("SysConfig",[]);
+            $forUserModel = $this->report ? $this->report['forUserModel'] : $this->sets['forUserModel'];
+            if($forUserModel && ($search_values = $forUserModel['v_search_values'])){
+                $params = array_merge($search_values,$params);
+            }
             $columns = $this->report ? $this->report->columns : $this->sets->columns;
             foreach($columns as $item){
                 $colnmn = $this->report ? $item['setsCol'] : $item;

@@ -291,7 +291,7 @@ class DcSets extends \webadmin\ModelCAR
             'report-api/set-data',
             'cache'=>$cache,
             'id'=>$this['id'],
-            //'access-token'=>Yii::$app->user->identity['access_token'],
+            'vid'=>($this['forUserModel']?$this['forUserModel']['id']:''),
         ];
         $params && ($arr['SysConfig'] = $params);
         return \yii\helpers\Url::to($arr);

@@ -122,7 +122,7 @@ class DcUserSets extends \webadmin\ModelCAR
                 $result[] = $model;
             }
         }
-        
+
         return ($muli ? $result : reset($result));
     }
 }

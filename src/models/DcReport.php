@@ -261,6 +261,7 @@ class DcReport extends \webadmin\ModelCAR
             'report-api/data',
             'cache'=>$cache,
             'id'=>$this['id'],
+            'vid'=>($this['forUserModel']?$this['forUserModel']['id']:''),
         ];
         $params && ($arr['SysConfig'] = $params);
         return \yii\helpers\Url::to($arr);

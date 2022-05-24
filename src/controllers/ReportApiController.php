@@ -8,6 +8,8 @@ use Yii;
 use datacenter\models\DcReport;
 use yii\data\ActiveDataProvider;
 use datacenter\models\DcSets;
+use datacenter\models\DcUserReport;
+use datacenter\models\DcUserSets;
 
 class ReportApiController extends ReportViewController // \webadmin\BController  \webadmin\restful\AController
 {
@@ -74,9 +76,9 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
     /**
      * 获取报表数据
      */
-    public function actionData($id,$cache='1')
+    public function actionData($id,$vid='',$cache='1')
     {
-        $model = $this->findModel($id,$cache);
+        $model = $this->findModel($id,$vid,$cache);
         if(Yii::$app->request->get('debug')){
             return $this->render('/report-view/api', [
                 'dataProvider' => $model->getDataProvider(),
@@ -97,9 +99,9 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
     /**
      * 获取数据集数据
      */
-    public function actionSetData($id,$cache='1')
+    public function actionSetData($id,$vid='',$cache='1')
     {
-        $model = $this->findSetModel($id,$cache);
+        $model = $this->findSetModel($id,$vid,$cache);
         if(Yii::$app->request->get('debug')){
             return $this->render('/report-view/api', [
                 'dataProvider' => $model->getDataProvider(),
@@ -111,10 +113,16 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
     /**
      * 查找报表模型
      */
-    protected function findModel($id,$cache='1')
+    protected function findModel($id,$vid='',$cache='1')
     {
-        if (($model = ($cache ? DcReport::model()->getCache('findModel',[$id]) : DcReport::model()->findModel($id))) !== null) {
-            return $model;
+        if($vid){
+            if (($model = ($cache ? DcUserReport::model()->getCache('findModel',[$vid]) : DcUserReport::model()->findModel($vid)))) {
+                return $model;
+            }
+        }else{
+            if (($model = ($cache ? DcReport::model()->getCache('findModel',[$id]) : DcReport::model()->findModel($id)))) {
+                return $model;
+            }
         }
         
         throw new \yii\web\NotFoundHttpException(Yii::t('common','您查询的模型对象不存在'));
@@ -123,10 +131,16 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
     /**
      * 查找数据集模型
      */
-    protected function findSetModel($id,$cache='1')
+    protected function findSetModel($id,$vid='',$cache='1')
     {
-        if (($model = ($cache ? DcSets::model()->getCache('findModel',[$id]) : DcSets::model()->findModel($id))) !== null) {
-            return $model;
+        if($vid){
+            if (($model = ($cache ? DcUserSets::model()->getCache('findModel',[$vid]) : DcUserSets::model()->findModel($vid)))) {
+                return $model;
+            }
+        }else{
+            if (($model = ($cache ? DcSets::model()->getCache('findModel',[$id]) : DcSets::model()->findModel($id)))) {
+                return $model;
+            }
         }
         
         throw new \yii\web\NotFoundHttpException(Yii::t('common','您查询的模型对象不存在'));
