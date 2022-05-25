@@ -238,7 +238,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             }
         }
         
-        if($params && ($colnmns = $this->report ? $this->report->columns : $this->sets->columns)){
+        if(($colnmns = $this->report ? $this->report->columns : $this->sets->columns)){
             if($this->report){
                 // 报表条件
                 $mainSet = $this->report->getV_mainSet();
@@ -254,11 +254,18 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     }
                 }
                 
-                foreach($sets as $set){
-                    if(isset($setSearchParams[$set['id']]) && is_array($setSearchParams[$set['id']])){
-                        $set->applySearchModels($setSearchParams[$set['id']]);
+                foreach($sets as $index=>$set){
+                    $searchParams = (isset($setSearchParams[$set['id']]) && is_array($setSearchParams[$set['id']])) ? $setSearchParams[$set['id']] : [];
+                    
+                    // 带入用户过滤条件
+                    if($set['forUserModel'] && ($search_values = $set['forUserModel']['v_search_values'])){
+                        $searchParams = array_merge($search_values,$searchParams);
+                    }
+                    
+                    if($searchParams){
+                        $set->applySearchModels($searchParams);
                         // 非主数据集的,查询出结果数据并入到主数据集条件
-                        if($mainSet['id'] != $set['id']){
+                        if($mainSet !== $set){
                             $set->filterSourceSearch($mainSet);
                         }
                     }
