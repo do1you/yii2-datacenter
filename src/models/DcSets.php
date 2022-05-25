@@ -481,6 +481,8 @@ class DcSets extends \webadmin\ModelCAR
     // 通过子查询的方式连接其他数据集
     public function joinQuerySets(\yii\db\Query $query, &$allSets = [])
     {
+        if(isset($allSets[$this->id])) unset($allSets[$this->id]);
+        
         if($allSets && $this->sourceRelation){
             $relations = \yii\helpers\ArrayHelper::map($this->sourceRelation, 'target_sets', 'v_self');
             $allSets = self::model()->getCache('findModel',[['id'=>\yii\helpers\ArrayHelper::map($allSets,'id','id')], true]);
@@ -514,7 +516,12 @@ class DcSets extends \webadmin\ModelCAR
     // 连接其他数据集查询出数据
     public function joinSets(&$sets=[])
     {
-        if(isset($sets[$this->id])) unset($sets[$this->id]);
+        if($this['forUserModel']){
+            unset($sets['-'.$this['forUserModel']['id']]);
+        }else{
+            unset($sets[$this['id']]);
+        }
+        
         $relations = \yii\helpers\ArrayHelper::map($this->sourceRelation, 'target_sets', 'v_self');
         $joinSets = [];
         foreach($sets as $k=>$set){

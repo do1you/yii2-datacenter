@@ -196,12 +196,14 @@ class DcReport extends \webadmin\ModelCAR
         if($this->_setsList === null){
             $this->_setsList = $this->_userSetsList = [];
             foreach($this->columns as $col){
-                if($col['set_id']){
+                if($col['set_id'] && $col['sets']){
+                    $col['sets']['report'] = $this;
                     if($col['user_set_id'] && $col['userSets']){
                         $col['userSets']['report'] = $this;
+                        $col['sets']['forUserModel'] = $col['userSets'];
                         $this->_userSetsList[$col['user_set_id']] = $col['userSets'];
+                        $this->_setsList['-'.$col['user_set_id']] = $col['sets'];
                     }elseif($col['sets']){
-                        $col['sets']['report'] = $this;
                         $this->_setsList[$col['set_id']] = $col['sets'];
                     }
                 }
@@ -273,12 +275,11 @@ class DcReport extends \webadmin\ModelCAR
         $query = parent::findByCondition($condition)->with([
             'columns.sets.sourceRelation',
             'columns.sets.columns.column',
-            
-            /*'columns.sets.columns.forSets',
-            'columns.forSets',
-            'columns.setColumn',
-            'sourceRelation',*/
-            
+            'columns.userSets',
+            'columns.sets.columns.sets.columns.forSets',
+            'columns.sets.columns.forSets',
+            'columns.sets.columns.setColumn',
+            'columns.sets.sourceRelation',
             'columns.sets.columns.model.sourceRelation.sourceModel',
             'columns.sets.columns.model.sourceRelation.targetModel',
             'columns.sets.sourceRelation.groupLabel.model',
@@ -376,7 +377,6 @@ class DcReport extends \webadmin\ModelCAR
             $mainSet = $this->getV_mainSet();
             $setLists = $this->v_sets;
             $this->_joinSetState = true;
-            
             $mainSet && $mainSet->joinSets($setLists);
             if($setLists){
                 $set = reset($setLists);

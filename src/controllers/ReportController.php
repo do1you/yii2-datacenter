@@ -111,7 +111,7 @@ class ReportController extends \webadmin\BController
             "dc_sets.cat_id"=>$mId,
             'dc_user_sets.user_id'=>Yii::$app->user->id,
         ])
-        ->orderBy("dc_user_sets.paixu desc,dc_user_sets.id")
+        ->orderBy("dc_user_sets.paixu desc,dc_user_sets.id desc")
         ->all();
         
         $result = ['items'=>[]];
