@@ -158,8 +158,10 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     $column = $aliasColumns[$columns];
                 }
                 if(!empty($column)){
-                    if($this->sets['set_type']=='model'){
-                        $columns = $column['v_fncolumn'] . ($isAs ? " as {$column['v_alias']}" : ''); // 模型输出v_fncolumn
+                    if($isAs && $isAs!==true && isset($column[$isAs])){
+                        $columns = $column[$isAs];
+                    }elseif($this->sets['set_type']=='model'){
+                        $columns = $column['v_fncolumn'] . ($isAs===true ? " as {$column['v_alias']}" : ''); // 模型输出v_fncolumn
                     }else{
                         $columns = $column['name']; // 非模型输出name字段
                     }

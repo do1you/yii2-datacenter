@@ -9,6 +9,11 @@ use Yii;
 class ActiveDataProvider extends BaseDataProvider
 {    
     /**
+     * 查询的字段
+     */
+    private $_selects = [];
+    
+    /**
      * 初始化
      */
     public function init()
@@ -64,8 +69,7 @@ class ActiveDataProvider extends BaseDataProvider
                     
                     // 添加查询
                     if(!$item->formula && !$col->formula && (!$this->report || $this->sets['id']==$col['set_id'])){
-                        $v_column = $col->v_fncolumn;
-                        $query->addSelect([new \yii\db\Expression("{$v_column} as {$col->v_alias}")]);
+                        $this->select($col['id']);
                     }
                 }
             }
@@ -154,12 +158,20 @@ class ActiveDataProvider extends BaseDataProvider
     {
         if($columns===false){
             $this->query->select([]);
+            $this->_selects = [];
         }else{
             $values = null;
-            $columns = $this->getColumns($columns, $values, true);
             $columns = is_array($columns) ? $columns : [$columns];
             foreach($columns as $select){
-                $select && $this->query->addSelect(new \yii\db\Expression($select));
+                if($select){
+                    $v_column = $this->getColumns($select, $values, 'v_fncolumn');
+                    $v_alias = $this->getColumns($select, $values, 'v_alias');
+                    if(!isset($this->_selects[$v_alias])){
+                        $this->_selects[$v_alias] = new \yii\db\Expression("{$v_column} as {$v_alias}");
+                        $this->query->addSelect([$this->_selects[$v_alias]]);
+                    }
+                }
+                
             }
         }
         return $this;
