@@ -200,9 +200,10 @@ class DcReport extends \webadmin\ModelCAR
                     $col['sets']['report'] = $this;
                     if($col['user_set_id'] && $col['userSets']){
                         $col['userSets']['report'] = $this;
-                        $col['sets']['forUserModel'] = $col['userSets'];
+                        $set = clone $col['sets'];
+                        $set['forUserModel'] = $col['userSets'];
                         $this->_userSetsList[$col['user_set_id']] = $col['userSets'];
-                        $this->_setsList['-'.$col['user_set_id']] = $col['sets'];
+                        $this->_setsList['-'.$col['user_set_id']] = $set;
                     }elseif($col['sets']){
                         $this->_setsList[$col['set_id']] = $col['sets'];
                     }

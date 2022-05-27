@@ -259,11 +259,6 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 foreach($sets as $index=>$set){
                     $searchParams = (isset($setSearchParams[$set['id']]) && is_array($setSearchParams[$set['id']])) ? $setSearchParams[$set['id']] : [];
                     
-                    // 带入用户过滤条件
-                    if($set['forUserModel'] && ($search_values = $set['forUserModel']['v_search_values'])){
-                        $searchParams = array_merge($search_values,$searchParams);
-                    }
-                    
                     if($searchParams){
                         $set->applySearchModels($searchParams);
                         // 非主数据集的,查询出结果数据并入到主数据集条件
@@ -271,6 +266,13 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                             $set->filterSourceSearch($mainSet);
                         }
                     }
+                    
+                    // 带入用户过滤条件
+                    if($set['forUserModel'] && ($search_values = $set['forUserModel']['v_search_values'])){
+                        $searchParams = array_merge($search_values,$searchParams);
+                        $set->applySearchModels($searchParams);
+                    }
+                    
                 }
             }else{
                 // 数据集条件
@@ -428,14 +430,15 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         $labelColmns = \yii\helpers\ArrayHelper::map($this->report->getV_columns(), 'label', 'name');
         foreach($this->report->columns as $col){
             if($isSummery && $col['setsCol'] && $col['setsCol']['is_summary']!='1') continue;
-            $set = isset($setLists[$col['set_id']]) ? $setLists[$col['set_id']] : null;
+            $sIndex = ($col['user_set_id'] && $col['userSets']) ? '-'.$col['user_set_id'] : $col['set_id'];
+            $set = isset($setLists[$sIndex]) ? $setLists[$sIndex] : null;
             $relation = $set ? $set['v_relation'] : null;
             if($set && $relation && $relation['rel_type']=='group'){
                 $groupCols = $relation->getV_group_list($set);
                 if($groupCols && is_array($groupCols)){
                     foreach($groupCols as $k=>$v){
-                        $data[$col['v_alias'].'_'.$k] = isset($values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']])
-                        ? $values['_'][$col['set_id']][$k][$col['setsCol']['v_alias']]
+                        $data[$col['v_alias'].'_'.$k] = isset($values['_'][$sIndex][$k][$col['setsCol']['v_alias']])
+                        ? $values['_'][$sIndex][$k][$col['setsCol']['v_alias']]
                         : ($isSummery ? '' : $col['v_default_value']);
                     }
                 }
@@ -443,8 +446,8 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 $data[$col['v_alias']] = isset($values[$col['setsCol']['v_alias']])
                     ? $values[$col['setsCol']['v_alias']]
                     : (
-                        isset($values['_'][$col['set_id']][$col['setsCol']['v_alias']])
-                        ? $values['_'][$col['set_id']][$col['setsCol']['v_alias']]
+                        isset($values['_'][$sIndex][$col['setsCol']['v_alias']])
+                        ? $values['_'][$sIndex][$col['setsCol']['v_alias']]
                         : ($isSummery ? '' : $col['v_default_value'])
                     );
             }

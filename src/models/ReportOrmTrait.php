@@ -130,7 +130,15 @@ trait ReportOrmTrait
             $setColumns = \yii\helpers\ArrayHelper::map($this->columns, 'id', 'v_self', 'set_id');
             foreach($this->columns as $col){
                 if(in_array($col['id'], $skipIds)) continue;
-                $set = (($this instanceof DcReport) && isset($setLists[$col['set_id']])) ? $setLists[$col['set_id']] : null;
+                if(($this instanceof DcReport)){
+                    if($col['user_set_id'] && $col['userSets']){
+                        $set = isset($setLists['-'.$col['user_set_id']]) ? $setLists['-'.$col['user_set_id']] : null;
+                    }else{
+                        $set = isset($setLists[$col['set_id']]) ? $setLists[$col['set_id']] : null;
+                    }
+                }else{
+                    $set = null;
+                }
                 $relation = $set ? $set['v_relation'] : null;
                 if($set && $relation && $relation['rel_type']=='union'){ // 合并
                     if(!isset($labelList[$col['v_label']])){

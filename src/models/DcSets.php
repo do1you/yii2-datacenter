@@ -529,8 +529,8 @@ class DcSets extends \webadmin\ModelCAR
                 unset($sets[$k]);
             }
             if(isset($relations[$set['id']])){
-                $this->_relation_source[$set['id']] = [$relations[$set['id']], $set];
-                $set->_relation_target[$this['id']] = [$relations[$set['id']], $this];
+                $this->_relation_source[] = [$relations[$set['id']], $set];
+                $set->_relation_target[] = [$relations[$set['id']], $this];
                 $set->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
                 $set->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_SUMMARY, [$set, 'targetAfterFindSummary']);
                 $set->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
@@ -620,7 +620,11 @@ class DcSets extends \webadmin\ModelCAR
                     $keys = $relation->getV_source_columns($source);
                     foreach($sourceList as $index=>$model){
                         $k = $this->getModelKey($model, $keys);
-                        $sourceList[$index]['_'][$target['id']] = isset($buckets[$k]) ? $buckets[$k] : null;
+                        if($target['forUserModel']){
+                            $sourceList[$index]['_']['-'.$target['forUserModel']['id']] = isset($buckets[$k]) ? $buckets[$k] : null;
+                        }else{
+                            $sourceList[$index]['_'][$target['id']] = isset($buckets[$k]) ? $buckets[$k] : null;
+                        }
                     }
                     
                     $source->setModels($sourceList);
@@ -653,7 +657,11 @@ class DcSets extends \webadmin\ModelCAR
                 }
                 
                 $sourceList = $source->getSummary();
-                $sourceList['_'][$target['id']] = $buckets;
+                if($target['forUserModel']){
+                    $sourceList['_']['-'.$target['forUserModel']['id']] = $buckets;
+                }else{
+                    $sourceList['_'][$target['id']] = $buckets;
+                }
                 $source->setSummary($sourceList);
             }
         }
