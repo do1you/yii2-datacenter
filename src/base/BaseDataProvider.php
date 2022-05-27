@@ -194,7 +194,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
                         'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),
                         'attribute' => $item['v_alias'],
-                        'label_name' => $colnmn['v_label'],
+                        'label_name' => $item['v_label'],
                         'config_params' => $colnmn['search_params'],
                         'v_config_params' => $colnmn['v_search_params'],
                         'v_config_ajax' => $colnmn['v_search_ajax'],
@@ -203,7 +203,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     // 反向查询
                     if($colnmn['is_back_search']){
                         $attribute = '-'.$item['v_alias'];
-                        $label = "不含{$colnmn['v_label']}";
+                        $label = "不含{$item['v_label']}";
                         $_ = [
                             'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
                             'value' => (isset($params[$attribute]) ? $params[$attribute] : ''), // $colnmn['v_search_defval']
@@ -232,10 +232,10 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         if($params === false){
             // 默认条件
             $searchModels = $this->getSearchModels();
-            $params = [];
+            $labelParams = $params = [];
             foreach($searchModels as $sModel){
                 if(isset($sModel['value']) && (is_array($sModel['value']) || strlen($sModel['value'])>0)){
-                    $params[$sModel['attribute']] = $sModel['value'];
+                    $labelParams[$sModel['label_name']] = $params[$sModel['attribute']] = $sModel['value'];
                 }
             }
         }
@@ -248,10 +248,13 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 $setSearchParams = [];
                 foreach($colnmns as $col){
                     if($col['formula']) continue;
-                    foreach([$col['v_alias'],'-'.$col['v_alias']] as $attribute){
+                    foreach([$col['v_alias'], '-'.$col['v_alias'], $col['v_label'], '不含'.$col['v_label']] as $attribute){
                         if(isset($params[$attribute]) && (is_array($params[$attribute]) || strlen($params[$attribute])>0) && $col['setsCol']){
-                            $is_back_search = substr($attribute,0,1)=='-';
+                            $is_back_search = (substr($attribute,0,1)=='-' || strpos($attribute, '不含'));
                             $setSearchParams[$col['set_id']][($is_back_search ? '-' : '').$col['setsCol']['v_alias']] = $params[$attribute];
+                        }elseif(isset($labelParams[$attribute]) && (is_array($labelParams[$attribute]) || strlen($labelParams[$attribute])>0) && $col['setsCol']){
+                            $is_back_search = (substr($attribute,0,1)=='-' || strpos($attribute, '不含'));
+                            $setSearchParams[$col['set_id']][($is_back_search ? '-' : '').$col['setsCol']['v_alias']] = $labelParams[$attribute];
                         }
                     }
                 }
