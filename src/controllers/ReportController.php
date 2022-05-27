@@ -182,6 +182,7 @@ class ReportController extends \webadmin\BController
             case '3': // 删除报表
                 if($model && $model->state=='9' && $model->delete()){
                     $result['success'] = true;
+                    \datacenter\models\DcReport::model()->getCache('allDefReport',[Yii::$app->user->id,null,1],86400,true);
                 }else{
                     $result['msg'] = "编辑报表时不允许删除操作，请返回报表管理界面删除！";
                 }
@@ -231,6 +232,7 @@ class ReportController extends \webadmin\BController
         if($model && ($cModel = $id ? DcReportColumns::findOne($id) : null)){
             if(count($model['columns'])<=1){
                 $model->delete();
+                \datacenter\models\DcReport::model()->getCache('allDefReport',[Yii::$app->user->id,null,1],86400,true);
             }else{
                 $cModel->delete();
             }
@@ -261,6 +263,7 @@ class ReportController extends \webadmin\BController
             $model->state = '0';
             if($model->load(Yii::$app->request->post()) && $model->save()){
                 $result['success'] = true;
+                \datacenter\models\DcReport::model()->getCache('allDefReport',[Yii::$app->user->id,null,1],86400,true);
             }else{
                 $result['msg'] = implode("；",$model->getErrorSummary(true));
             }

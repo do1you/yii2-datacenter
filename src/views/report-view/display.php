@@ -12,7 +12,7 @@ $rmodel->loadDefaultValues();
 <div id="saveReportDiv" style="display:none;">
     <div class="row">
         <div class="col-md-12">
-        	<?php $form = ActiveForm::begin(); ?>
+        	<?php $form = ActiveForm::begin(['enableClientValidation'=>false,'enableAjaxValidation'=>false]); ?>
                 <?= $form->field($rmodel, 'alias_name')->textInput(['maxlength' => true]) ?>
                 
                 <?= $form->field($rmodel, 'paixu')->textInput(['maxlength' => true]) ?>

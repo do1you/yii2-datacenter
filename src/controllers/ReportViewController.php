@@ -153,9 +153,16 @@ class ReportViewController extends \webadmin\BController
         $userReportId = Yii::$app->request->getBodyParam('userReportId',Yii::$app->getRequest()->getQueryParam('userReportId'));
         $userSetId = Yii::$app->request->getBodyParam('userSetId',Yii::$app->getRequest()->getQueryParam('userSetId'));
         $searchValues = Yii::$app->request->getBodyParam('SysConfig',Yii::$app->getRequest()->getQueryParam('SysConfig',''));
-        $searchValues = is_array($searchValues) ? json_encode($searchValues,302) : $searchValues;
         $modelParams = Yii::$app->request->getBodyParam('DcUserReport',Yii::$app->getRequest()->getQueryParam('DcUserReport',[]));
-
+        if($searchValues && is_array($searchValues)){
+            foreach($searchValues as $k=>$v){
+                if(!is_array($v) && strlen($v)<=0){
+                    unset($searchValues[$k]);
+                }
+            }
+        }
+        $searchValues = is_array($searchValues) ? json_encode($searchValues,302) : $searchValues;
+        
         $result = [];
         if($reportId){
             $model = new DcUserReport;

@@ -119,6 +119,7 @@ class SetsController extends \webadmin\BController
             ($transaction = DcSets::getDb()->beginTransaction()) && $model->save()
         ){
             $transaction->commit(); // 提交事务
+            \datacenter\models\DcSets::model()->getCache('allDefSets',[Yii::$app->user->id,null,1],86400,true); // 更新数据集缓存
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));
             return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
         }
@@ -139,6 +140,7 @@ class SetsController extends \webadmin\BController
             ($transaction = DcSets::getDb()->beginTransaction()) && $model->save()
         ){
             $transaction->commit(); // 提交事务
+            \datacenter\models\DcSets::model()->getCache('allDefSets',[Yii::$app->user->id,null,1],86400,true); // 更新数据集缓存
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息修改成功'));
             return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
         }
@@ -160,6 +162,7 @@ class SetsController extends \webadmin\BController
         		$model->delete();
         	}
             $transaction->commit(); // 提交事务
+            \datacenter\models\DcSets::model()->getCache('allDefSets',[Yii::$app->user->id,null,1],86400,true); // 更新数据集缓存
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息删除成功'));
         }else{
         	Yii::$app->session->setFlash('error',Yii::t('common', '需要删除的对象信息不存在'));
@@ -178,6 +181,7 @@ class SetsController extends \webadmin\BController
         $transaction = DcSets::getDb()->beginTransaction(); // 使用事务关联
         if(($num = $model->copySets())) {
             $transaction->commit(); // 提交事务
+            \datacenter\models\DcSets::model()->getCache('allDefSets',[Yii::$app->user->id,null,1],86400,true); // 更新数据集缓存
             Yii::$app->session->setFlash('success',Yii::t('datacenter', '复制数据集成功'));
         }else{
             Yii::$app->session->setFlash('error',Yii::t('datacenter', '复制数据集失败'));
