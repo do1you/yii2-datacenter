@@ -362,10 +362,11 @@ class DcSetsRelation extends \webadmin\ModelCAR
                 if(is_array($keys)){
                     $data = [];
                     foreach($keys as $k){
-                        $data[] = isset($item[$k]) ? $item[$k] : '';
+                        $data[] = isset($item[$k]) ? (trim($item[$k])=='&nbsp;' ? '' : $item[$k]) : '';
                     }
                 }else{
                     $data = isset($item[$keys]) ? $item[$keys] : '';
+                    $data = trim($data)=='&nbsp;' ? '' : $data;
                 }
                 
                 if($data && !in_array($data,$values)){
