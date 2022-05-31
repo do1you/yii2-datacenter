@@ -220,7 +220,7 @@ class SetsColController extends \webadmin\BController
         if($mId) $model->model_id = $mId;
         if($fId) $model->for_set_id = $fId;
         if($cId) $model->column_id = $cId;
-
+        
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息修改成功'));
             return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
@@ -256,7 +256,7 @@ class SetsColController extends \webadmin\BController
      */
     protected function findModel($id)
     {
-        if (($model = DcSetsColumns::find()->where(['id'=>$id])->with(['model','model.columns.model.source'])->one()) !== null) {
+        if (($model = DcSetsColumns::find()->where(['id'=>$id])->one()) !== null) { // ->with(['model','model.columns.model.source'])
             return $model;
         }
 
