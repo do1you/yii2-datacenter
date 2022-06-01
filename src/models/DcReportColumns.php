@@ -28,9 +28,10 @@ class DcReportColumns extends \webadmin\ModelCAR
     public function rules()
     {
         return [
-            [['report_id', 'set_id', 'col_id', 'paixu', 'is_frozen', 'user_set_id'], 'safe'],
+            [['report_id', 'set_id', 'col_id', 'paixu', 'is_frozen', 'user_set_id', 'resp_fun'], 'safe'],
             [['formula'], 'string', 'max' => 255],
             [['label'], 'string', 'max' => 50],
+            [['resp_fun'], 'string', 'max' => 100],
         ];
     }
 
@@ -49,6 +50,7 @@ class DcReportColumns extends \webadmin\ModelCAR
             'paixu' => Yii::t('datacenter', '排序'),
             'formula' => Yii::t('datacenter', '计算公式'),
             'is_frozen' => Yii::t('datacenter', '是否冻结'),
+            'resp_fun' => Yii::t('datacenter', '输出函数'),
         ];
     }
     
@@ -80,6 +82,12 @@ class DcReportColumns extends \webadmin\ModelCAR
     public function getV_is_frozen($val = null)
     {
         return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_frozen));
+    }
+    
+    // 获取输出函数
+    public function getV_resp_fun($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('dc_resp_fun', ($val !== null ? $val : $this->resp_fun));
     }
     
     // 返回字段别名

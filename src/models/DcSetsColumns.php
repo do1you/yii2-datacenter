@@ -47,9 +47,10 @@ class DcSetsColumns extends \webadmin\ModelCAR
                 return ($model->model_id>0 || $model->for_set_id>0);
             }],
             [['set_id', 'is_search', 'is_summary', 'paixu', 'is_back_search'], 'integer'],
-            [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type'], 'safe'],
+            [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type', 'resp_fun'], 'safe'],
             [['name', 'label', 'type', 'fun', 'search_value'], 'string', 'max' => 50],
             [['formula', 'sql_formula'], 'string', 'max' => 255],
+            [['resp_fun'], 'string', 'max' => 100],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
             [['search_params_text', 'search_params_dd', 'search_value_text'], 'safe', 'on'=>['insertForm','batchInsertForm','updateForm']],
             [['model_id'], 'required', 'on'=>'batchInsertForm'],
@@ -77,6 +78,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'formula' => Yii::t('datacenter', '计算公式'),
             'sql_formula' => Yii::t('datacenter', 'SQL公式'),
             'fun' => Yii::t('datacenter', '处理函数'),
+            'resp_fun' => Yii::t('datacenter', '输出函数'),
             'paixu' => Yii::t('datacenter', '排序'),
             'is_frozen' => Yii::t('datacenter', '是否冻结'),
             'search_params' => Yii::t('datacenter', '查询参数'),
@@ -134,6 +136,12 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function getV_fun($val = null)
     {
         return \webadmin\modules\config\models\SysLdItem::dd('dc_db_fun', ($val !== null ? $val : $this->fun));
+    }
+    
+    // 获取输出函数
+    public function getV_resp_fun($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('dc_resp_fun', ($val !== null ? $val : $this->resp_fun));
     }
     
     // 获取查询默认值

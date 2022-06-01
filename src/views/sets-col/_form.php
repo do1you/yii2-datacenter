@@ -54,7 +54,7 @@ $model->afterFind();
         		
         		<?= $form->field($model, 'label')->textInput(['maxlength' => true]) ?>
         		
-        		<?= $form->field($model, 'fun')->textInput(['maxlength' => true])->dropDownList($model->getV_fun(false), ['prompt'=>'请选择']) ?>
+        		<?= $form->field($model, 'fun')->textInput(['maxlength' => true])->select2($model->getV_fun(false), ['prompt'=>'请选择']) ?>
             		
         		<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true]) ?>
     		<?php elseif($model['sets']['set_type']=='sql'):?>
@@ -73,6 +73,8 @@ $model->afterFind();
             
             <?= $form->field($model, 'paixu')->textInput(['maxlength' => true]) ?>
             
+            <?= $form->field($model, 'resp_fun')->textInput(['maxlength' => true])->select2($model->getV_resp_fun(false), ['prompt'=>'请选择']) ?>
+            
             <?= $form->field($model, 'is_frozen')->textInput()->dropDownList($model->getV_is_frozen(false), []) ?>
             
             <?= $form->field($model, 'is_summary')->textInput()->dropDownList($model->getV_is_summary(false), []) ?>
@@ -83,16 +85,16 @@ $model->afterFind();
             	<?= $form->field($model, 'is_back_search')->textInput()->dropDownList($model->getV_is_back_search(false), []) ?>
             <?php endif;?>
             
-            <?= $form->field($model, 'type')->textInput(['maxlength' => true])->dropDownList($model->getV_type(false), ['prompt'=>'请选择']) ?>
+            <?= $form->field($model, 'type')->textInput(['maxlength' => true])->select2($model->getV_type(false), ['prompt'=>'请选择']) ?>
             
-            <?= $form->field($model, 'search_value')->textInput(['maxlength' => true])->dropDownList($model->getV_search_value(false), ['prompt'=>'请选择']) ?>
+            <?= $form->field($model, 'search_value')->textInput(['maxlength' => true])->select2($model->getV_search_value(false), ['prompt'=>'请选择']) ?>
             
             <?= $form->field($model, 'search_value_text')->textInput(['maxlength' => true]) ?>
             
             <?= $form->field($model, 'search_params')->textarea(['rows' => 6])->hint('每行一个选项，值和名称用“|”分隔，示例：value|name') ?>
             
             <?= $form->field($model, 'search_params_text')->textInput(['maxlength' => true])
-                ->hint('格式化文本：正则表达式（9:[0-9], a:[A-Za-z], w:[A-Za-z0-9], *:.）；<br>异步下拉：表名.取值字段.显示字段（table.key.text）')?>
+                ->hint('格式化文本：正则表达式（9:[0-9], a:[A-Za-z], w:[A-Za-z0-9], *:.）；<br>异步下拉：表名.取值字段.显示字段（table.key.text），从当前数据源取值采用（/table.key.text/）包含')?>
             
             <?= $form->field($model, 'search_params_dd')->textInput()->selectajax(\yii\helpers\Url::toRoute('dd'), []) ?>
             
