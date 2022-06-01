@@ -440,24 +440,31 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 $groupCols = $relation->getV_group_list($set);
                 if($groupCols && is_array($groupCols)){
                     foreach($groupCols as $k=>$v){
-                        $data[$col['v_alias'].'_'.$k] = isset($values['_'][$sIndex][$k][$col['setsCol']['v_alias']])
-                        ? $values['_'][$sIndex][$k][$col['setsCol']['v_alias']]
-                        : ($isSummery ? '' : $col['v_default_value']);
+                        $index = $col['v_alias'].'_'.$k;
+                        $data[$index] = isset($values['_'][$sIndex][$k][$col['setsCol']['v_alias']])
+                            ? $values['_'][$sIndex][$k][$col['setsCol']['v_alias']]
+                            : ($isSummery ? '' : $col['v_default_value']);
+                        
+                        $data[$index] = $this->formatRespFun($col['resp_fun'],$data[$index]);
                     }
                 }
             }else{
-                $data[$col['v_alias']] = isset($values[$col['setsCol']['v_alias']])
+                $index = $col['v_alias'];
+                $data[$index] = isset($values[$col['setsCol']['v_alias']])
                     ? $values[$col['setsCol']['v_alias']]
                     : (
                         isset($values['_'][$sIndex][$col['setsCol']['v_alias']])
                         ? $values['_'][$sIndex][$col['setsCol']['v_alias']]
                         : ($isSummery ? '' : $col['v_default_value'])
                     );
+                
+                $data[$index] = $this->formatRespFun($col['resp_fun'],$data[$index]);
             }
             
             if($set && $relation && $relation['rel_type']=='union'){
                 if(strlen($data[$labelColmns[$col['v_label']]])<=0){
-                    $data[$labelColmns[$col['v_label']]] = $data[$col['v_alias']];
+                    $index = $labelColmns[$col['v_label']];
+                    $data[$index] = $this->formatRespFun($col['resp_fun'],$data[$col['v_alias']]);
                 }
                 $this->_unionSets[$set['id']] = $set;
             }
@@ -505,10 +512,27 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && (substr($v,0,2)=='0.' || substr($v,0,1)!='0')){
                 $v = floatval($v);
             }
-            $data[$key] = $v;
+            $data[$key] = $this->formatRespFun($col['resp_fun'],$v);
         }
         
         return $this->formatValue($data);
+    }
+    
+    // 返回输出函数处理过的内容
+    public function formatRespFun($respFun,$val)
+    {
+        if($respFun){
+            list($fun,$params) = explode(':',$respFun);
+            $params = $params ? explode(',',$params) : [];
+            array_unshift($params,$val);
+            if(strpos($fun, '.')===false){
+                if(function_exists($fun)) $val = call_user_func_array($fun,$params);
+            }else{
+                list($class, $function) = explode('.',$fun);
+                if(class_exists($class) && method_exists($class, $function)) $val = call_user_func_array([$class, $function],$params);
+            }
+        }
+        return $val;
     }
     
     // 返回格式化计算公式参数
