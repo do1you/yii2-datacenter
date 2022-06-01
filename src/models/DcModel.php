@@ -233,6 +233,7 @@ class DcModel extends \webadmin\ModelCAR
                 $colModel->load([
                     'set_id' => $setModel->id,
                     'model_id' => $this->id,
+                    'column_id' => $col->id,
                     'name' => $col->name,
                     'label' => $col->label,
                 ],'');
