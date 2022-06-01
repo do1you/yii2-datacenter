@@ -47,9 +47,9 @@ class DcSetsColumns extends \webadmin\ModelCAR
                 return ($model->model_id>0 || $model->for_set_id>0);
             }],
             [['set_id', 'is_search', 'is_summary', 'paixu', 'is_back_search'], 'integer'],
-            [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type', 'resp_fun'], 'safe'],
+            [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type', 'resp_fun', 'sql_formula'], 'safe'],
             [['name', 'label', 'type', 'fun', 'search_value'], 'string', 'max' => 50],
-            [['formula', 'sql_formula'], 'string', 'max' => 255],
+            [['formula'], 'string', 'max' => 255],
             [['resp_fun'], 'string', 'max' => 100],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
             [['search_params_text', 'search_params_dd', 'search_value_text'], 'safe', 'on'=>['insertForm','batchInsertForm','updateForm']],
