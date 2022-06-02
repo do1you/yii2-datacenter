@@ -69,7 +69,7 @@ class ActiveDataProvider extends BaseDataProvider
                     
                     // 添加查询
                     if(!$item->formula && !$col->formula && (!$this->report || $this->sets['id']==$col['set_id'])){
-                        $this->select($col['id']);
+                        $col['column_id'] && $this->select($col['id']);
                     }
                 }
             }

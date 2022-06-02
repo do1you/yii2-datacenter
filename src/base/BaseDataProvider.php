@@ -66,6 +66,11 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     private $_searchModels;
     
     /**
+     * 用于查询的数据值缓存
+     */
+    private $_searchValues;
+    
+    /**
      * 用于汇总数据模型缓存
      */
     private $_summaryModels;
@@ -173,6 +178,22 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     }
     
     /**
+     * 返回数据查询表单的key=>value对应值
+     */
+    public function getSearchValues()
+    {
+        if($this->_searchValues === null){
+            $list = $this->getSearchModels();
+            $this->_searchValues = [];
+            foreach($list as $item){
+                $this->_searchValues[$item['label_name']] = is_array($item['value']) ? implode(',', $item['value']) : $item['value'];
+            }
+        }
+        
+        return $this->_searchValues;
+    }
+    
+    /**
      * 返回数据查询条件的表单构建模型
      */
     public function getSearchModels()
@@ -187,9 +208,9 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             $columns = $this->report ? $this->report->columns : $this->sets->columns;
             foreach($columns as $item){
                 $colnmn = $this->report ? $item['setsCol'] : $item;
-                if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
+                // if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
                 
-                if($colnmn && $colnmn['is_search'] && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')){
+                if($colnmn && $colnmn['is_search']){ // && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')
                     $_ = [
                         'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
                         'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),
@@ -248,13 +269,10 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 $setSearchParams = [];
                 foreach($colnmns as $col){
                     if($col['formula']) continue;
-                    foreach([$col['v_alias'], '-'.$col['v_alias'], $col['v_label'], '不含'.$col['v_label']] as $attribute){
+                    foreach([$col['v_alias'], '-'.$col['v_alias']] as $attribute){
                         if(isset($params[$attribute]) && (is_array($params[$attribute]) || strlen($params[$attribute])>0) && $col['setsCol']){
-                            $is_back_search = (substr($attribute,0,1)=='-' || strpos($attribute, '不含'));
+                            $is_back_search = substr($attribute,0,1)=='-';
                             $setSearchParams[$col['set_id']][($is_back_search ? '-' : '').$col['setsCol']['v_alias']] = $params[$attribute];
-                        }elseif(isset($labelParams[$attribute]) && (is_array($labelParams[$attribute]) || strlen($labelParams[$attribute])>0) && $col['setsCol']){
-                            $is_back_search = (substr($attribute,0,1)=='-' || strpos($attribute, '不含'));
-                            $setSearchParams[$col['set_id']][($is_back_search ? '-' : '').$col['setsCol']['v_alias']] = $labelParams[$attribute];
                         }
                     }
                 }
@@ -270,9 +288,23 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         }
                     }
                     
+                    // 同标签条件带入
+                    $label_values = [];
+                    if($set['columns']){
+                        foreach($set['columns'] as $col){
+                            if($col['formula']) continue;
+                            foreach([$col['v_label'], '不含'.$col['v_label']] as $attribute){
+                                if(isset($labelParams[$attribute]) && (is_array($labelParams[$attribute]) || strlen($labelParams[$attribute])>0)){
+                                    $is_back_search = strpos($attribute, '不含')!==false;
+                                    $label_values[($is_back_search ? '-' : '').$col['v_alias']] = $labelParams[$attribute];
+                                }
+                            }
+                        }
+                    }
+                    
                     // 带入用户过滤条件
-                    if($set['forUserModel'] && ($search_values = $set['forUserModel']['v_search_values'])){
-                        $searchParams = array_merge($search_values,$searchParams);
+                    if($label_values || ($set['forUserModel'] && ($search_values = $set['forUserModel']['v_search_values']))){
+                        $searchParams = array_merge((is_array($search_values) ? $search_values : []),$label_values,$searchParams);
                         $set->applySearchModels($searchParams);
                     }
                     
@@ -572,6 +604,8 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         if($formatFormulas && is_array($formatFormulas)){
             $search = $formatLabels ? array_keys($formatLabels) : [];
             $replace = $formatLabels ? array_values($formatLabels) : [];
+            $searchParams = $this->getSearchValues();
+            if($searchParams && is_array($searchParams)) extract($searchParams, EXTR_OVERWRITE);
             foreach($formatFormulas as $key=>$formula){
                 try {
                     $values[$key] = '';

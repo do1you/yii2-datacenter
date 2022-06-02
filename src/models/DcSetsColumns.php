@@ -242,10 +242,16 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return ((($this->model_id>0&&$this->column&&!$this->formula&&!$this->fun) || $this->sets['set_type']!='model') ? true : false);
     }
     
-    // 返回计算公式替换内容
+    // 返回计算公式替换标签
     public function getV_format_label()
     {
         return "{{$this->v_label}}";
+    }
+    
+    // 返回计算公式替换名称
+    public function getV_format_name()
+    {
+        return "{{$this->name}}";
     }
     
     // 返回字段默认值

@@ -292,9 +292,10 @@ class DcReport extends \webadmin\ModelCAR
             'columns.setsCol.column',
             'columns.setsCol.model',
             'columns.setsCol.sets.mainModel',
+            'columns.setsCol.sets.columns.model',
             'columns.sets.source',
             'columns.sets.columns.sets.columns.model',
-            'columns.setsCol.sets.columns.model',
+            'columns.sets.columns.sets.mainModel',            
         ]);
         
         return ($muli ? $query->all() : $query->one());
