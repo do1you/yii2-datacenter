@@ -165,8 +165,11 @@ class ReportViewController extends \webadmin\BController
         
         $result = [];
         if($reportId){
-            $model = new DcUserReport;
-            $model->loadDefaultValues();
+            if($userReportId) $model = DcUserReport::findOne($userReportId);
+            if(empty($model)){
+                $model = new DcUserReport;
+                $model->loadDefaultValues();
+            }            
             $model->load($modelParams,'');
             if($model->load([
                 'report_id' => $reportId,
@@ -177,10 +180,12 @@ class ReportViewController extends \webadmin\BController
             }else{
                 $result['msg'] = implode("；",$model->getErrorSummary(true));
             }
-        }
-        if($setId){
-            $model = new DcUserSets;
-            $model->loadDefaultValues();
+        }elseif($setId){
+            if($userSetId) $model = DcUserSets::findOne($userSetId);
+            if(empty($model)){
+                $model = new DcUserSets;
+                $model->loadDefaultValues();
+            }
             $model->load($modelParams,'');
             if($model->load([
                 'set_id' => $setId,
@@ -191,8 +196,7 @@ class ReportViewController extends \webadmin\BController
             }else{
                 $result['msg'] = implode("；",$model->getErrorSummary(true));
             }
-        }
-        if($userReportId){
+        }elseif($userReportId){
             $model = DcUserReport::findOne($userReportId);
             if($model){
                 $model->delete();
@@ -201,8 +205,7 @@ class ReportViewController extends \webadmin\BController
             }else{
                 $result['msg'] = "参数有误";
             }
-        }
-        if($userSetId){
+        }elseif($userSetId){
             $model = DcUserSets::findOne($userSetId);
             if($model){
                 $model->delete();

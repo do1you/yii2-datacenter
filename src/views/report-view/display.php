@@ -47,6 +47,8 @@ $(document).on('click','a[data-toggle="collection"],a[data-toggle="cancel"]',fun
                             params = box.find('form').serializeJson();
                         params.reportId = reportId||'';
                         params.setId = setId||'';
+                        params.userReportId = userReportId||'';
+                        params.userSetId = userSetId||'';
                         $.extend(params, searchParmas);
                         $.getJSON((reportId ? "{$durl}" : "{$durl1}"),params,function(json){
                             if(json.success){
