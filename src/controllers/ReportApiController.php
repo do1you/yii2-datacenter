@@ -58,7 +58,10 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
             'class' => \webadmin\behaviors\SearchBehaviors::className(),
             'searchCacheActions' => $this->searchCacheActions,
             'cacheKey' => Yii::$app->session->id.'/datacenter/'.$this->id.'/'.
-                ($this->action ? (in_array($this->action->id,['view','set-view']) ? str_replace('view','data',$this->action->id) : $this->action->id) : 'index'),
+                ($this->action 
+                    ? (in_array($this->action->id,['data','set-data']) ? $this->action->id
+                        .'/'.Yii::$app->request->get('id','0').'_'.Yii::$app->request->get('vid','0') : $this->action->id) 
+                    : 'index'),
         ];
         
         return $behaviors;

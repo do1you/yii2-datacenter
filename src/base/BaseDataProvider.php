@@ -304,7 +304,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     }
                     
                     // 带入用户过滤条件，合并条件应用过滤
-                    if($searchParams || $label_values || ($set['forUserModel'] && ($search_values = $set['forUserModel']['v_search_values']))){
+                    if(($set['forUserModel'] && ($search_values = $set['forUserModel']['v_search_values'])) || $searchParams || $label_values){
                         $appleParams = array_merge((is_array($search_values) ? $search_values : []), $label_values, $searchParams);
                         $set->applySearchModels($appleParams);
                         
