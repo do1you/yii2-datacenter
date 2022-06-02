@@ -259,6 +259,15 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     $labelParams[$sModel['label_name']] = $params[$sModel['attribute']] = $sModel['value'];
                 }
             }
+        }elseif(!$this->report){
+            $searchModels = $this->getSearchModels();
+            $searchValues = $this->getSearchValues();
+            foreach($searchModels as $sModel){
+                if(isset($params[$sModel['attribute']])){
+                    $searchValues[$sModel['label_name']] = is_array($params[$sModel['attribute']]) ? implode(',', $params[$sModel['attribute']]) : $params[$sModel['attribute']];
+                }
+            }
+            $this->_searchValues = $searchValues;
         }
         
         if(($colnmns = $this->report ? $this->report->columns : $this->sets->columns)){
@@ -280,14 +289,6 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 foreach($sets as $index=>$set){
                     $searchParams = (isset($setSearchParams[$set['id']]) && is_array($setSearchParams[$set['id']])) ? $setSearchParams[$set['id']] : [];
                     
-                    if($searchParams){
-                        $set->applySearchModels($searchParams);
-                        // 非主数据集的,查询出结果数据并入到主数据集条件
-                        if($mainSet !== $set){
-                            $set->filterSourceSearch($mainSet);
-                        }
-                    }
-                    
                     // 同标签条件带入
                     $label_values = [];
                     if($set['columns']){
@@ -302,10 +303,15 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         }
                     }
                     
-                    // 带入用户过滤条件
-                    if($label_values || ($set['forUserModel'] && ($search_values = $set['forUserModel']['v_search_values']))){
-                        $searchParams = array_merge((is_array($search_values) ? $search_values : []),$label_values,$searchParams);
-                        $set->applySearchModels($searchParams);
+                    // 带入用户过滤条件，合并条件应用过滤
+                    if($searchParams || $label_values || ($set['forUserModel'] && ($search_values = $set['forUserModel']['v_search_values']))){
+                        $appleParams = array_merge((is_array($search_values) ? $search_values : []), $label_values, $searchParams);
+                        $set->applySearchModels($appleParams);
+                        
+                        // 非主数据集的,查询出结果数据并入到主数据集条件
+                        if($searchParams && $mainSet !== $set){
+                            $set->filterSourceSearch($mainSet);
+                        }
                     }
                     
                 }

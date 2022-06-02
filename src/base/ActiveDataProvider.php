@@ -112,7 +112,7 @@ class ActiveDataProvider extends BaseDataProvider
                 $query = $this->query;
                 $query->orderBy([]);
                 if(!$this->forReport) $query->groupBy([]);
-                if($query->having){
+                /*if($query->having){
                     $newQuery = new \yii\db\Query([
                         'from' => ['sub' => $query],
                     ]);
@@ -126,13 +126,13 @@ class ActiveDataProvider extends BaseDataProvider
                         }
                         $newQuery->addSelect($select);
                     }
-                }else{
+                }else{*/
                     foreach($summaryColumns as $select){
                         $query->addSelect($select);
                     }
                     
                     $newQuery = $query;
-                }
+                //}
                 
                 if($newQuery->where && preg_match('/\s+\(?0\=1\)?\s*?/', $newQuery->createCommand($this->db)->sql)){
                     $row = [];
