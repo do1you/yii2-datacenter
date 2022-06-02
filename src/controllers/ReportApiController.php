@@ -60,7 +60,7 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
             'cacheKey' => Yii::$app->session->id.'/datacenter/'.$this->id.'/'.
                 ($this->action 
                     ? (in_array($this->action->id,['data','set-data']) ? $this->action->id
-                        .'/'.Yii::$app->request->get('id','0').'_'.Yii::$app->request->get('vid','0') : $this->action->id) 
+                        .'/'.Yii::$app->request->get('id','').'_'.Yii::$app->request->get('vid','') : $this->action->id) 
                     : 'index'),
         ];
         

@@ -200,16 +200,29 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     {
         if($this->_searchModels === null){
             $list = [];
-            $params = Yii::$app->request->get("SysConfig",[]);
+            $globalParams = Yii::$app->request->get("SysConfig",[]);
             $forUserModel = $this->report ? $this->report['forUserModel'] : $this->sets['forUserModel'];
             if($forUserModel && ($search_values = $forUserModel['v_search_values'])){
-                $params = array_merge($search_values,$params);
+                $globalParams = array_merge($search_values,$globalParams);
             }
             $columns = $this->report ? $this->report->columns : $this->sets->columns;
             foreach($columns as $item){
                 $colnmn = $this->report ? $item['setsCol'] : $item;
                 // if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
                 
+                // 引入数据集默认条件
+                $params = $globalParams;
+                if($this->report && $item['user_set_id'] && ($forUserSet = $item['userSets']) 
+                    && ($search_values = $forUserSet['v_search_values'])
+                ){
+                    foreach([$colnmn['v_alias'], '-'.$colnmn['v_alias']] as $attribute){
+                        if(isset($search_values[$attribute]) && (is_array($search_values[$attribute]) || strlen($search_values[$attribute])>0)){
+                            $is_back_search = substr($attribute,0,1)=='-';
+                            $params[($is_back_search ? '-' : '').$item['v_alias']] = $search_values[$attribute];
+                        }
+                    }
+                }
+
                 if($colnmn && $colnmn['is_search']){ // && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')
                     $_ = [
                         'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),

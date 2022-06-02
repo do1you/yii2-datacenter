@@ -76,7 +76,7 @@ class ReportViewController extends \webadmin\BController
             'cacheKey' => Yii::$app->session->id.'/datacenter/report-api/'.
                 ($this->action 
                     ? (in_array($this->action->id,['view','set-view','collection','set-collection']) ? str_replace(['collection','view'],'data',$this->action->id)
-                        .'/'.Yii::$app->request->get('id','0').'_'.Yii::$app->request->get('vid','0') : $this->action->id)
+                        .'/'.Yii::$app->request->get('id','').'_'.Yii::$app->request->get('vid','') : $this->action->id)
                     : 'index'),
         ];   
         

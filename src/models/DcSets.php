@@ -50,6 +50,11 @@ class DcSets extends \webadmin\ModelCAR
     public $_relation_target = [];
     
     /**
+     * 关联的本数据集信息
+     */
+    public $_relation_union = [];
+    
+    /**
      * 数据集所属的报表实例
      */
     public $report;
@@ -536,11 +541,27 @@ class DcSets extends \webadmin\ModelCAR
                 $set->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
                 $set->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_SUMMARY, [$set, 'targetAfterFindSummary']);
                 if($relations[$set['id']]->rel_type=='union'){
-                    $this->setPagination(false);
-                    $set->setPagination(false);
+                    if(in_array($set['set_type'],['model','sql']) && in_array($this['set_type'],['model','sql']) && $set->getDataProvider()->db==$this->getDataProvider()->db){
+                        $this->_relation_union[] = $set;
+                    }else{
+                        $this->setPagination(false);
+                        $set->setPagination(false);
+                        $joinSets[$set['id']] = $set;
+                    }
+                }else{
+                    $joinSets[$set['id']] = $set;
                 }
-                $joinSets[$set['id']] = $set;
                 unset($sets[$k]);
+            }
+        }
+        
+        // 相同数据集的数据进行合并
+        if(!empty($sets)){
+            foreach($sets as $k=>$set){
+                if($set['id']==$this->id){
+                    $this->_relation_union[] = $set;
+                    unset($sets[$k]);
+                }
             }
         }
         
