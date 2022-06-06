@@ -90,6 +90,7 @@ class ActiveDataProvider extends BaseDataProvider
                 $list[$key] = $this->filterColumns($item);
             }
         }else{
+            $this->union();
             $list = parent::prepareModels();
             foreach($list as $key=>$item){
                 $list[$key] = $this->filterSetsColumns($item);
@@ -259,5 +260,18 @@ class ActiveDataProvider extends BaseDataProvider
             }
         }
         return $this;
+    }
+    
+    /**
+     * 合并数据集
+     */
+    public function union()
+    {
+        if(($sets = $this->sets->_relation_union)){
+            $query = $this->query;
+            foreach($sets as $set){
+                $this->query->union($set->getDataProvider()->query, true);
+            }
+        }
     }
 }

@@ -208,7 +208,6 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             $columns = $this->report ? $this->report->columns : $this->sets->columns;
             foreach($columns as $item){
                 $colnmn = $this->report ? $item['setsCol'] : $item;
-                // if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
                 
                 // 引入数据集默认条件
                 $params = $globalParams;
@@ -291,16 +290,18 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 $setSearchParams = [];
                 foreach($colnmns as $col){
                     if($col['formula']) continue;
+                    $sIndex = ($col['user_set_id'] && $col['userSets']) ? '-'.$col['user_set_id'] : $col['set_id'];
                     foreach([$col['v_alias'], '-'.$col['v_alias']] as $attribute){
                         if(isset($params[$attribute]) && (is_array($params[$attribute]) || strlen($params[$attribute])>0) && $col['setsCol']){
                             $is_back_search = substr($attribute,0,1)=='-';
-                            $setSearchParams[$col['set_id']][($is_back_search ? '-' : '').$col['setsCol']['v_alias']] = $params[$attribute];
+                            $setSearchParams[$sIndex][($is_back_search ? '-' : '').$col['setsCol']['v_alias']] = $params[$attribute];
                         }
                     }
                 }
                 
                 foreach($sets as $index=>$set){
-                    $searchParams = (isset($setSearchParams[$set['id']]) && is_array($setSearchParams[$set['id']])) ? $setSearchParams[$set['id']] : [];
+                    $sIndex = $set['forUserModel'] ? '-'.$set['forUserModel']['id'] : $set['id'];
+                    $searchParams = (isset($setSearchParams[$sIndex]) && is_array($setSearchParams[$sIndex])) ? $setSearchParams[$sIndex] : [];
                     
                     // 同标签条件带入
                     $label_values = [];

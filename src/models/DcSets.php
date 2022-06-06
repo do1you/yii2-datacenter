@@ -543,6 +543,9 @@ class DcSets extends \webadmin\ModelCAR
                 if($relations[$set['id']]->rel_type=='union'){
                     if(in_array($set['set_type'],['model','sql']) && in_array($this['set_type'],['model','sql']) && $set->getDataProvider()->db==$this->getDataProvider()->db){
                         $this->_relation_union[] = $set;
+                        $set->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$set, 'targetAfterFindModels']);
+                        $set->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_SUMMARY, [$set, 'targetAfterFindSummary']);
+                        array_pop($this->_relation_source);
                     }else{
                         $this->setPagination(false);
                         $set->setPagination(false);
