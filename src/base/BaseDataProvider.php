@@ -624,13 +624,14 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             $search = $formatLabels ? array_keys($formatLabels) : [];
             $replace = $formatLabels ? array_values($formatLabels) : [];
             $searchParams = $this->getSearchValues();
-            if($searchParams && is_array($searchParams)) extract($searchParams, EXTR_OVERWRITE);
+            if($searchParams && is_array($searchParams)) extract($searchParams, EXTR_OVERWRITE); // 搜索条件缓存
             foreach($formatFormulas as $key=>$formula){
                 try {
                     $values[$key] = '';
                     $formula = str_replace($search, $replace, $formula);
                     extract($values, EXTR_OVERWRITE);
                     $formula = preg_replace('/[{][^}]*?[}]/','$null',$formula);
+                    $formula = preg_replace('/\$([a-zA-Z0-9\_]+\.[a-zA-Z0-9\_\.]+)/','\yii\helpers\ArrayHelper::getValue($this, \'$1\')',$formula);
                     //var_dump('$values[$key] = '.$formula.';');
                     eval('$values[$key] = '.$formula.';');
                     $values[$key] = (string)$values[$key];
@@ -656,6 +657,14 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             }
         }
         return $columns;
+    }
+    
+    /**
+     * 获取模型
+     */
+    public function getV_model()
+    {
+        return ($this->report ? $this->report : $this->sets);
     }
     
     /**
