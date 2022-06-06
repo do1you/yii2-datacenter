@@ -521,6 +521,8 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 $this->_unionSets[$set['id']] = $set;
             }
         }
+        
+        if(isset($values['title'])) $data['title'] = $values['title'];
         return $this->formatValue($data);
     }
     
@@ -567,6 +569,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             $data[$key] = $this->formatRespFun($col['resp_fun'],$v);
         }
         
+        if(isset($values['title'])) $data['title'] = $values['title'];
         return $this->formatValue($data);
     }
     

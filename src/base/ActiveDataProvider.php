@@ -268,9 +268,19 @@ class ActiveDataProvider extends BaseDataProvider
     public function union()
     {
         if(($sets = $this->sets->_relation_union)){
-            $query = $this->query;
+            $v_alias = "title"; // 标识出数据集名称
             foreach($sets as $set){
-                $this->query->union($set->getDataProvider()->query, true);
+                $query = $set->getDataProvider()->query;
+                if(!isset($this->_selects[$v_alias])){
+                    $title = $set['forUserModel'] ? $set['forUserModel']['v_name'] : $set['v_title'];
+                    $query->addSelect(new \yii\db\Expression("'{$title}' as {$v_alias}"));
+                }
+                $this->query->union($query, true);
+            }
+            if(!isset($this->_selects[$v_alias])){
+                $title = $this->sets['forUserModel'] ? $this->sets['forUserModel']['v_name'] : $this->sets['v_title'];
+                $this->_selects[$v_alias] = new \yii\db\Expression("'{$title}' as {$v_alias}");
+                $this->query->addSelect([$this->_selects[$v_alias]]);
             }
         }
     }
