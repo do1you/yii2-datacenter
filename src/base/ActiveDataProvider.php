@@ -267,8 +267,9 @@ class ActiveDataProvider extends BaseDataProvider
      */
     public function union()
     {
+        $v_alias = "title"; // 标识出数据集名称
+        
         if(($sets = $this->sets->_relation_union)){
-            $v_alias = "title"; // 标识出数据集名称
             foreach($sets as $set){
                 $query = $set->getDataProvider()->query;
                 if(!isset($this->_selects[$v_alias])){
@@ -277,11 +278,13 @@ class ActiveDataProvider extends BaseDataProvider
                 }
                 $this->query->union($query, true);
             }
-            if(!isset($this->_selects[$v_alias])){
-                $title = $this->sets['forUserModel'] ? $this->sets['forUserModel']['v_name'] : $this->sets['v_title'];
-                $this->_selects[$v_alias] = new \yii\db\Expression("'{$title}' as {$v_alias}");
-                $this->query->addSelect([$this->_selects[$v_alias]]);
-            }
+            
+        }
+        
+        if(!isset($this->_selects[$v_alias])){
+            $title = $this->sets['forUserModel'] ? $this->sets['forUserModel']['v_name'] : $this->sets['v_title'];
+            $this->_selects[$v_alias] = new \yii\db\Expression("'{$title}' as {$v_alias}");
+            $this->query->addSelect([$this->_selects[$v_alias]]);
         }
     }
 }
