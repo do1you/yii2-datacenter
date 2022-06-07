@@ -43,13 +43,12 @@ $(document).on('click','a[data-toggle="collection"],a[data-toggle="cancel"]',fun
                     label: '保存',
                     className: 'btn-primary',
                     callback: function(e){
-                        var searchParmas = t.closest('.data-report-index').find('.dataconter-search form').serializeJson(),
-                            params = box.find('form').serializeJson();
-                        params.reportId = reportId||'';
-                        params.setId = setId||'';
-                        params.userReportId = userReportId||'';
-                        params.userSetId = userSetId||'';
-                        $.extend(params, searchParmas);
+                        var searchParmas = t.closest('.data-report-index').find('.dataconter-search form').serialize(),
+                            params = box.find('form').serialize() + (searchParmas ? '&' + searchParmas : '');
+                        if(reportId) params += "&reportId=" + reportId;
+                        if(setId) params += "&setId=" + setId;
+                        if(userReportId) params += "&userReportId=" + userReportId;
+                        if(userSetId) params += "&userSetId=" + userSetId;
                         $.getJSON((reportId ? "{$durl}" : "{$durl1}"),params,function(json){
                             if(json.success){
                                 Notify((json.msg || '操作成功'), 'top-right', '5000', 'success', 'fa-check', true);

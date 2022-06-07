@@ -236,7 +236,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     // 反向查询
                     if($colnmn['is_back_search']){
                         $attribute = '-'.$item['v_alias'];
-                        $label = "不含{$item['v_label']}";
+                        $label = "剔除{$item['v_label']}";
                         $_ = [
                             'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
                             'value' => (isset($params[$attribute]) ? $params[$attribute] : ''), // $colnmn['v_search_defval']
@@ -308,9 +308,9 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     if($set['columns']){
                         foreach($set['columns'] as $col){
                             if($col['formula']) continue;
-                            foreach([$col['v_label'], '不含'.$col['v_label']] as $attribute){
+                            foreach([$col['v_label'], '剔除'.$col['v_label']] as $attribute){
                                 if(isset($labelParams[$attribute]) && (is_array($labelParams[$attribute]) || strlen($labelParams[$attribute])>0)){
-                                    $is_back_search = strpos($attribute, '不含')!==false;
+                                    $is_back_search = strpos($attribute, '剔除')!==false;
                                     $label_values[($is_back_search ? '-' : '').$col['v_alias']] = $labelParams[$attribute];
                                 }
                             }
