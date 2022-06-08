@@ -217,7 +217,9 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     foreach([$colnmn['v_alias'], '-'.$colnmn['v_alias']] as $attribute){
                         if(isset($search_values[$attribute]) && (is_array($search_values[$attribute]) || strlen($search_values[$attribute])>0)){
                             $is_back_search = substr($attribute,0,1)=='-';
-                            $params[($is_back_search ? '-' : '').$item['v_alias']] = $search_values[$attribute];
+                            if(!isset($params[($is_back_search ? '-' : '').$item['v_alias']])){
+                                $params[($is_back_search ? '-' : '').$item['v_alias']] = $search_values[$attribute];
+                            }
                         }
                     }
                 }
