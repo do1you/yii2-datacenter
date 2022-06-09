@@ -78,7 +78,7 @@ class ReportController extends \webadmin\BController
                 'className' => '\datacenter\models\DcSetsColumns',
                 'col_id' => 'id',
                 'col_text' => ['name','label'],
-                'col_v_text' => 'v_name',
+                'col_v_text' => 'v_colname',
                 'col_where' => ["set_id"=>$mId],
                 'model_withs' => ['sets'],
                 'col_sort' => 'dc_sets_columns.is_frozen desc,dc_sets_columns.paixu desc,dc_sets_columns.id asc',

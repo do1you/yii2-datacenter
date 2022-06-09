@@ -329,7 +329,7 @@ class DcReport extends \webadmin\ModelCAR
     public function allDefReport($userId='0',$where=[],$group=false)
     {
         $query = self::find();
-        $query->where($userId=='1' ? [] : [
+        $query->where([ // $userId=='1' ? [] : 
             'or',
             ['in', 'dc_report.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'5'])],
             ['=', 'dc_report.create_user', $userId],

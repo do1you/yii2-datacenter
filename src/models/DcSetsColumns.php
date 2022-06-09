@@ -179,6 +179,11 @@ class DcSetsColumns extends \webadmin\ModelCAR
         return $this->sets['title'].'.'.$this->label.($this->name ? "[{$this->name}]" : "");
     }
     
+    // 返回格式化名称，不含数据集
+    public function getV_colname(){
+        return $this->label.($this->name ? "[{$this->name}]" : "");
+    }
+    
     // 返回字段格式化名称
     public function getV_column()
     {
