@@ -48,7 +48,8 @@ class DefaultController extends \webadmin\BController
                 $query->select(["{$key} as id","{$text} as text"])
                 ->from($table)
                 ->andFilterWhere(['like',$text,$q])
-                ->andFilterWhere([$key=>$id]);
+                ->andFilterWhere([$key=>$id])
+                ->orderBy($text);
                 
                 $dataProvider = new \yii\data\ActiveDataProvider([
                     'query' => $query,
