@@ -536,7 +536,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         if(!$this->sets) return $values;
         
         $data = [];
-        list($formatFormulas, $formatLabels, $formatDd) = $this->formatValueTpl();
+        list($formatFormulas, $formatLabels, $formatDd, $formatFn) = $this->formatValueTpl();
         foreach($this->sets->columns as $col){
             $key = $col['v_alias'];
             $v = isset($values[$key])
@@ -600,30 +600,35 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             || !isset($this->_replace_params['format_formulas'])
             || !isset($this->_replace_params['format_labels'])
             || !isset($this->_replace_params['format_dd'])
+            || !isset($this->_replace_params['format_fn'])
         ){
-                $formatDd = $formatLabels = $formatFormulas = [];
-                $columns = $this->report ? $this->report->columns : $this->sets->columns;
-                foreach($columns as $col){
-                    if($col['formula']){
-                        $formatFormulas[$col['v_alias']] = $col['formula'];
-                    }
-                    if(isset($col['type']) && in_array($col['type'],['dd', 'ddmulti', 'select', 'selectmult', 'select2', 'select2mult', 'ddselect2', 'ddselect2multi'])){
-                        $formatDd[$col['v_alias']] = $col;
-                    }
-                    
-                    $formatLabels[$col['v_format_label']] = "\${$col['v_alias']}";
+            $formatFn = $formatDd = $formatLabels = $formatFormulas = [];
+            $columns = $this->report ? $this->report->columns : $this->sets->columns;
+            foreach($columns as $col){
+                if($col['formula']){
+                    $formatFormulas[$col['v_alias']] = $col['formula'];
                 }
-                $this->_replace_params['format_formulas'] = $formatFormulas;
-                $this->_replace_params['format_labels'] = $formatLabels;
-                $this->_replace_params['format_dd'] = $formatDd;
+                if(isset($col['type']) && in_array($col['type'],['dd', 'ddmulti', 'select', 'selectmult', 'select2', 'select2mult', 'ddselect2', 'ddselect2multi'])){
+                    $formatDd[$col['v_alias']] = $col;
+                }
+                if(isset($col['resp_fun']) && !empty($col['resp_fun'])){
+                    $formatFn[$col['v_alias']] = $col;
+                }
+                
+                $formatLabels[$col['v_format_label']] = "\${$col['v_alias']}";
+            }
+            $this->_replace_params['format_formulas'] = $formatFormulas;
+            $this->_replace_params['format_labels'] = $formatLabels;
+            $this->_replace_params['format_dd'] = $formatDd;
+            $this->_replace_params['format_fn'] = $formatFn;
         }
-        return [$this->_replace_params['format_formulas'],$this->_replace_params['format_labels'],$this->_replace_params['format_dd']];
+        return [$this->_replace_params['format_formulas'],$this->_replace_params['format_labels'],$this->_replace_params['format_dd'],$this->_replace_params['format_fn']];
     }
     
     // 格式化计算公式字符串
     public function formatValue($values)
     {
-        list($formatFormulas, $formatLabels, $formatDd) = $this->formatValueTpl();
+        list($formatFormulas, $formatLabels, $formatDd, $formatFn) = $this->formatValueTpl();
         
         // 公式数据
         if($formatFormulas && is_array($formatFormulas)){
@@ -641,7 +646,11 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     //var_dump('$values[$key] = '.$formula.';');
                     eval('$values[$key] = '.$formula.';');
                     $values[$key] = (string)$values[$key];
-                    if(strlen($values[$key])<=0) $values[$key] = '&nbsp;';
+                    if(!empty($formatFn[$key])){
+                        $values[$key] = $this->formatRespFun($formatFn[$key]['resp_fun'],$values[$key]);
+                    }elseif(strlen($values[$key])<=0){
+                        $values[$key] = '&nbsp;';
+                    }
                 }catch(\Exception $e) {
                 }
             }
