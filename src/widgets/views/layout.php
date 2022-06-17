@@ -5,8 +5,8 @@ $sourceList = $model ? $model['v_source'] : [];
     <?php echo $search;?>
     <div class="widget flat radius-bordered">
     	<div class="widget-header bg-themeprimary">
-    	    <span class="widget-caption tooltip-primary" style="position:absolute;left:12px;" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo ($model['forUserModel'] ? $model['forUserModel']['v_name'] : $model['title'])?>">
-    	    	<?php echo ($model['forUserModel'] ? $model['forUserModel']['v_name']."【".$model['title']."】" : $model['title'])?>&nbsp;
+    	    <span class="widget-caption tooltip-primary" style="position:absolute;left:12px;" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo $model['v_report_body']?>">
+    	    	<?php echo $model['v_report_title']?>&nbsp;
     	    </span>
     	    <div class="widget-buttons">
     	    	<?php //if(isset($cache) && $cache===true):?>

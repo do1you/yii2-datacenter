@@ -17,7 +17,7 @@ class ReportViewController extends \webadmin\BController
      * 当前控制器中需要缓存查询条件的方法
      */
     public $searchCacheActions = ['index', 'list', 'tree', 'view', 'set-view']; // , 'collection', 'set-collection'
-    
+        
     // 初始化
     public function init()
     {
@@ -68,6 +68,9 @@ class ReportViewController extends \webadmin\BController
     public function behaviors()
     {
         $behaviors = parent::behaviors();
+        
+        // 禁止异步下载EXCEL，没开后台队列
+        unset($behaviors['excelBehaviors']); 
         
         // 缓存查询条件
         $behaviors['searchBehaviors'] = [

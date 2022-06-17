@@ -52,6 +52,32 @@ trait ReportOrmTrait
     public $forUserModel;
     
     /**
+     * 返回报表显示标题
+     */
+    public function getV_report_title()
+    {
+        if($this->forUserModel){
+            $title = $this->forUserModel['v_name']."【".$this->title."】";
+        }else{
+            $title = $this->title;
+        }
+        return $title;
+    }
+    
+    /**
+     * 返回标题显示内容
+     */
+    public function getV_report_body()
+    {
+        if($this instanceof DcReport){ // 报表
+            $body = $this->getV_sets_str();
+        }else{
+            $body = $this->getV_report_title();
+        }
+        return $body;
+    }
+    
+    /**
      * 返回缓存主键值
      */
     public function getV_cache_key()

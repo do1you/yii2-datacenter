@@ -185,9 +185,11 @@ class DcReport extends \webadmin\ModelCAR
     // 数据集合显示
     public function getV_sets_str()
     {
-        $names = \yii\helpers\ArrayHelper::map($this->v_userSets, 'id', 'v_name');
-        $names += \yii\helpers\ArrayHelper::map($this->v_sets, 'id', 'v_title');
-        return implode(",",$names);
+        $names = [];
+        foreach($this->v_sets as $set){
+            $names[] = $set['v_report_title'];
+        }
+        return implode("，",$names);
     }
     
     // 返回数据集合
