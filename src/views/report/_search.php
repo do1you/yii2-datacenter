@@ -23,7 +23,9 @@ use webadmin\widgets\ActiveForm;
                     ],
                 ]); ?>
                 
-                <?= $form->field($model, 'cat_id')->searchInput()->select2($model->getV_cat_id(false),['prompt'=>'请选择']) ?>
+                <?= $form->field($model, 'cat_id')->searchInput()->select2($model->getV_cat_id(false),['prompt'=>'请选择','multiple'=>'multiple']) ?>
+
+				<?= $form->field($model, 'create_user')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
 
 				<?= $form->field($model, 'title')->searchInput() ?>
 
@@ -31,8 +33,7 @@ use webadmin\widgets\ActiveForm;
 				
 				<?= $form->field($model, 'show_type')->searchInput()->dropDownList($model->getV_show_type(false),['prompt'=>'请选择']) ?>
 
-				<?= $form->field($model, 'create_user')->searchInput()->selectajax(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
-
+				
                 <div class="form-group">
                     <?= Html::submitButton(Yii::t('common','查询'), ['class' => 'btn btn-primary', 'id'=>'search_btn']) ?>
                     <?//= Html::submitButton(Yii::t('common','导出'), ['class' => 'btn btn-primary', 'id'=>'export_btn']) ?>

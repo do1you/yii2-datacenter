@@ -296,43 +296,50 @@ class DcSource extends \webadmin\ModelCAR
     {
         $comments = $this->getTableComments();
         $schemas = $this->getTableSchemas();
-        $models = \yii\helpers\ArrayHelper::map($this->getModels()->with(['columns'])->all(), 'tb_name', 'v_self');
+        $list = $this->getModels()->with(['columns'])->all();
+        $models = [];
+        foreach($list as $item){
+            if(!isset($models[$item['tb_name']])) $models[$item['tb_name']] = [];
+            $models[$item['tb_name']][] = $item;
+        }
         $tbNum = $colNum = 0;
         
         foreach($schemas as $schema){
             $tb = $schema->name;
-            $model = isset($models[$tb]) ? $models[$tb] : DcModel::model();
-            if($model->load([
-                'source_db' => $this->id,
-                'tb_name' => $tb,
-                'tb_label' => ($model['tb_label'] ? $model['tb_label'] : (isset($comments[$tb]) ? $comments[$tb] : '')),
-                'update_time' => ($model['tb_label']&&$model['update_time'] ? $model['update_time'] : date('Y-m-d H:i:s')),
-            ],'') && $model->save()){
-                $columns = isset($models[$tb]) ? $model['columns'] : [];
-                $columns = \yii\helpers\ArrayHelper::map($columns, 'name', 'v_self');
-                
-                foreach($schema->columns as $column){
-                    $col = $column->name;
-                    $cModel = isset($columns[$col]) ? $columns[$col] : DcAttribute::model();
-                    if($cModel->load([
-                        'model_id' => $model['id'],
-                        'name' => $col,
-                        'label' => ($cModel['label'] ? $cModel['label'] : $column->comment),
-                        'type' => ($cModel['type'] ? $cModel['type'] : $column->type), // phpType
-                        'length' => ($cModel['length'] ? $cModel['length'] : $column->size),
-                        'default' => (strlen($cModel['default'])>0 ? $cModel['default'] : $column->defaultValue),
-                    ],'') && $cModel->save(false)){
-                        unset($columns[$col]);
-                        $colNum++;
+            $modelList = isset($models[$tb])&&is_array($models[$tb]) ? $models[$tb] : [DcModel::model()];
+            foreach($modelList as $model){
+                if($model->load([
+                    'source_db' => $this->id,
+                    'tb_name' => $tb,
+                    'tb_label' => ($model['tb_label'] ? $model['tb_label'] : (isset($comments[$tb]) ? $comments[$tb] : '')),
+                    'update_time' => ($model['tb_label']&&$model['update_time'] ? $model['update_time'] : date('Y-m-d H:i:s')),
+                ],'') && $model->save()){
+                    $columns = isset($models[$tb]) ? $model['columns'] : [];
+                    $columns = \yii\helpers\ArrayHelper::map($columns, 'name', 'v_self');
+                    
+                    foreach($schema->columns as $column){
+                        $col = $column->name;
+                        $cModel = isset($columns[$col]) ? $columns[$col] : DcAttribute::model();
+                        if($cModel->load([
+                            'model_id' => $model['id'],
+                            'name' => $col,
+                            'label' => ($cModel['label'] ? $cModel['label'] : $column->comment),
+                            'type' => ($cModel['type'] ? $cModel['type'] : $column->type), // phpType
+                            'length' => ($cModel['length'] ? $cModel['length'] : $column->size),
+                            'default' => (strlen($cModel['default'])>0 ? $cModel['default'] : $column->defaultValue),
+                        ],'') && $cModel->save(false)){
+                            unset($columns[$col]);
+                            $colNum++;
+                        }
                     }
+                    
+                    foreach($columns as $item){
+                        $item->delete();
+                    }
+                    
+                    unset($models[$tb]);
+                    $tbNum++;
                 }
-
-                foreach($columns as $item){
-                    $item->delete();
-                }
-                
-                unset($models[$tb]);
-                $tbNum++;
             }
         }
 

@@ -23,11 +23,11 @@ use webadmin\widgets\ActiveForm;
                     ],
                 ]); ?>
 				
-				<?= $form->field($model, 'report_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('report'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'report_id')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('report'),['style'=>'width:200px;']) ?>
 				
-				<?= $form->field($model, 'user_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'user_id')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
 				
-				<?= $form->field($model, 'grant_user')->searchInput()->selectajax(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'grant_user')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
 
                 <div class="form-group">
                     <?= Html::submitButton(Yii::t('common','查询'), ['class' => 'btn btn-primary', 'id'=>'search_btn']) ?>

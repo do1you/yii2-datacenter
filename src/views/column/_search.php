@@ -23,13 +23,13 @@ use webadmin\widgets\ActiveForm;
                     ],
                 ]); ?>
                 
-                <?= $form->field($model, 'model_id')->searchInput()->searchInput()->selectajax(\yii\helpers\Url::toRoute('model'),['style'=>'width:200px;']) ?>
+                <?= $form->field($model, 'model_id')->searchInput()->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('model'),['style'=>'width:200px;']) ?>
 
 				<?= $form->field($model, 'name')->searchInput() ?>
 
 				<?= $form->field($model, 'label')->searchInput() ?>
 
-				<?= $form->field($model, 'type')->searchInput()->select2($model->getV_type(false),['prompt'=>'请选择']) ?>
+				<?= $form->field($model, 'type')->searchInput()->select2($model->getV_type(false),['prompt'=>'请选择','multiple'=>'multiple']) ?>
 
 				<?= $form->field($model, 'is_visible')->searchInput()->dropDownList($model->getV_is_visible(false),['prompt'=>'请选择']) ?>
 

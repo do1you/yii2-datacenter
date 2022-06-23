@@ -23,9 +23,9 @@ use webadmin\widgets\ActiveForm;
                     ],
                 ]); ?>
                 
-                <?= $form->field($model, 'cat_id')->searchInput()->select2($model->getV_cat_id(false),['prompt'=>'请选择']) ?>
+                <?= $form->field($model, 'cat_id')->searchInput()->select2($model->getV_cat_id(false),['prompt'=>'请选择','multiple'=>'multiple']) ?>
 
-				<?= $form->field($model, 'source_db')->searchInput()->selectajax(\yii\helpers\Url::toRoute('source'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'source_db')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('source'),['style'=>'width:200px;']) ?>
 
 				<?= $form->field($model, 'tb_name')->searchInput() ?>
 

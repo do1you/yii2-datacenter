@@ -23,7 +23,7 @@ use webadmin\widgets\ActiveForm;
                     ],
                 ]); ?>
                 
-                <?= $form->field($model, 'parent_id')->searchInput()->select2(\datacenter\models\DcCat::treeOptions(),['prompt'=>'请选择']) ?>
+                <?= $form->field($model, 'parent_id')->searchInput()->select2(\datacenter\models\DcCat::treeOptions(),['prompt'=>'请选择','multiple'=>'multiple']) ?>
 
 				<?= $form->field($model, 'name')->searchInput() ?>
 

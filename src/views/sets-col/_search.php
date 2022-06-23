@@ -23,11 +23,11 @@ use webadmin\widgets\ActiveForm;
                     ],
                 ]); ?>
 
-				<?= $form->field($model, 'set_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'set_id')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
 
-				<?= $form->field($model, 'model_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('model'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'model_id')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('model'),['style'=>'width:200px;']) ?>
 				
-				<?= $form->field($model, 'for_set_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'for_set_id')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
 
 				<?= $form->field($model, 'name')->searchInput() ?>
 
@@ -39,9 +39,9 @@ use webadmin\widgets\ActiveForm;
 
 				<?= $form->field($model, 'is_summary')->searchInput()->dropDownList($model->getV_is_summary(false),['prompt'=>'请选择']) ?>
 
-				<?= $form->field($model, 'type')->searchInput()->dropDownList($model->getV_type(false),['prompt'=>'请选择']) ?>
+				<?= $form->field($model, 'type')->searchInput()->select2($model->getV_type(false),['prompt'=>'请选择','multiple'=>'multiple']) ?>
 
-				<?= $form->field($model, 'fun')->searchInput()->dropDownList($model->getV_fun(false),['prompt'=>'请选择']) ?>
+				<?= $form->field($model, 'fun')->searchInput()->select2($model->getV_fun(false),['prompt'=>'请选择','multiple'=>'multiple']) ?>
 
                 <div class="form-group">
                     <?= Html::submitButton(Yii::t('common','查询'), ['class' => 'btn btn-primary', 'id'=>'search_btn']) ?>

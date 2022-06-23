@@ -23,11 +23,11 @@ use webadmin\widgets\ActiveForm;
                     ],
                 ]); ?>
 
-				<?= $form->field($model, 'report_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('report'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'report_id')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('report'),['style'=>'width:200px;']) ?>
 				
-				<?= $form->field($model, 'set_id')->searchInput()->selectajax(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'set_id')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('sets'),['style'=>'width:200px;']) ?>
 				
-				<?= $form->field($model, 'share_user')->searchInput()->selectajax(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
+				<?= $form->field($model, 'share_user')->searchInput()->selectajaxmult(\yii\helpers\Url::toRoute('user'),['style'=>'width:200px;']) ?>
 
 				<?= $form->field($model, 'alias_name')->searchInput() ?>
 
