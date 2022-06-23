@@ -97,6 +97,14 @@ class ReportViewController extends \webadmin\BController
             ],
             'optional' => ['token'],
         ];
+        
+        // 权限判断放到token之后处理
+        if(!empty($behaviors['webAuthFilter'])){
+            $webAuthFilter = $behaviors['webAuthFilter'];
+            unset($behaviors['webAuthFilter']);
+            $behaviors['webAuthFilter'] = $webAuthFilter;
+        }
+        
         return $behaviors;
     }
     
