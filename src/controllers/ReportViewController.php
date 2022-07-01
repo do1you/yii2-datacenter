@@ -61,6 +61,12 @@ class ReportViewController extends \webadmin\BController
             }
         }
         
+        // 多表查看
+        if(($reid = Yii::$app->request->get('reid')) && ($id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id')))){
+            $this->redirect([$this->action->id,$reid=>$id]);
+            return false;
+        }
+        
         return parent::beforeAction($action);
     }
     
