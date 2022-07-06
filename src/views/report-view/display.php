@@ -31,7 +31,8 @@ $(document).on('click','a[data-toggle="collection"],a[data-toggle="cancel"]',fun
         reportId = t.attr('report-id'),
         setId = t.attr('set-id'),
         userReportId = t.attr('user-report-id'),
-        userSetId = t.attr('user-set-id');
+        userSetId = t.attr('user-set-id'),
+        beforeTitle = t.attr('before-title');
 
     if(reportId || setId){
         box = bootbox.dialog({
@@ -60,6 +61,7 @@ $(document).on('click','a[data-toggle="collection"],a[data-toggle="cancel"]',fun
                 }
             }
         });
+        beforeTitle && box.find('#dcuserreport-alias_name,#dcusersets-alias_name').val(beforeTitle);
     }else if(userReportId || userSetId){
         $.getJSON((userReportId ? "{$durl}" : "{$durl1}"),{
             userReportId:(userReportId||''),
