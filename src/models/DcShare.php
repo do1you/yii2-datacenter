@@ -42,6 +42,7 @@ class DcShare extends \webadmin\ModelCAR
             [['set_id'], 'required', 'when'=>function($model){
                 return empty($model->report_id);
             }],
+            [['hash_key'], 'unique'],
             [['share_user', 'report_id', 'set_id'], 'integer'],
             [['alias_name', 'hash_key', 'search_values', 'user_ids', 'invalid_time', 'create_time', 'switch_type'], 'safe'],
             [['search_values'], 'string'],
@@ -130,5 +131,11 @@ class DcShare extends \webadmin\ModelCAR
     public function getV_switch_type($val = null)
     {
         return \webadmin\modules\config\models\SysLdItem::dd('dc_switch_report', ($val !== null ? $val : $this->switch_type));
+    }
+    
+    //  返回分享链接
+    public function getV_url()
+    {
+        return \yii\helpers\Url::to(['share-view/view','h'=>$this->hash_key], true);
     }
 }

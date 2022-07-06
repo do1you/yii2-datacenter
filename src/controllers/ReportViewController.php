@@ -10,6 +10,7 @@ use datacenter\models\DcSets;
 use datacenter\models\DcUserReport;
 use datacenter\models\DcRoleAuthority;
 use datacenter\models\DcUserSets;
+use datacenter\models\DcShare;
 
 class ReportViewController extends \webadmin\BController
 {
@@ -114,6 +115,24 @@ class ReportViewController extends \webadmin\BController
         return $behaviors;
     }
     
+    /**
+     * 继承
+     */
+    public function actions()
+    {
+        return [
+            // 系统用户
+            'user' => [
+                'class' => '\webadmin\actions\Select2Action',
+                'className' => '\webadmin\modules\authority\models\AuthUser',
+                'col_id' => 'id',
+                'col_text' => 'name',
+                'col_v_text' => 'name',
+                //'col_where' => [],
+            ],
+        ];
+    }
+    
     // 设置数据源
     public function actionSetSource($id, $sid)
     {
@@ -162,16 +181,18 @@ class ReportViewController extends \webadmin\BController
     }
     
     /**
-     * 收藏报表
+     * 收藏/保存/分享报表
      */
     public function actionCollection()
     {
+        $share = Yii::$app->request->getBodyParam('share',Yii::$app->getRequest()->getQueryParam('share'));
         $reportId = Yii::$app->request->getBodyParam('reportId',Yii::$app->getRequest()->getQueryParam('reportId'));
         $setId = Yii::$app->request->getBodyParam('setId',Yii::$app->getRequest()->getQueryParam('setId'));
         $userReportId = Yii::$app->request->getBodyParam('userReportId',Yii::$app->getRequest()->getQueryParam('userReportId'));
         $userSetId = Yii::$app->request->getBodyParam('userSetId',Yii::$app->getRequest()->getQueryParam('userSetId'));
         $searchValues = Yii::$app->request->getBodyParam('SysConfig',Yii::$app->getRequest()->getQueryParam('SysConfig',''));
         $modelParams = Yii::$app->request->getBodyParam('DcUserReport',Yii::$app->getRequest()->getQueryParam('DcUserReport',[]));
+        $shareParams = Yii::$app->request->getBodyParam('DcShare',Yii::$app->getRequest()->getQueryParam('DcShare',[]));
         if($searchValues && is_array($searchValues)){
             foreach($searchValues as $k=>$v){
                 if(!is_array($v) && strlen($v)<=0){
@@ -182,7 +203,22 @@ class ReportViewController extends \webadmin\BController
         $searchValues = is_array($searchValues) ? json_encode($searchValues,302) : $searchValues;
         
         $result = [];
-        if($reportId){
+        if($share=='9'){
+            $model = new DcShare;
+            $model->loadDefaultValues();
+            $model->load($shareParams,'');
+            if($model->load([
+                'share_user' => Yii::$app->user->id,
+                'report_id' => ($reportId ? $reportId : 0),
+                'set_id' => ($setId ? $setId : 0),
+                'search_values' => $searchValues,
+            ],'') && $model->save()){
+                $result['success'] = true;
+                $result['url'] = $model['v_url'];
+            }else{
+                $result['msg'] = implode("；",$model->getErrorSummary(true));
+            }
+        }elseif($reportId){
             if($userReportId) $model = DcUserReport::findOne($userReportId);
             if(empty($model)){
                 $model = new DcUserReport;
