@@ -144,4 +144,55 @@ class DcShare extends \webadmin\ModelCAR
     {
         return \yii\helpers\Url::to(['share-view/view','h'=>$this->hash_key], true);
     }
+    
+    // 预处理数据
+    public function findModel($condition, $muli = false)
+    {
+        $list = parent::findByCondition($condition)->all();
+        $reportIds = $setIds = [];
+        foreach($list as $item){
+            if($item['report_id']){
+                $reportIds[] = $item['report_id'];
+            }elseif($item['set_id']){
+                $setIds[] = $item['set_id'];
+            }
+        }
+        $setList = $setIds ? DcSets::model()->getCache('findModel',[['id'=>$setIds], true]) : [];
+        $setList = \yii\helpers\ArrayHelper::map($setList, 'id', 'v_self');
+        $reportList = $reportIds ? DcReport::model()->getCache('findModel',[['id'=>$reportIds], true]) : [];
+        $reportList = \yii\helpers\ArrayHelper::map($reportList, 'id', 'v_self');
+        
+        $result = [];
+        foreach($list as $key=>$item){
+            if($item['report_id'] && isset($reportList[$item['report_id']])){
+                $model = $reportList[$item['report_id']]->forUserModel ? (clone $reportList[$item['report_id']]) : $reportList[$item['report_id']];
+            }elseif($item['set_id'] && isset($setList[$item['set_id']])){
+                $model = $setList[$item['set_id']]->forUserModel ? (clone $setList[$item['set_id']]) : $setList[$item['set_id']];
+            }else{
+                $model = null;
+            }
+            if($model){
+                $model->forUserModel = $item;
+                $result[] = $model;
+            }
+        }
+        
+        return ($muli ? $result : reset($result));
+    }
+    
+    // 设置数据源
+    public function setSource()
+    {
+        $search_values = $this->getV_search_values();
+        if(!empty($search_values['source']) && is_array($search_values['source'])){
+            $sIds = array_keys($search_values['source']);
+            $models = $sIds ? \datacenter\models\DcSource::findAll($sIds) : [];
+            $models = \yii\helpers\ArrayHelper::map($models, 'id', 'v_self');
+            foreach($search_values['source'] as $sid=>$id){
+                if(isset($models[$sid]) && $id){
+                    Yii::$app->session[$models[$sid]['v_sessionName']] = $id;
+                }
+            }
+        }
+    }
 }

@@ -193,6 +193,7 @@ class ReportViewController extends \webadmin\BController
         $searchValues = Yii::$app->request->getBodyParam('SysConfig',Yii::$app->getRequest()->getQueryParam('SysConfig',''));
         $modelParams = Yii::$app->request->getBodyParam('DcUserReport',Yii::$app->getRequest()->getQueryParam('DcUserReport',[]));
         $shareParams = Yii::$app->request->getBodyParam('DcShare',Yii::$app->getRequest()->getQueryParam('DcShare',[]));
+        
         if($searchValues && is_array($searchValues)){
             foreach($searchValues as $k=>$v){
                 if(!is_array($v) && strlen($v)<=0){
@@ -200,6 +201,17 @@ class ReportViewController extends \webadmin\BController
                 }
             }
         }
+        
+        // 动态数据源
+        if(($reportModel = $reportId ? DcReport::findOne($reportId) : ($setId ? DcSets::findOne($setId) : null)) && ($sourceList = $reportModel ? $reportModel['v_source'] : [])){
+            if(!is_array($searchValues)) $searchValues = [];
+            foreach($sourceList as $source){
+                if($source['is_dynamic']=='1'){
+                    $searchValues['source'][$source['id']] = Yii::$app->session[$source['v_sessionName']];
+                }
+            }
+        }
+        
         $searchValues = is_array($searchValues) ? json_encode($searchValues,302) : $searchValues;
         
         $result = [];

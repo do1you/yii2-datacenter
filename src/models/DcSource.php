@@ -156,15 +156,19 @@ class DcSource extends \webadmin\ModelCAR
     {
         $list = $this->getDynamicList($f5);
         if($userId!='1'){
-            $ids = DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'3']);
-            if(!empty($ids[$this->id]) && is_array($ids[$this->id])){
-                foreach($list as $key=>$item){
-                    if(!in_array($item['id'],$ids[$this->id])){
-                        unset($list[$key]);
+            if($userId){
+                $ids = DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'3']);
+                if(!empty($ids[$this->id]) && is_array($ids[$this->id])){
+                    foreach($list as $key=>$item){
+                        if(!in_array($item['id'],$ids[$this->id])){
+                            unset($list[$key]);
+                        }
                     }
+                }else{
+                    $list = [];
                 }
-            }else{
-                $list = [];
+            }elseif(($currIdent = Yii::$app->session[$this['v_sessionName']]) && isset($list[$currIdent])){
+                $list = [$currIdent => $list[$currIdent]];
             }
         }
         
