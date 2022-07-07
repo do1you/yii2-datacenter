@@ -47,8 +47,10 @@ $smodel->invalid_time = date('Y-m-d H:i:s',(time()+3600*24*3));
                 
                 <?= $form->field($smodel, 'user_ids')->dropDownList([],['multiple'=>'multiple','style'=>'width:100%']) ?>
                 
+                <?= $form->field($smodel, 'password')->textInput(['maxlength' => true]) ?>
+                
                 <?= $form->field($smodel, 'invalid_time')->textInput(['maxlength' => true]) ?>
-   
+                
     		<?php ActiveForm::end(); ?>
         </div>
     </div>
@@ -89,7 +91,7 @@ $(document).on('click','a[data-toggle="collection"],a[data-toggle="share"],a[dat
                         $.getJSON((reportId ? "{$durl}" : "{$durl1}"),params,function(json){
                             if(json.success){
                                 if(json.url){
-                                    bootbox.alert('分享成功！链接地址：<a href="'+json.url+'" target="_blank">'+json.url+'</a>');
+                                    bootbox.alert('分享成功！<br>链接地址：<a href="'+json.url+'" target="_blank">'+json.url+'</a><br>访问密码：'+(json.password || '不需要密码'));
                                 }else{
                                     Notify((json.msg || '操作成功'), 'top-right', '5000', 'success', 'fa-check', true);
                                 }
@@ -101,7 +103,7 @@ $(document).on('click','a[data-toggle="collection"],a[data-toggle="share"],a[dat
                 }
             }
         });
-        beforeTitle && box.find('#dcuserreport-alias_name,#dcusersets-alias_name').val(beforeTitle);
+        beforeTitle && box.find('#dcuserreport-alias_name,#dcusersets-alias_name,#dcshare-alias_name').val(beforeTitle);
         if(isShare){
             box.find('#dcshare-user_ids').select2({
                  ajax: {

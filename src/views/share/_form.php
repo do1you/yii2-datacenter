@@ -42,6 +42,8 @@ use webadmin\widgets\ActiveForm;
             <?= $form->field($model, 'alias_name')->textInput(['maxlength' => true]) ?>
 
             <?= $form->field($model, 'user_ids')->selectajaxmult(\yii\helpers\Url::toRoute('user'),[]) ?>
+            
+            <?= $form->field($model, 'password')->textInput(['maxlength' => true]) ?>
 
             <?= $form->field($model, 'invalid_time')->datetime([]) ?>
             

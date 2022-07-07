@@ -215,6 +215,7 @@ class ReportViewController extends \webadmin\BController
             ],'') && $model->save()){
                 $result['success'] = true;
                 $result['url'] = $model['v_url'];
+                $result['password'] = htmlspecialchars_decode($model['password']);
             }else{
                 $result['msg'] = implode("；",$model->getErrorSummary(true));
             }

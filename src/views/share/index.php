@@ -60,7 +60,12 @@ use yii\helpers\Url;
                 	         'filter' => false,
                 	     ],
                 	     'alias_name',
-                	     'hash_key',
+                	     [
+                	         'attribute' => 'v_url',
+                	         'value' => 'v_url',
+                	         'filter' => false,
+                	     ],
+                	     'password',
                 	     'invalid_time',
                 	     'create_time',
 

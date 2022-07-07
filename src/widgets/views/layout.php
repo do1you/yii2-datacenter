@@ -36,6 +36,7 @@ $sourceList = $model ? $model['v_source'] : [];
     			<?php elseif(isset($cache) && $cache===true):?>
     				<!-- 分享 -->
     				<a href="#" data-toggle="share" <?php echo ($model instanceof \datacenter\models\DcReport ? 'report-id' : 'set-id')?>="<?php echo $model['id']?>" 
+    				before-title="<?php echo $model['title']?>"
     				title="<?= Yii::t('datacenter','分享')?>"><i class="fa fa-share"></i></a>
     				<!-- 保存 -->
     				<a href="#" data-toggle="collection" 

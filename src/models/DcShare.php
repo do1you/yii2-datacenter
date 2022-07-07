@@ -49,6 +49,7 @@ class DcShare extends \webadmin\ModelCAR
             [['invalid_time', 'create_time'], 'safe'],
             [['alias_name'], 'string', 'max' => 150],
             [['hash_key'], 'string', 'max' => 50],
+            [['password'], 'string', 'max' => 32],
             [['hash_key'], 'unique', 'filter' => "invalid_time>='".date('Y-m-d H:i:s')."'"],
         ];
     }
@@ -70,6 +71,8 @@ class DcShare extends \webadmin\ModelCAR
             'invalid_time' => Yii::t('datacenter', '失效时间'),
             'create_time' => Yii::t('datacenter', '创建时间'),
             'switch_type' => Yii::t('datacenter', '归属类型'),
+            'password' => Yii::t('datacenter', '访问密码'),
+            'v_url' => Yii::t('datacenter', '分享链接'),
         ];
     }
     
@@ -86,7 +89,10 @@ class DcShare extends \webadmin\ModelCAR
         }
         
         if(!$this->hash_key){
-            $this->hash_key = substr(md5(microtime(true)),-8);
+            //$this->hash_key = substr(md5(microtime(true)),-8);
+            $str = substr(md5(microtime(true)),-5);
+            $str1 = substr(base64_encode($str),0,5);
+            $this->hash_key = str_shuffle($str.$str1);
         }
         
         return parent::beforeSave($insert);
