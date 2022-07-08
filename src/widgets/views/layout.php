@@ -31,7 +31,7 @@ $sourceList = $model ? $model['v_source'] : [];
                 <?php //endif;?>
                 <?php if($model['forUserModel'] && $model['forUserModel'] instanceof DcShare):?>
                 	<?php if(Yii::$app->user->id && (!$model['forUserModel']['user_ids'] || in_array(Yii::$app->user->id, $model['forUserModel']['v_user_ids']))):?>
-                		<a href="#" data-toggle="save" title="<?= Yii::t('datacenter','保存为我的报表（预留）')?>"><i class="fa fa-save"></i></a>
+                		<!-- a href="#" data-toggle="save" title="<?= Yii::t('datacenter','保存为我的报表（预留）')?>"><i class="fa fa-save"></i></a -->
                 	<?php endif;?>
                 <?php else:?>
                 	<a href="#" data-toggle="search" title="<?= Yii::t('datacenter','打开/关闭查询面板')?>"><i class="fa fa-search"></i></a>
