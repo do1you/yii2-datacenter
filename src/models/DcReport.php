@@ -261,15 +261,19 @@ class DcReport extends \webadmin\ModelCAR
     // 返回API请求地址
     public function getV_apiurl($cache='1')
     {
-        $params = Yii::$app->request->post("SysConfig",Yii::$app->request->get("SysConfig",[]));
-        $arr = [
-            'report-api/data',
-            'cache'=>$cache,
-            'id'=>$this['id'],
-            'vid'=>($this['forUserModel']?$this['forUserModel']['id']:''),
-        ];
-        $params && ($arr['SysConfig'] = $params);
-        return \yii\helpers\Url::to($arr);
+        if($this->forUserModel && $this->forUserModel instanceof DcShare){
+            return $this->forUserModel['v_dataurl'];
+        }else{
+            $params = Yii::$app->request->post("SysConfig",Yii::$app->request->get("SysConfig",[]));
+            $arr = [
+                'report-api/data',
+                'cache'=>$cache,
+                'id'=>$this['id'],
+                'vid'=>($this['forUserModel']?$this['forUserModel']['id']:''),
+            ];
+            $params && ($arr['SysConfig'] = $params);
+            return \yii\helpers\Url::to($arr);
+        }
     }
     
     // 预处理数据

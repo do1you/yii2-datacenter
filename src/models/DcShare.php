@@ -133,6 +133,12 @@ class DcShare extends \webadmin\ModelCAR
         return (is_array($this->search_values) ? $this->search_values : ($this->search_values ? json_decode($this->search_values,1) : []));
     }
     
+    // 返回分享用户
+    public function getV_user_ids()
+    {
+        return (is_array($this->user_ids) ? $this->user_ids : ($this->user_ids ? explode(',',$this->user_ids) : []));
+    }
+    
     // 获取归属类型
     public function getV_switch_type($val = null)
     {
@@ -143,6 +149,12 @@ class DcShare extends \webadmin\ModelCAR
     public function getV_url()
     {
         return \yii\helpers\Url::to(['share-view/view','h'=>$this->hash_key], true);
+    }
+    
+    //  返回API数据链接
+    public function getV_dataurl()
+    {
+        return \yii\helpers\Url::to(['share-view/data','h'=>$this->hash_key], true);
     }
     
     // 预处理数据

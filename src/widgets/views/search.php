@@ -1,10 +1,17 @@
 <?php
 use yii\helpers\Html;
 use webadmin\widgets\ActiveForm;
+use datacenter\models\DcShare;
 
 $searchList = $model->getSearchModels();
 $count = !$this->context->isCache ? 2 : ($this->context->reportList ? count($this->context->reportList) : 0);
-$url = $model['forUserModel'] ? [Yii::$app->controller->action->id,'id'=>$model['id'],'vid'=>$model['forUserModel']['id']] : [Yii::$app->controller->action->id,'id'=>$model['id']];
+$url = $model['forUserModel'] 
+    ? (
+        ($model['forUserModel'] instanceof DcShare) 
+        ? [Yii::$app->controller->action->id,'h'=>$model['forUserModel']['hash_key']]
+        : [Yii::$app->controller->action->id,'id'=>$model['id'],'vid'=>$model['forUserModel']['id']]
+      )
+    : [Yii::$app->controller->action->id,'id'=>$model['id']];
 ?>
 <?php if(!empty($searchList)):?>
     <div class="row dataconter-search">
