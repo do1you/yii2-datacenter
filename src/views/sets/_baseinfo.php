@@ -13,7 +13,10 @@ use webadmin\widgets\ActiveForm;
             
             <?= $form->field($model, 'cat_id')->textInput()->select2($model->getV_cat_id(false), []) ?>
 
-            <?= $form->field($model, 'set_type')->textInput(['maxlength' => true])->dropDownList($model->getV_set_type(false), []) ?>
+            <?= $form->field($model, 'set_type')->textInput(['maxlength' => true])->dropDownList($model->getV_set_type(false), (
+                (Yii::$app->request->get('type') || Yii::$app->controller->action->id!='create') 
+                ? ['readonly'=>'readonly', 'disabled'=>'disabled'] 
+                : [])) ?>
 
             <?= $form->field($model, 'main_model',['options'=>['class'=>'form-group box_form box_model']])->textInput()->selectajax(\yii\helpers\Url::toRoute('model'),[]) ?>
 

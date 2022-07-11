@@ -110,10 +110,11 @@ class SetsController extends \webadmin\BController
     /**
      * 添加模型
      */
-    public function actionCreate()
+    public function actionCreate($type='')
     {
         $model = new DcSets();
         $model->loadDefaultValues();
+        if($type) $model->set_type = $type;
 
         if($model->load(Yii::$app->request->post()) && $model->ajaxValidation() &&
             ($transaction = DcSets::getDb()->beginTransaction()) && $model->save()
@@ -121,7 +122,8 @@ class SetsController extends \webadmin\BController
             $transaction->commit(); // 提交事务
             \datacenter\models\DcSets::model()->getCache('allDefSets',[Yii::$app->user->id,null,1],86400,true); // 更新数据集缓存
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));
-            return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
+        	return $this->redirect(['update', 'id' => $model->id]);
+            // return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
         }
 
         return $this->render('create', [

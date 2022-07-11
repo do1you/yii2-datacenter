@@ -1,5 +1,6 @@
 <?php
 use webadmin\widgets\ActiveForm;
+use \yii\helpers\Url;
 $reportList = \datacenter\models\DcReport::model()->findModel((in_array(Yii::$app->controller->action->id,['copy','update'])
     ? [ 'id' => (!empty($id) ? $id : '-999') ]
     : [
@@ -9,22 +10,33 @@ $reportList = \datacenter\models\DcReport::model()->findModel((in_array(Yii::$ap
 ?>
 <div class="row">
 	<div class="col-sm-2 col-xs-12 report_box_left">
-		<div class="well with-header well-min-height" style="padding-top:50px;min-height:500px;">
-            <div class="header bg-themeprimary">数据集</div>
-    		<?= $this->render('_tree', [
-    		    'id' => $id,
-    		]) ?>
-        </div>
+		<div class="widget flat radius-bordered">
+    		<div class="widget-header bg-themeprimary">
+    		    <span class="widget-caption">数据集</span>
+    		    <div class="widget-buttons">
+    				<a href="<?php echo Url::to(['sets/create','type'=>'excel']);?>" target="_blank" title="<?= Yii::t('datacenter','导入EXCEL')?>"><i class="fa fa-file-excel-o"></i></a>
+    		    </div>
+    		</div>
+    		<div class="widget-body well-min-height" style="min-height:500px;">
+    			<?= $this->render('_tree', [
+        		    'id' => $id,
+        		]) ?>
+    		</div>
+		</div>
 	</div>
 	<div class="col-sm-10 col-xs-12 report_box_right">
-		<div class="well with-header well-min-height" id="report_box" style="padding:50px 12px 12px;min-height:500px;">
-            <div class="header bg-themeprimary">构建报表</div>
-            <div id="report_div">
-            	<?= $this->render('_reports', [
-            	    'reportList' => $reportList,
-            	]) ?>
-            </div>
-        </div>
+		<div class="widget flat radius-bordered">
+    		<div class="widget-header bg-themeprimary">
+    		    <span class="widget-caption">构建报表</span>
+    		</div>
+    		<div class="widget-body well-min-height" style="min-height:500px;">
+    			<div id="report_div">
+                	<?= $this->render('_reports', [
+                	    'reportList' => $reportList,
+                	]) ?>
+                </div>
+    		</div>
+		</div>
 	</div>
 </div>
 
