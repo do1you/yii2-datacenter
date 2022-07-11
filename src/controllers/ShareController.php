@@ -61,7 +61,9 @@ class ShareController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcShare();
-        $dataProvider = $model->search(Yii::$app->request->queryParams,[],['shareUser','report','set']);
+		$dataProvider = $model->search(Yii::$app->request->queryParams,(Yii::$app->user->id=='-1' ? [] : [
+		    '=', 'dc_share.share_user', Yii::$app->user->id,
+		]),['shareUser','report','set']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

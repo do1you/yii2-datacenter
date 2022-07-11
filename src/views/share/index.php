@@ -76,11 +76,7 @@ use yii\helpers\Url;
                             'template' => '{show} {view} {update} {delete}',
                             'buttons'=>[
                                 'show'=>function($url,$model){
-                                    return Html::a('<span class="fa fa-navicon"></span>', (
-                                            $model->report_id>0 
-                                                ? ['report-view/view', 'id' => $model->report_id, 'vid' => $model->id] 
-                                                : ['report-view/set-view', 'id' => $model->set_id, 'vid' => $model->id]
-                                        ), [
+                                return Html::a('<span class="fa fa-navicon"></span>', $model['v_url'], [
                                         'title' => Yii::t('datacenter', '查看数据'),
                                         'target' => '_blank',
                                         'data-pjax'=>'0',
