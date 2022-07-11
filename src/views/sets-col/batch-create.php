@@ -13,7 +13,7 @@ Yii::$app->controller->currNav[] = Yii::t('common','批量添加');
 <div class="row">
 	<div class="col-xs-12">
 		<div class="pull-right inline">
-			<a class="btn btn-primary" href="<?php echo Url::to(['index'])?>"><i class="ace-icon glyphicon glyphicon-list bigger-110"></i> <?php echo Yii::t('common','列表')?></a>
+			<a class="btn btn-primary" href="<?php echo Url::to(!empty(Yii::$app->session[Yii::$app->controller->id]) ? Yii::$app->session[Yii::$app->controller->id] : ['index'])?>"><i class="ace-icon glyphicon glyphicon-list bigger-110"></i> <?php echo Yii::t('common','列表')?></a>
 		</div>
 	</div>
 </div>

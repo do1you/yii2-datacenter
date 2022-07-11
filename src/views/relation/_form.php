@@ -13,7 +13,7 @@ $source_col = array_merge([''=>''],$model['v_source_col']);
 	<div class="col-xs-12">
 		<div class="pull-right inline">
 			<?php /* <a class="btn btn-primary" href="<?php echo Url::to(['tree']);?>"><i class='fa fa-sitemap'></i> <?= Yii::t('common','树型数据')?></a> */?>
-			<a class="btn btn-primary" href="<?php echo Url::to(['index'])?>"><i class="ace-icon glyphicon glyphicon-list bigger-110"></i> <?php echo Yii::t('common','列表')?></a>
+			<a class="btn btn-primary" href="<?php echo Url::to(!empty(Yii::$app->session[Yii::$app->controller->id]) ? Yii::$app->session[Yii::$app->controller->id] : ['index'])?>"><i class="ace-icon glyphicon glyphicon-list bigger-110"></i> <?php echo Yii::t('common','列表')?></a>
 			<?php if(Yii::$app->controller->action->id!='create'):?>
 				<a class="btn btn-primary" href="<?php echo Url::to(['create'])?>"><i class="ace-icon fa fa-plus bigger-110"></i> <?php echo Yii::t('common','添加')?></a>
 			<?php endif;?>
