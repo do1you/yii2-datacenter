@@ -231,6 +231,14 @@ class ReportDataBehaviors extends \yii\base\Behavior
     {
         return $this->getDataProvider()->getSearchModels();
     }
+    
+    /**
+     * 返回数据查询条件的表单数值
+     */
+    public function getSearchValues()
+    {
+        return $this->getDataProvider()->getSearchValues();
+    }
         
     /**
      * 应用过滤条件

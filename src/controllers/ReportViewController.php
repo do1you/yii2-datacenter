@@ -330,21 +330,47 @@ class ReportViewController extends \webadmin\BController
     {
         if($list && is_array($list)){
             foreach($list as $key=>$item){
+                // 提取过滤参数
+                $excelData = $item['v_excelData'];
+                $searchValues = $item->getSearchValues();
+                $searchValues = is_array($searchValues) ? array_filter($searchValues,function($val){
+                    if($val===null || $val===false || $val===''){
+                        return false;
+                    }
+                    return true;
+                }) : [];
+                $searchValuesStr = $colspans = [];
+                if($searchValues && $excelData){
+                    $first = reset($excelData);
+                    $last = end($excelData);
+                    if(!empty($first['value']) && !empty($last['value']) && $first['value']!=$last['value']){
+                        foreach($searchValues as $k=>$v){
+                            $searchValuesStr[] = "{$k}：{$v}";
+                        }
+                        $colspans[$first['value']] = [
+                            'attribute' => $last['value'],
+                            'label' => implode("\r\n",$searchValuesStr),
+                        ];
+                    }
+                }
+                
+                // 拼装EXCEL
                 if($key==0){
                     $dataProvider = $item->getDataProvider();
-                    $titles= $item['v_excelData'];
+                    $titles = $excelData;
                     $filename = $item['title'];
-                    $options = ['title'=>$item['title']];
+                    $options = ['title'=>$item['title'],'colspans'=>($colspans ? $colspans : null),];
                 }else{
                     $options['sheets'][$item['id']] = [
                         'dataProvider' => $item->getDataProvider(),
-                        'titles' => $item['v_excelData'],
+                        'titles' => $excelData,
                         'title' => $item['title'],
+                        'colspans' => ($colspans ? $colspans : null),
                     ];
                 }
             }
         }
-        
+
         if(empty($dataProvider) || empty($titles)){
             throw new \yii\web\NotFoundHttpException(Yii::t('common','您查询的模型对象不存在'));
         }
