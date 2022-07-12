@@ -1,6 +1,3 @@
-<?php
-use datacenter\models\DcRoleAuthority;
-?>
 <div id="report_tree" class="tree tree-solid-line tree-unselectable" style="overflow-y:auto;">
     <div class="tree-folder" style="display: none;">
         <div class="tree-folder-header">

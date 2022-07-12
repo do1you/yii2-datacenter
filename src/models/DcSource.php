@@ -163,6 +163,8 @@ class DcSource extends \webadmin\ModelCAR
         if($userId!='1'){
             if($userId){
                 $ids = DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'3']);
+                $userIds = DcUserAuthority::model()->getCache('getAuthorityIds', [$userId,'3']);
+                $ids = \yii\helpers\ArrayHelper::merge($ids, $userIds);
                 if(!empty($ids[$this->id]) && is_array($ids[$this->id])){
                     foreach($list as $key=>$item){
                         if(!in_array($item['id'],$ids[$this->id])){

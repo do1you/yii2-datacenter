@@ -338,6 +338,7 @@ class DcReport extends \webadmin\ModelCAR
         $query->where([ // $userId=='1' ? [] : 
             'or',
             ['in', 'dc_report.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'5'])],
+            ['in', 'dc_report.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [$userId,'5'])],
             ['=', 'dc_report.create_user', $userId],
         ])->andWhere(['dc_report.state'=>'0']);
         if($where){

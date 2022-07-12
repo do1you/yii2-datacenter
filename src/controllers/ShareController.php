@@ -40,7 +40,12 @@ class ShareController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
-                //'col_where' => [],
+                'col_where' => (Yii::$app->user->id=='1' ? [] : [
+                    'or',
+                    ['in', 'dc_report.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'5'])],
+                    ['in', 'dc_report.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'5'])],
+                    ['=', 'dc_report.create_user', Yii::$app->user->id],
+                ]),
             ],
             // 数据集查询
             'sets' => [
@@ -49,7 +54,12 @@ class ShareController extends \webadmin\BController
                 'col_id' => 'id',
                 'col_text' => 'title',
                 'col_v_text' => 'v_title',
-                //'col_where' => [],
+                'col_where' => (Yii::$app->user->id=='1' ? [] : [
+                    'or',
+                    ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                    ['in', 'dc_sets.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                    ['=', 'dc_sets.create_user', Yii::$app->user->id],
+                ]),
             ],
         ];
     }
@@ -61,7 +71,7 @@ class ShareController extends \webadmin\BController
     {
     	unset(Yii::$app->session[$this->id]);
 		$model = new DcShare();
-		$dataProvider = $model->search(Yii::$app->request->queryParams,(Yii::$app->user->id=='-1' ? [] : [
+		$dataProvider = $model->search(Yii::$app->request->queryParams,(Yii::$app->user->id=='1' ? [] : [
 		    '=', 'dc_share.share_user', Yii::$app->user->id,
 		]),['shareUser','report','set']);
         

@@ -9,6 +9,7 @@ use datacenter\models\DcReport;
 use datacenter\models\DcSets;
 use datacenter\models\DcUserReport;
 use datacenter\models\DcRoleAuthority;
+use datacenter\models\DcUserAuthority;
 use datacenter\models\DcUserSets;
 use datacenter\models\DcShare;
 

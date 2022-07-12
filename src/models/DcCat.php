@@ -66,6 +66,8 @@ class DcCat extends \webadmin\ModelCAR
     {
         if($userId!='1'){
             $haveCatIds = DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'1']);
+			$userHaveCatIds = DcUserAuthority::model()->getCache('getAuthorityIds', [$userId,'1']);
+			$haveCatIds = \yii\helpers\ArrayHelper::merge($haveCatIds, $userHaveCatIds);
             if($wheres){
                 $wheres = [
                     'and',
@@ -85,6 +87,8 @@ class DcCat extends \webadmin\ModelCAR
     {
         if($userId!='1'){
             $haveCatIds = DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'1']);
+			$userHaveCatIds = DcUserAuthority::model()->getCache('getAuthorityIds', [$userId,'1']);
+			$haveCatIds = \yii\helpers\ArrayHelper::merge($haveCatIds, $userHaveCatIds);
             if($wheres){
                 $wheres = [
                     'and',

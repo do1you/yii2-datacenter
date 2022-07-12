@@ -323,19 +323,6 @@ class DcSets extends \webadmin\ModelCAR
     // 保存后动作
     public function afterSave($insert, $changedAttributes)
     {
-        // 保存默认数据集权限
-        if($insert && Yii::$app instanceof \yii\web\Application){
-            $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>Yii::$app->user->id]), 'role_id', 'role_id');
-            foreach($roleIds as $roleId){
-                $model = new DcRoleAuthority;
-                $model->role_id = $roleId;
-                $model->source_id = $this->id;
-                $model->source_type = '4';
-                $model->save(false);
-            }
-            \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'], 86400, true);
-        }
-        
         // excel文件保存
         if($this->set_type=='excel'){
             $this->saveExcelData();
@@ -718,6 +705,7 @@ class DcSets extends \webadmin\ModelCAR
         $query->where($userId=='1' ? [] : [
             'or',
             ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'4'])],
+            ['in', 'dc_sets.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [$userId,'4'])],
             ['=', 'dc_sets.create_user', $userId],
         ])->andWhere(['dc_sets.state'=>'0']);
         if($where){

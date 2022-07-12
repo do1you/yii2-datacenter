@@ -11,6 +11,7 @@ use datacenter\models\DcSets;
 use datacenter\models\DcSetsColumns;
 use datacenter\models\DcReportColumns;
 use datacenter\models\DcRoleAuthority;
+use datacenter\models\DcUserAuthority;
 
 class ReportController extends \webadmin\BController
 {
@@ -51,7 +52,8 @@ class ReportController extends \webadmin\BController
                 'col_text' => ['tb_name','tb_label'],
                 'col_v_text' => 'v_tb_name',
                 'col_where' => (Yii::$app->user->id=='1' ? [] : [
-                    'source_db'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
+                    'source_db'=>\yii\helpers\ArrayHelper::merge(\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']), 
+                        \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2'])),
                 ]),
 				'model_withs' => ['source'],
             ],
@@ -67,7 +69,8 @@ class ReportController extends \webadmin\BController
                     ['=', "dc_sets.cat_id", $mId],
                     [
 						'or',
-						['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                        ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                        ['in', 'dc_sets.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
 						['=', 'dc_sets.create_user', Yii::$app->user->id],
 					]
                 ]),
@@ -100,6 +103,7 @@ class ReportController extends \webadmin\BController
             [
                 'or',
                 ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                ['in', 'dc_sets.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
                 ['=', 'dc_sets.create_user', Yii::$app->user->id],
             ]
         ]))
@@ -366,6 +370,7 @@ class ReportController extends \webadmin\BController
 		$dataProvider = $model->search(Yii::$app->request->queryParams,(Yii::$app->user->id=='1' ? null : [
 		    'or',
 		    ['in', 'dc_report.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'5'])],
+		    ['in', 'dc_report.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'5'])],
 		    ['=', 'dc_report.create_user', Yii::$app->user->id],
 		]),['columns.sets','user','cat.parent.parent.parent']);
         

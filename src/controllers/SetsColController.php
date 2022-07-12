@@ -7,6 +7,7 @@ namespace datacenter\controllers;
 use Yii;
 use datacenter\models\DcSetsColumns;
 use datacenter\models\DcRoleAuthority;
+use datacenter\models\DcUserAuthority;
 use yii\data\ActiveDataProvider;
 use datacenter\models\DcSets;
 
@@ -38,7 +39,10 @@ class SetsColController extends \webadmin\BController
                 'col_text' => ['tb_name','tb_label'],
                 'col_v_text' => 'v_tb_name',
                 'col_where' => (Yii::$app->user->id=='1' ? [] : [
-                    'source_db'=>\datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
+                    'source_db'=>\yii\helpers\ArrayHelper::merge(
+                        \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
+                        \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2'])
+                    ),
                 ]),
                 'model_withs' => ['source'],
             ],
@@ -51,7 +55,8 @@ class SetsColController extends \webadmin\BController
                 'col_v_text' => 'v_title',
                 'col_where' => (Yii::$app->user->id=='1' ? [] : [
 					'or',
-					['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                    ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                    ['in', 'dc_sets.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
 					['=', 'dc_sets.create_user', Yii::$app->user->id],
 				]),
             ],
@@ -65,7 +70,8 @@ class SetsColController extends \webadmin\BController
                 'join_withs' => ['mainModel','sourceRelation'],
                 'col_where' => ['and',(Yii::$app->user->id=='1' ? [] : [
 					'or',
-					['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                    ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                    ['in', 'dc_sets.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
 					['=', 'dc_sets.create_user', Yii::$app->user->id],
 				]),"dc_model.source_db='{$mModel['source_db']}' and dc_sets.set_type='model' and dc_sets_relation.target_sets='{$fId}'"],
             ],
@@ -92,7 +98,8 @@ class SetsColController extends \webadmin\BController
         $dataProvider = $model->search(Yii::$app->request->queryParams,(
             Yii::$app->user->id=='1' ? null : [
 				'or',
-				['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
+                ['in', 'dc_sets.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
 				['=', 'dc_sets.create_user', Yii::$app->user->id],
 			]
         ),['sets','model.source','forSets']);
