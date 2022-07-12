@@ -130,22 +130,27 @@ class DcSource extends \webadmin\ModelCAR
         
         if(($list = Yii::$app->cache->get($cacheKey))===false || $f5){
             $sql = "select * from {$model['dctable']}".($model['dcwhere'] ? " where {$model['dcwhere']} " : "")." order by ".($model['dcselect'] ? $model['dcselect'] : ($model['dcname'] ? $model['dcname'] : '1'));
-            $rows = $this->getSourceDb(false, true)->createCommand($sql)->queryAll();
             $list = [];
-            foreach($rows as $row){
-                $list[$row[$model['dcident']]] = [
-                    'parent_id' => $this->id,
-                    'id' => $row[$model['dcident']],
-                    'name' => $row[$model['dcselect']],
-                    'dbtype' => $this->dbtype,
-                    'dbhost' => $row[$model['dchost']],
-                    'dbport' => (isset($row[$model['dcport']]) ? $row[$model['dcport']] : ($model['dcport'] ? $model['dcport'] : '3306')),
-                    'dbname' => (isset($row[$model['dcname']]) ? $row[$model['dcname']] : ($model['dcname'] ? $model['dcname'] : 'mysql')),
-                    'dbuser' => (isset($row[$model['dcuser']]) ? $row[$model['dcuser']] : ($model['dcuser'] ? $model['dcuser'] : 'root')),
-                    'dbpass' => (isset($row[$model['dcpass']]) ? $row[$model['dcpass']] : ($model['dcpass'] ? $model['dcpass'] : 'root')),
-                ];
+            if(($db = $this->getSourceDb(false, true))){
+                try{
+                    $rows = $db->createCommand($sql)->queryAll();
+                    foreach($rows as $row){
+                        $list[$row[$model['dcident']]] = [
+                            'parent_id' => $this->id,
+                            'id' => $row[$model['dcident']],
+                            'name' => $row[$model['dcselect']],
+                            'dbtype' => $this->dbtype,
+                            'dbhost' => $row[$model['dchost']],
+                            'dbport' => (isset($row[$model['dcport']]) ? $row[$model['dcport']] : ($model['dcport'] ? $model['dcport'] : '3306')),
+                            'dbname' => (isset($row[$model['dcname']]) ? $row[$model['dcname']] : ($model['dcname'] ? $model['dcname'] : 'mysql')),
+                            'dbuser' => (isset($row[$model['dcuser']]) ? $row[$model['dcuser']] : ($model['dcuser'] ? $model['dcuser'] : 'root')),
+                            'dbpass' => (isset($row[$model['dcpass']]) ? $row[$model['dcpass']] : ($model['dcpass'] ? $model['dcpass'] : 'root')),
+                        ];
+                    }
+                    $model['id'] && Yii::$app->cache->set($cacheKey, $list, 7200);
+                }catch(\yii\base\Exception $e) {
+                }
             }
-            $model['id'] && Yii::$app->cache->set($cacheKey, $list, 7200);
         }
         
         return $list;

@@ -1,9 +1,9 @@
 <?php
 /**
- * 数据库表 "dc_role_authority" 的模型对象.
+ * 数据库表 "dc_user_authority" 的模型对象.
  * @property int $id 流水号
- * @property int $role_id 角色ID
- * @property int $source_id 源ID
+ * @property int $user_id 用户ID
+ * @property string $source_id 源ID
  * @property int $source_type 源类型
  */
 
@@ -11,7 +11,7 @@ namespace datacenter\models;
 
 use Yii;
 
-class DcRoleAuthority extends \webadmin\ModelCAR
+class DcUserAuthority extends \webadmin\ModelCAR
 {
     /**
      * 自定义的权限保存参数
@@ -34,7 +34,7 @@ class DcRoleAuthority extends \webadmin\ModelCAR
      */
     public static function tableName()
     {
-        return 'dc_role_authority';
+        return 'dc_user_authority';
     }
 
     /**
@@ -43,7 +43,7 @@ class DcRoleAuthority extends \webadmin\ModelCAR
     public function rules()
     {
         return [
-            [['role_id', 'source_type'], 'integer'],
+            [['user_id', 'source_type'], 'integer'],
             [['source_id'], 'integer', 'when' => function ($model) {
                 return ($model->source_type!='3');
             }],
@@ -58,7 +58,7 @@ class DcRoleAuthority extends \webadmin\ModelCAR
     {
         return [
             'id' => Yii::t('datacenter', '流水号'),
-            'role_id' => Yii::t('datacenter', '角色ID'),
+            'user_id' => Yii::t('datacenter', '用户ID'),
             'source_id' => Yii::t('datacenter', '源ID'),
             'source_type' => Yii::t('datacenter', '源类型'),
             'sourceList' => Yii::t('datacenter', '数据源权限'),
@@ -69,10 +69,10 @@ class DcRoleAuthority extends \webadmin\ModelCAR
         ];
     }
     
-    // 获取角色关系
-    public function getRole()
+    // 获取用户关系
+    public function getUser()
     {
-        return $this->hasOne(\webadmin\modules\authority\models\AuthRole::className(), ['id'=>'role_id']);
+        return $this->hasOne(\webadmin\modules\authority\models\AuthUser::className(), ['id'=>'user_id']);
     }
     
     // 获取分类关系
@@ -89,9 +89,9 @@ class DcRoleAuthority extends \webadmin\ModelCAR
     
     // 获取动态数据源关系
     /*public function getDynamicSource()
-    {
-        // source_type=3
-    }*/
+     {
+     // source_type=3
+     }*/
     
     // 获取数据集关系
     public function getSets()
@@ -114,11 +114,10 @@ class DcRoleAuthority extends \webadmin\ModelCAR
     // 返回包含的权限数组 1 分类 2 数据源 3 动态数据源 4 数据集 5 数据报表
     public function getAuthorityIds($userId,$type)
     {
-        $roleIds = \yii\helpers\ArrayHelper::map(\webadmin\modules\authority\models\AuthUserRole::findAll(['user_id'=>$userId]), 'role_id', 'role_id');
-        $ids = self::find()->where([
-            'role_id'=>$roleIds,
+        $ids = $userId ? self::find()->where([
+            'user_id'=>$userId,
             'source_type'=>$type,
-        ])->select('source_id')->asArray()->column();
+        ])->select('source_id')->asArray()->column() : [];
         $ids = $ids ? $ids : ['-999'];
         if($type=='3'){
             $list = [];
@@ -133,35 +132,35 @@ class DcRoleAuthority extends \webadmin\ModelCAR
         return array_unique($ids);
     }
     
-    // 保存角色权限
-    public function saveAuthority($roleId)
+    // 保存用户权限
+    public function saveAuthority($userId)
     {
-        $list = self::find()->where(['role_id'=>$roleId])->all();
+        $list = self::find()->where(['user_id'=>$userId])->all();
         $list = \yii\helpers\ArrayHelper::map($list, 'source_id', 'v_self', 'source_type');
         
         // 保存动态数据源
-        $this->_saveAuthority('3', $roleId, $list);
+        $this->_saveAuthority('3', $userId, $list);
         
         // 保存数据源
-        $this->_saveAuthority('2', $roleId, $list);
+        $this->_saveAuthority('2', $userId, $list);
         
         // 保存数据集
-        $this->_saveAuthority('4', $roleId, $list);
+        $this->_saveAuthority('4', $userId, $list);
         
         // 保存数据报表
-        $this->_saveAuthority('5', $roleId, $list);
+        $this->_saveAuthority('5', $userId, $list);
         
         // 保存数据分类
-        $this->_saveAuthority('1', $roleId, $list);
+        $this->_saveAuthority('1', $userId, $list);
         
         return true;
     }
     
     // 保存权限
-    private function _saveAuthority($type,$roleId,$list)
+    private function _saveAuthority($type,$userId,$list)
     {
         $param = $this->parameterAuthority[$type];
-
+        
         if($param && $this->$param){
             if($this->$param && is_array($this->$param)){
                 foreach($this->$param as $dbId=>$dynamicIds){
@@ -182,9 +181,9 @@ class DcRoleAuthority extends \webadmin\ModelCAR
                                 }elseif($type=='3'){
                                     $subDbId = "{$dbId}_{$subDbId}";
                                 }
-                                $model = isset($list[$type][$subDbId]) ? $list[$type][$subDbId] : (new DcRoleAuthority());
+                                $model = isset($list[$type][$subDbId]) ? $list[$type][$subDbId] : (new DcUserAuthority());
                                 $model->load([
-                                    'role_id' => $roleId,
+                                    'user_id' => $userId,
                                     'source_id' => $subDbId,
                                     'source_type' => $type,
                                 ],'');
@@ -209,8 +208,4 @@ class DcRoleAuthority extends \webadmin\ModelCAR
         
         return false;
     }
-    
-    
-    
-    
 }

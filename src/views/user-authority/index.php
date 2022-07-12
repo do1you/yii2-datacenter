@@ -34,21 +34,22 @@ use yii\helpers\Url;
 
         	            'id',
         	            'name',
+        	            'login_name',
+        	            'mobile',
         	            [
-        	                'attribute' => 'is_system',
-        	                'value' => 'v_is_system',
+        	                'attribute' => 'state',
+        	                'value' => 'v_state',
         	            ],
         	            [
-        	                'attribute' => 'role_group',
-        	                'value' => 'v_role_group',
+        	                'attribute' => 'roleList',
+        	                'value' => 'v_roleList',
         	            ],
-        	            'note',
-
-                        [
-                        	'class' => '\yii\grid\ActionColumn',
-                        	'buttonOptions' => ['data-pjax'=>'1'],
-                            'template' => '{view} {update}',
-                        ],
+        	            
+        	            [
+        	                'class' => '\yii\grid\ActionColumn',
+        	                'buttonOptions' => ['data-pjax'=>'1'],
+        	                'template' => '{view} {update}',
+        	            ],
                     ],
                 ]); ?>
 

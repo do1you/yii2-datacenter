@@ -1,0 +1,1 @@
+<?= $form->field($aModel, 'reportList')->treeList(\datacenter\models\DcReport::treeData($aModel->catList,$aModel->reportList),['title'=>Yii::t('authority','请给该用户分配需要操作的数据报表')]) ?>
