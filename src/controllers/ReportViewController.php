@@ -186,6 +186,7 @@ class ReportViewController extends \webadmin\BController
      */
     public function actionCollection()
     {
+        $is_new = Yii::$app->request->getBodyParam('is_new',Yii::$app->getRequest()->getQueryParam('is_new'));
         $share = Yii::$app->request->getBodyParam('share',Yii::$app->getRequest()->getQueryParam('share'));
         $reportId = Yii::$app->request->getBodyParam('reportId',Yii::$app->getRequest()->getQueryParam('reportId'));
         $setId = Yii::$app->request->getBodyParam('setId',Yii::$app->getRequest()->getQueryParam('setId'));
@@ -233,6 +234,7 @@ class ReportViewController extends \webadmin\BController
                 $result['msg'] = implode("；",$model->getErrorSummary(true));
             }
         }elseif($reportId){
+            if($is_new && $userReportId) unset($userReportId);
             if($userReportId) $model = DcUserReport::findOne($userReportId);
             if(empty($model)){
                 $model = new DcUserReport;
@@ -249,6 +251,7 @@ class ReportViewController extends \webadmin\BController
                 $result['msg'] = implode("；",$model->getErrorSummary(true));
             }
         }elseif($setId){
+            if($is_new && $userSetId) unset($userSetId);
             if($userSetId) $model = DcUserSets::findOne($userSetId);
             if(empty($model)){
                 $model = new DcUserSets;

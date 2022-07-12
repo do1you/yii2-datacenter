@@ -33,6 +33,8 @@ $smodel->invalid_time = date('Y-m-d H:i:s',(time()+3600*24*3));
                 <?= $form->field($rmodel, 'alias_name')->textInput(['maxlength' => true]) ?>
                 
                 <?= $form->field($rmodel, 'paixu')->textInput(['maxlength' => true]) ?>
+                
+                <?= $form->field($rmodel, 'is_new')->textInput(['maxlength' => true])->switchs() ?>
    
     		<?php ActiveForm::end(); ?>
         </div>
@@ -137,6 +139,12 @@ $(document).on('click','a[data-toggle="collection"],a[data-toggle="share"],a[dat
             });
 
             box.find('#dcshare-invalid_time').datetimepicker();
+        }else{
+            if(userReportId || userSetId){
+                box.find('#dcuserreport-is_new').closest('.form-group').show();
+            }else{
+                box.find('#dcuserreport-is_new').closest('.form-group').hide();
+            }
         }
     }else if(userReportId || userSetId){
         $.getJSON((userReportId ? "{$durl}" : "{$durl1}"),{

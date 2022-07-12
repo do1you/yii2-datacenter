@@ -17,6 +17,11 @@ use Yii;
 class DcUserReport extends \webadmin\ModelCAR
 {
     /**
+     * 是否保存新数据表
+     */
+    public $is_new = '1';
+    
+    /**
      * 返回数据库表名称
      */
     public static function tableName()
@@ -33,7 +38,7 @@ class DcUserReport extends \webadmin\ModelCAR
             [['user_id', 'report_id'], 'required'],
             [['user_id', 'report_id', 'paixu', 'grant_user'], 'integer'],
             [['alias_name', 'create_time'], 'safe'],
-            [['create_time', 'search_values'], 'safe'],
+            [['create_time', 'search_values', 'is_new'], 'safe'],
             [['alias_name'], 'string', 'max' => 70],
         ];
     }
@@ -52,6 +57,7 @@ class DcUserReport extends \webadmin\ModelCAR
             'create_time' => Yii::t('datacenter', '授权时间'),
             'grant_user' => Yii::t('datacenter', '授权用户'),
             'search_values' => Yii::t('datacenter', '过滤条件'),
+            'is_new' => Yii::t('datacenter', '新报表'),
         ];
     }
     

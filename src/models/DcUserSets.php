@@ -23,6 +23,11 @@ class DcUserSets extends \webadmin\ModelCAR
     public $report;
     
     /**
+     * 是否保存新数据表
+     */
+    public $is_new = '1';
+    
+    /**
      * 返回数据库表名称
      */
     public static function tableName()
@@ -38,7 +43,7 @@ class DcUserSets extends \webadmin\ModelCAR
         return [
             [['user_id', 'set_id'], 'required'],
             [['user_id', 'set_id', 'paixu', 'grant_user'], 'integer'],
-            [['search_values', 'alias_name', 'create_time'], 'safe'],
+            [['search_values', 'alias_name', 'create_time', 'is_new'], 'safe'],
             [['search_values'], 'string'],
             [['create_time'], 'safe'],
             [['alias_name'], 'string', 'max' => 70],
@@ -59,6 +64,7 @@ class DcUserSets extends \webadmin\ModelCAR
             'alias_name' => Yii::t('datacenter', '别名'),
             'create_time' => Yii::t('datacenter', '授权时间'),
             'grant_user' => Yii::t('datacenter', '授权用户'),
+            'is_new' => Yii::t('datacenter', '新数据集'),
         ];
     }
     
