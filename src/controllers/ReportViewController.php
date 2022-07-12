@@ -186,7 +186,6 @@ class ReportViewController extends \webadmin\BController
      */
     public function actionCollection()
     {
-        $is_new = Yii::$app->request->getBodyParam('is_new',Yii::$app->getRequest()->getQueryParam('is_new'));
         $share = Yii::$app->request->getBodyParam('share',Yii::$app->getRequest()->getQueryParam('share'));
         $reportId = Yii::$app->request->getBodyParam('reportId',Yii::$app->getRequest()->getQueryParam('reportId'));
         $setId = Yii::$app->request->getBodyParam('setId',Yii::$app->getRequest()->getQueryParam('setId'));
@@ -195,6 +194,7 @@ class ReportViewController extends \webadmin\BController
         $searchValues = Yii::$app->request->getBodyParam('SysConfig',Yii::$app->getRequest()->getQueryParam('SysConfig',''));
         $modelParams = Yii::$app->request->getBodyParam('DcUserReport',Yii::$app->getRequest()->getQueryParam('DcUserReport',[]));
         $shareParams = Yii::$app->request->getBodyParam('DcShare',Yii::$app->getRequest()->getQueryParam('DcShare',[]));
+        $is_new = isset($modelParams['is_new']) ? $modelParams['is_new'] : '0';
         
         if($searchValues && is_array($searchValues)){
             foreach($searchValues as $k=>$v){
