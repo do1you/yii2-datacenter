@@ -597,6 +597,8 @@ class DcSets extends \webadmin\ModelCAR
                 $relation->joinWhere($this, $target, false, true);
                 $target->getSummary();
             }
+        }else{
+            $this->select(false)->order(false);
         }
     }
     

@@ -110,6 +110,9 @@ class ActiveDataProvider extends BaseDataProvider
             $row = $this->filterColumns($row, true);
         }else{
             if(($summaryColumns = $this->getSummaryModels())){
+                if(!$this->forReport){
+                    $this->select(false);
+                }
                 $query = $this->query;
                 $query->orderBy([]);
                 if(!$this->forReport) $query->groupBy([]);
