@@ -54,7 +54,7 @@ if(Yii::$app->controller->action->id=='update'){
         	<?php $form = ActiveForm::begin(); ?>
                 <?= $form->field($rmodel, 'title')->textInput(['maxlength' => true]) ?>
                 
-                <?= $form->field($rmodel, 'cat_id')->dropDownList(\datacenter\models\DcCat::treeOptions(),['prompt'=>'请选择分类']) ?>
+                <?= $form->field($rmodel, 'cat_id')->dropDownList(\datacenter\models\DcCat::authorityTreeOptions(Yii::$app->user->id),[]) // 'prompt'=>'请选择分类'?>
                 
                 <?= $form->field($rmodel, 'paixu')->textInput(['maxlength' => true]) ?>
    
