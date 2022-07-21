@@ -37,19 +37,28 @@ class DefaultController extends \webadmin\BController
         $id = Yii::$app->request->post('id',Yii::$app->request->get('id'));
         $k = Yii::$app->request->post('key',Yii::$app->request->get('key'));
         $q = Yii::$app->request->post('q',Yii::$app->request->get('q'));
-        $source = Yii::$app->request->post('q',Yii::$app->request->get('s'));
+        $source = Yii::$app->request->post('s',Yii::$app->request->get('s'));
         $source = $source ? \datacenter\models\DcSource::model()->getCache('findModel',[['id'=>$source], false]) : null;
         $result = ['items'=>[], 'total_count' => 0,];
         if((($arr=explode('.', $k)) && count($arr)==3) && ($db = $source->getSourceDb())){
             list($table,$key,$text) = $arr;
             if($table && $key && $text){
+                $wheres = ['or'];
+                $qList = $q ? explode(',',str_replace("，",",",$q)) : [];
+                foreach($qList as $qItem){
+                    $qItem = trim($qItem);
+                    if(strlen($qItem)>0){
+                        $wheres[] = ['like',$text,$qItem];
+                    }
+                }
                 $limit = 20;
                 $query = new \yii\db\Query();
                 $query->select(["{$key} as id","{$text} as text"])
                 ->from($table)
-                ->andFilterWhere(['like',$text,$q])
+                //->andFilterWhere(['like',$text,$q]) // 调整为支持逗号间隔批量查询
                 ->andFilterWhere([$key=>$id])
                 ->orderBy($text);
+                count($wheres)>1 && $query->andFilterWhere($wheres);
                 
                 $dataProvider = new \yii\data\ActiveDataProvider([
                     'query' => $query,
