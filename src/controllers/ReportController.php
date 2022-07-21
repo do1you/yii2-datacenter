@@ -336,7 +336,7 @@ class ReportController extends \webadmin\BController
             }
             $model = new DcReport;
             $model->state = 9;
-            $model->title = "新报表".date('YmdHis');
+            $model->title = (($sets = reset($setLists)) ? $sets['title'] : "新报表").date('YmdHis');
             $model->save(false);
         }
         

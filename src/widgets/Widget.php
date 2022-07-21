@@ -62,10 +62,16 @@ class Widget extends \yii\base\Widget
     public function run()
     {
         ob_get_clean();
-        $this->renderAsset();
-        $content = $this->renderContent();
-        $search = $this->showSearchBox ? $this->renderSearch() : '';
-        $content = $this->renderLayout($content, $search);
+        
+        try{
+            $this->renderAsset();
+            $content = $this->renderContent();
+            $search = $this->showSearchBox ? $this->renderSearch() : '';
+            $content = $this->renderLayout($content, $search);
+        }catch(\yii\base\Exception $e) {
+            $content = $this->reportModel['v_report_title'].$e->getMessage();
+            $content = $this->renderLayout($content);
+        }
         
         return $content;
     }
