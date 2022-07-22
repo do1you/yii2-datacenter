@@ -268,6 +268,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             // 默认条件
             $searchModels = $this->getSearchModels();
             $labelParams = $params = [];
+            $globalParams = Yii::$app->request->get("SysConfig",[]);
             foreach($searchModels as $sModel){
                 if(isset($sModel['value']) && (is_array($sModel['value']) || strlen($sModel['value'])>0)){
                     $labelParams[$sModel['label_name']] = $params[$sModel['attribute']] = $sModel['value'];
@@ -289,14 +290,17 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 // 报表条件
                 $mainSet = $this->report->getV_mainSet();
                 $sets = $this->report->getV_sets();
-                $setSearchParams = [];
+                $setSearchParams = $requestSetParams = [];
                 foreach($colnmns as $col){
                     if($col['formula']) continue;
                     $sIndex = ($col['user_set_id'] && $col['userSets']) ? '-'.$col['user_set_id'] : $col['set_id'];
                     foreach([$col['v_alias'], '-'.$col['v_alias']] as $attribute){
+                        $is_back_search = substr($attribute,0,1)=='-';
                         if(isset($params[$attribute]) && (is_array($params[$attribute]) || strlen($params[$attribute])>0) && $col['setsCol']){
-                            $is_back_search = substr($attribute,0,1)=='-';
                             $setSearchParams[$sIndex][($is_back_search ? '-' : '').$col['setsCol']['v_alias']] = $params[$attribute];
+                        }
+                        if(isset($globalParams[$attribute]) && (is_array($globalParams[$attribute]) || strlen($globalParams[$attribute])>0) && $col['setsCol']){
+                            $requestSetParams[$sIndex][($is_back_search ? '-' : '').$col['setsCol']['v_alias']] = $globalParams[$attribute];
                         }
                     }
                 }
@@ -304,6 +308,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 foreach($sets as $index=>$set){
                     $sIndex = $set['forUserModel'] ? '-'.$set['forUserModel']['id'] : $set['id'];
                     $searchParams = (isset($setSearchParams[$sIndex]) && is_array($setSearchParams[$sIndex])) ? $setSearchParams[$sIndex] : [];
+                    $reqParams = (isset($requestSetParams[$sIndex]) && is_array($requestSetParams[$sIndex])) ? $requestSetParams[$sIndex] : [];
                     
                     // 同标签条件带入
                     $label_values = [];
@@ -324,8 +329,8 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         $appleParams = array_merge((is_array($search_values) ? $search_values : []), $label_values, $searchParams);
                         $set->applySearchModels($appleParams);
                         
-                        // 非主数据集的,查询出结果数据并入到主数据集条件
-                        if($searchParams && $mainSet !== $set){
+                        // 非主数据集的,查询出结果数据并入到主数据集条件，只有从前端提交的参数才进行匹配主数据集
+                        if($reqParams && $mainSet !== $set){ // $searchParams
                             $set->filterSourceSearch($mainSet);
                         }
                     }

@@ -41,20 +41,22 @@ $sourceList = $model ? $model['v_source'] : [];
             				<a href="#" data-toggle="dispose" report-id="<?php echo $model['id']?>" title="<?= Yii::t('datacenter','删除')?>"><i class="fa fa-times"></i></a>
         				<?php endif;?>
         			<?php elseif(isset($cache) && $cache===true):?>
-        				<!-- 分享 -->
-        				<a href="#" data-toggle="share" <?php echo ($model instanceof \datacenter\models\DcReport ? 'report-id' : 'set-id')?>="<?php echo $model['id']?>" 
-        				before-title="<?php echo $model['title']?>"
-        				title="<?= Yii::t('datacenter','分享')?>"><i class="fa fa-share"></i></a>
-        				<!-- 保存 -->
-        				<a href="#" data-toggle="collection" 
-                        <?php if($model['forUserModel']):?>
-                        	<?php echo ($model instanceof \datacenter\models\DcReport ? 'user-report-id' : 'user-set-id')?>="<?php echo $model['forUserModel']['id']?>"
-                        	before-title="<?php echo $model['forUserModel']['alias_name']?>"
-                        <?php endif;?>
-        				<?php echo ($model instanceof \datacenter\models\DcReport ? 'report-id' : 'set-id')?>="<?php echo $model['id']?>" 
-        				title="<?= Yii::t('datacenter','保存')?>"><i class="fa fa-save"></i></a>
-        				<?php if($model['forUserModel']):?>
-        					<a href="#" data-toggle="cancel" <?php echo ($model instanceof \datacenter\models\DcReport ? 'user-report-id' : 'user-set-id')?>="<?php echo $model['forUserModel']['id']?>" title="<?= Yii::t('datacenter','删除')?>"><i class="fa fa-times"></i></a>
+        				<?php if(!Yii::$app->request->get('access-token')):?>
+            				<!-- 分享 -->
+            				<a href="#" data-toggle="share" <?php echo ($model instanceof \datacenter\models\DcReport ? 'report-id' : 'set-id')?>="<?php echo $model['id']?>" 
+            				before-title="<?php echo $model['title']?>"
+            				title="<?= Yii::t('datacenter','分享')?>"><i class="fa fa-share"></i></a>
+            				<!-- 保存 -->
+            				<a href="#" data-toggle="collection" 
+                            <?php if($model['forUserModel']):?>
+                            	<?php echo ($model instanceof \datacenter\models\DcReport ? 'user-report-id' : 'user-set-id')?>="<?php echo $model['forUserModel']['id']?>"
+                            	before-title="<?php echo $model['forUserModel']['alias_name']?>"
+                            <?php endif;?>
+            				<?php echo ($model instanceof \datacenter\models\DcReport ? 'report-id' : 'set-id')?>="<?php echo $model['id']?>" 
+            				title="<?= Yii::t('datacenter','保存')?>"><i class="fa fa-save"></i></a>
+            				<?php if($model['forUserModel']):?>
+            					<a href="#" data-toggle="cancel" <?php echo ($model instanceof \datacenter\models\DcReport ? 'user-report-id' : 'user-set-id')?>="<?php echo $model['forUserModel']['id']?>" title="<?= Yii::t('datacenter','删除')?>"><i class="fa fa-times"></i></a>
+            				<?php endif;?>
         				<?php endif;?>
         			<?php endif;?>
         			<a href="#" data-toggle="collapse" title="<?= Yii::t('common','最小化')?>"><i class="fa fa-minus"></i></a>
