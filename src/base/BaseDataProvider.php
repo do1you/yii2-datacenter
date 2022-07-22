@@ -398,18 +398,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                                 case 'textarea': //  多行文本框
                                 case 'mask': //  格式化文本
                                 default: // 默认文本框
-                                    if(strpos($params[$attribute], '~')!==false){ // 范围查询
-                                        list($start, $end) = explode('~', $params[$attribute]);
-                                        if($is_back_search){
-                                            $this->$callFn(['or',
-                                                [$col['id'], trim($start), '<'],
-                                                [$col['id'], trim($end), '>'],
-                                            ]);
-                                        }else{
-                                            $this->$callFn($col['id'], trim($start), '>=');
-                                            $this->$callFn($col['id'], trim($end), '<=');
-                                        }
-                                    }elseif(preg_match('/^(<>|!=|>=|>|<=|<|=)/', $params[$attribute], $matches)){
+                                    if(preg_match('/^(<>|!=|>=|>|<=|<|~=|=)/', $params[$attribute], $matches)){
                                         $operator = $matches[1];
                                         $value = substr($params[$attribute], strlen($operator));
                                         if($is_back_search){
@@ -421,12 +410,47 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                                                 '<' => '>=',
                                                 '<=' => '>',
                                                 '=' => '!=',
+                                                '~=' => 'not like',
                                             ];
                                             if(isset($notOperators[$operator])){
-                                                $this->$callFn($col['id'], $value, $notOperators[$operator]); // 指定操作
+                                                $operator = $notOperators[$operator];
+                                            }
+                                        }else{
+                                            $operator =  $operator=='~=' ? 'like' : $operator;
+                                        }
+                                        
+                                        // 多个匹配模式
+                                        if(in_array($operator, ['not like','like','!=','='])){
+                                            $qList = $value ? explode(',',str_replace(["，","\r\n","\n","\t"],",",$value)) : [''];
+                                            $qList = array_map('trim',$qList);
+                                            if(count($qList)>1){
+                                                if($operator=='='){
+                                                    $this->$callFn($col['id'], $qList, 'in');
+                                                }elseif($operator=='!='){
+                                                    $this->$callFn($col['id'], $qList, 'not in');
+                                                }else{
+                                                    $wheres = $operator=='like' ? ['or'] : ['and'];
+                                                    foreach($qList as $qitem){
+                                                        $wheres[] = [$col['id'], $qitem, $operator];
+                                                    }
+                                                    $this->$callFn($wheres);
+                                                }
+                                            }else{
+                                                $this->$callFn($col['id'], $value, $operator);
                                             }
                                         }else{
                                             $this->$callFn($col['id'], $value, $operator); // 指定操作
+                                        }
+                                    }elseif(strpos($params[$attribute], '~')!==false){ // 范围查询
+                                        list($start, $end) = explode('~', $params[$attribute]);
+                                        if($is_back_search){
+                                            $this->$callFn(['or',
+                                                [$col['id'], trim($start), '<'],
+                                                [$col['id'], trim($end), '>'],
+                                            ]);
+                                        }else{
+                                            $this->$callFn($col['id'], trim($start), '>=');
+                                            $this->$callFn($col['id'], trim($end), '<=');
                                         }
                                     }else{
                                         $this->$callFn($col['id'], $params[$attribute], ($is_back_search ? 'not like' : 'like')); // 模糊查询
@@ -660,13 +684,13 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     }
     
     // 格式化字段查询数据
-    protected function formatColumns($columns)
+    protected function formatColumns($columns, $skipFormat = false)
     {
         foreach($columns as $key=>$items){
             if(is_array($items) && !empty($items[0]) && isset($items[1])){
                 $columns[$key] = [
-                    (isset($items[2]) ? $items[2] : '='),
-                    $this->getColumns($items[0]),
+                    (isset($items[2]) ? $items[2] : (is_array($items[1]) ? 'in' : '=')),
+                    ($skipFormat ? $items[0] : $this->getColumns($items[0])),
                     $items[1],
                 ];
             }
