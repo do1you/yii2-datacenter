@@ -14,7 +14,7 @@ $url = $model['forUserModel']
     : [Yii::$app->controller->action->id,'id'=>$model['id']];
 ?>
 <?php if(!empty($searchList)):?>
-    <div class="row dataconter-search">
+    <div class="row dataconter-search tooltip-primary" data-toggle="tooltip" data-placement="left" data-original-title="<p class='text-left'>查询帮助：<br>1. 带有“剔除”字眼的条件表示剔除符合这个条件的数据<br>2. 输入框以“>、>=、<、<=、=、!=、<>、~=”开头的查询，表示运算后面的数据的条件，如：>100<br>3. “=、!=、<>、~=”的运算支持使用逗号或Tab符号进行多条件匹配，如：=张三,李四,王五<br>4. 下拉搜索框支持多条件匹配，如：张三,李四,王五<br>5. 日期过滤中带有“至”的表示进行日期范围查询<br>6. 时分条件查询，将24小时制的小时数和分钟数拼接用数字表示，时间范围在0点至9点时进行相加2400，如：2200~2600</p>">
     	<div class="col-xs-12">
     		<div class="widget margin-bottom-20">
     			<div class="widget-body bordered-left bordered-themeprimary">
