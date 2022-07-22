@@ -425,13 +425,13 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                                         }
                                         
                                         // 多个匹配模式
-                                        if(in_array($operator, ['not like','like','!=','='])){
+                                        if(in_array($operator, ['not like','like','!=','<>','='])){
                                             $qList = $value ? explode(',',str_replace(["，","\r\n","\n","\t"],",",$value)) : [''];
                                             $qList = array_map('trim',$qList);
                                             if(count($qList)>1){
                                                 if($operator=='='){
                                                     $this->$callFn($col['id'], $qList, 'in');
-                                                }elseif($operator=='!='){
+                                                }elseif($operator=='!=' || $operator=='<>'){
                                                     $this->$callFn($col['id'], $qList, 'not in');
                                                 }else{
                                                     $wheres = $operator=='like' ? ['or'] : ['and'];
