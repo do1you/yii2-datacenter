@@ -110,13 +110,9 @@ class ActiveDataProvider extends BaseDataProvider
             $row = $this->filterColumns($row, true);
         }else{
             if(($summaryColumns = $this->getSummaryModels())){
-                if(!$this->forReport){
-                    $this->select(false);
-                }
                 $query = $this->query;
                 $query->orderBy([]);
-                if(!$this->forReport) $query->groupBy([]);
-                /*if($query->having){
+                if($query->having){
                     $newQuery = new \yii\db\Query([
                         'from' => ['sub' => $query],
                     ]);
@@ -124,19 +120,22 @@ class ActiveDataProvider extends BaseDataProvider
                         if($select instanceof \yii\db\ExpressionInterface) {
                             $select = $select->expression;
                         }
-                        
                         if(preg_match('/^(.*?)(?i:\s+as\s+|\s+)([\w\-_\.]+)$/', $select, $matches)) {
-                            $select = $matches[2];
+                            $select = "SUM({$matches[2]}) as {$matches[2]}";
                         }
                         $newQuery->addSelect($select);
                     }
-                }else{*/
+                }else{
+                    if(!$this->forReport){
+                        $this->select(false);
+                        $query->groupBy([]);
+                    }
                     foreach($summaryColumns as $select){
                         $query->addSelect($select);
                     }
                     
                     $newQuery = $query;
-                //}
+                }
                 
                 if($newQuery->where && preg_match('/\s+\(?0\=1\)?\s*?/', $newQuery->createCommand($this->db)->sql)){
                     $row = [];
