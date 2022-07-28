@@ -111,7 +111,6 @@ class ActiveDataProvider extends BaseDataProvider
         }else{
             if(($summaryColumns = $this->getSummaryModels())){
                 $query = $this->query;
-                $query->orderBy([]);
                 if($query->having){
                     $newQuery = new \yii\db\Query([
                         'from' => ['sub' => $query],
@@ -126,10 +125,10 @@ class ActiveDataProvider extends BaseDataProvider
                         $newQuery->addSelect($select);
                     }
                 }else{
-                    if(!$this->forReport){
-                        $this->select(false);
-                        $query->groupBy([]);
-                    }
+                    $query->orderBy([]);
+                    $this->select(false);
+                    $query->groupBy([]);
+                    
                     foreach($summaryColumns as $select){
                         $query->addSelect($select);
                     }

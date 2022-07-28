@@ -320,13 +320,7 @@ class DcSetsRelation extends \webadmin\ModelCAR
         }
 
         if($reverse){
-            // 被关联的数据集不分页
-            $pagination = $target->getPagination();
-            if($pagination){
-                $pagination->setPage(0);
-                $pagination->setPageSize(2000);
-            }
-            
+            $this->putSetPagination($target,false);
             $columns = $this->getV_source_columns($source, false);
             $keys = $this->getV_target_columns($target);
             
@@ -348,38 +342,27 @@ class DcSetsRelation extends \webadmin\ModelCAR
             $target->select($columns);
         }
         
-        if($summary){
+        if($summary){ // 汇总过滤
             // 写入汇总条件
             $columns = $this->getV_target_columns($target);
             $keys = $this->getV_source_columns($source);
             $source->select(false)->order(false)->select($keys);
             $target->select(false)->group(false)->order(false)->select($this['v_group_col']);
-            $target->where($columns, $source);
-        }else{
-            $values = [];
-            $list = $reverse ? $target->getModels() : $source->getModels();
-            foreach($list as $item){
-                if(is_array($keys)){
-                    $data = [];
-                    foreach($keys as $k){
-                        $data[] = isset($item[$k]) ? (trim($item[$k])=='&nbsp;' ? '' : $item[$k]) : '';
-                    }
-                }else{
-                    $data = isset($item[$keys]) ? $item[$keys] : '';
-                    $data = trim($data)=='&nbsp;' ? '' : $data;
-                }
-                
-                if($data && !in_array($data,$values)){
-                    $values[] = $data;
-                }
-            }
-            
-            // 写入条件
-            if($values){
-                $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
+            if(in_array($source['set_type'], ['model','sql']) && in_array($target['set_type'], ['model','sql'])
+                && $source->getDataProvider()->db==$target->getDataProvider()->db
+            ){
+                $target->where($columns, $source);
             }else{
-                $reverse ? $source->setModels([]) : $target->setModels([]);
-            }
+                // 关闭事件处理
+                $source->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$source, 'sourceAfterFindModels']);
+                $this->putSetPagination($source);
+                $list = $source->getModels();
+                $this->putListValue($source,$target,$list,$keys,$columns,$reverse);
+                $source->on(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$source, 'sourceAfterFindModels']);
+            }            
+        }else{
+            $list = $reverse ? $target->getModels() : $source->getModels();
+            $this->putListValue($source,$target,$list,$keys,$columns,$reverse);
         }
         
         // 分组写入
@@ -394,5 +377,44 @@ class DcSetsRelation extends \webadmin\ModelCAR
         }
         
         return $this;
+    }
+    
+    // 重写分页取2000条
+    private function putSetPagination($source, $setCount = true)
+    {
+        $pagination = $source->getPagination();
+        if($pagination){
+            $pagination->setPage(0);
+            $pagination->setPageSize(2000);
+        }
+        $setCount && $source->setTotalCount(2000);
+    }
+    
+    // 提取数据集数据匹配到另一个数据作为条件
+    private function putListValue($source,$target,$list,$keys,$columns,$reverse)
+    {
+        $values = [];
+        foreach($list as $item){
+            if(is_array($keys)){
+                $data = [];
+                foreach($keys as $k){
+                    $data[] = isset($item[$k]) ? (trim($item[$k])=='&nbsp;' ? '' : $item[$k]) : '';
+                }
+            }else{
+                $data = isset($item[$keys]) ? $item[$keys] : '';
+                $data = trim($data)=='&nbsp;' ? '' : $data;
+            }
+            
+            if($data && !in_array($data,$values)){
+                $values[] = $data;
+            }
+        }
+        
+        // 写入条件
+        if($values){
+            $reverse ? $source->where($columns, $values) : $target->where($columns, $values);
+        }else{
+            $reverse ? $source->setModels([])||$source->setSummary([]) : $target->setModels([])||$target->setSummary([]);
+        }
     }
 }
