@@ -62,11 +62,13 @@ class SqlDataProvider extends BaseDataProvider
                 $col = $this->report ? ($item->col_id>0 ? $item->setsCol : null) : $item;
                 if($col){
                     // 添加排序
-                    $sort->attributes[$item->v_alias] = [
-                        'asc' => [$col['v_field'] => SORT_ASC],
-                        'desc' => [$col['v_field'] => SORT_DESC],
-                        'label' => $item->v_label,
-                    ];
+                    if($this->sets['id']==$col['set_id']){
+                        $sort->attributes[$item->v_alias] = [
+                            'asc' => [$col['v_field'] => SORT_ASC],
+                            'desc' => [$col['v_field'] => SORT_DESC],
+                            'label' => $item->v_label,
+                        ];
+                    }
                 }
             }
         }

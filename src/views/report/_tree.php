@@ -81,7 +81,7 @@ var hasTouch = 'ontouchstart' in document,
     onStartEvent = function(e){ // 拖动前
         var target = $(e.target).closest('.tree-item,.tree-folder-header');
         isFolder = target.is('.tree-folder-header');
-        itemData = target.data();console.log(itemData);
+        itemData = target.data();
         if(target && target.length && !$(e.target).is('.set-folder') && (!isFolder || target.find('.set-folder').length) && itemData && itemData.id){
             moveStatus = target;
             moveEl = target.clone();

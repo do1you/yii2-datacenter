@@ -38,11 +38,13 @@ class ExcelDataProvider extends ScriptDataProvider
                 $col = $this->report ? ($item->col_id>0 ? $item->setsCol : null) : $item;
                 if($col){
                     // 添加排序
-                    $sort->attributes[$item->v_alias] = [
-                        'asc' => [$col['name'] => SORT_ASC],
-                        'desc' => [$col['name'] => SORT_DESC],
-                        'label' => $item->v_label,
-                    ];
+                    if($this->sets['id']==$col['set_id']){
+                        $sort->attributes[$item->v_alias] = [
+                            'asc' => [$col['name'] => SORT_ASC],
+                            'desc' => [$col['name'] => SORT_DESC],
+                            'label' => $item->v_label,
+                        ];
+                    }
                 }
             }
         }

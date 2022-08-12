@@ -406,6 +406,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                                     if(preg_match('/^(<>|!=|>=|>|<=|<|~=|=)/', $params[$attribute], $matches)){
                                         $operator = $matches[1];
                                         $value = substr($params[$attribute], strlen($operator));
+                                        if($value===false) $value = '';
                                         if($is_back_search){
                                             $notOperators = [
                                                 '<>' => '=',
@@ -886,6 +887,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         $this->setTotalCount(null);
         $this->_models = null;
         $this->_keys = null;
+        $this->_summarys = null;
     }
     
     /**
