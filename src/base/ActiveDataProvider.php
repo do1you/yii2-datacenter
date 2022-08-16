@@ -92,8 +92,26 @@ class ActiveDataProvider extends BaseDataProvider
                 $list[$key] = $this->filterColumns($item);
             }
         }else{
+            if (!$this->query instanceof \yii\db\QueryInterface) {
+                throw new \yii\base\InvalidConfigException('The "query" property must be an instance of a class that implements the QueryInterface e.g. yii\db\Query or its subclasses.');
+            }
+            
             $this->union();
-            $list = parent::prepareModels();
+            $query = clone $this->query;
+            if (($pagination = $this->getPagination()) !== false) {
+                $pagination->totalCount = $this->getTotalCount();
+                if ($pagination->totalCount === 0) {
+                    return [];
+                }
+                $query->limit($pagination->getLimit())->offset($pagination->getOffset());
+            }
+            if (($sort = $this->getSort()) !== false) {
+                $orderBy = $query->orderBy;
+                $query->orderBy($sort->getOrders());
+                $query->addOrderBy($orderBy);
+            }
+            
+            $list = $query->all($this->db);
             foreach($list as $key=>$item){
                 $list[$key] = $this->filterSetsColumns($item);
             }

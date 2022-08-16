@@ -67,10 +67,15 @@ use yii\helpers\Url;
                 	         'filter' => false,
                 	     ],
                 	     'run_script',
-                	     'excel_file',
+                	     //'excel_file',
                 	     [
                 	         'attribute' => 'state',
                 	         'value' => 'v_state',
+                	         'filter' => false,
+                	     ],
+                	     [
+                	         'attribute' => 'create_user',
+                	         'value' => 'user.name',
                 	         'filter' => false,
                 	     ],
                 	     'update_time',
