@@ -68,7 +68,8 @@ $url = $model['forUserModel']
                         <?= Html::hiddenInput('is_export',''); ?>
                         <?php  
                         $apiUrl = $this->context->apiUrl;
-                        $this->registerJs("$('.report_search_btn,.report_export_btn').off('click').on('click',function(){
+                        $this->registerJs("
+                        $('.report_search_btn,.report_export_btn').off('click').on('click',function(){
                             var form = $(this).closest('form');
                             form.find('input[name=is_export]').val($(this).is('.report_export_btn') ? '1' : '');
                             if('{$count}'>1 && $(this).is('button[type=button].report_search_btn')){ // 异步加载数据
@@ -84,10 +85,24 @@ $url = $model['forUserModel']
                             }else{
                                 form.submit();
                             }
-                        });$('.dataconter-search').hide();", 4, 'report.search.submit');
+                        });
+                        $('.dataconter-search').hide();
+
+                        // 更多过滤条件
+                        $('.more_search_box').off('click').on('click','a[group]',function(){
+                            var el = $(this),
+                                group = el.attr('group'),
+                                isHide = el.data('hide'),
+                                box = el.closest('.dataconter-search').find('.form-group[group=\''+ group +'\']');
+                            isHide ? box.show()&&el.closest('li').addClass('active') : box.hide()&&el.closest('li').removeClass('active');
+                            el.data('hide', (isHide ? 0 : 1));
+                            $('.data-report-row').triggerHandler('relad.layout');
+                        });
+                        $('.dataconter-search .form-group[group]').hide();
+                        ", 4, 'report.search.submit');
                         ?>
                     </div>
-                    
+                    <?php /*
                     <!-- 收缩/展开 -->
                     <div class="form-group search_box">
                         <a class="btn btn-primary search_box_btn" href="#"><i class='fa fa-angle-double-up'></i> <?= Yii::t('datacenter','收起过滤')?></a>
@@ -101,19 +116,10 @@ $url = $model['forUserModel']
                             $(this).hide();
                             $('.data-report-row').triggerHandler('relad.layout');
                         });
-                        // 更多过滤条件
-                        $('.more_search_box').off('click').on('click','a[group]',function(){
-                            var el = $(this),
-                                group = el.attr('group'),
-                                isHide = el.data('hide'),
-                                box = el.closest('.dataconter-search').find('.form-group[group=\''+ group +'\']');
-                            isHide ? box.show()&&el.closest('li').addClass('active') : box.hide()&&el.closest('li').removeClass('active');
-                            el.data('hide', (isHide ? 0 : 1));
-                        });
-                        $('.dataconter-search .form-group[group]').hide();
                         ", 4, 'report.search.slide'); // $('.dataconter-search').find('.form-group').not('.search_box').hide();
                         ?>
                     </div>
+                    */?>
     
     				<?php ActiveForm::end(); ?>
     			</div>
