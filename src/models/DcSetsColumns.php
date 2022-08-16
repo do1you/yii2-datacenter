@@ -47,8 +47,8 @@ class DcSetsColumns extends \webadmin\ModelCAR
                 return ($model->model_id>0 || $model->for_set_id>0);
             }],
             [['set_id', 'is_search', 'is_summary', 'paixu', 'is_back_search'], 'integer'],
-            [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type', 'resp_fun', 'sql_formula'], 'safe'],
-            [['name', 'label', 'type', 'fun', 'search_value'], 'string', 'max' => 50],
+            [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type', 'resp_fun', 'sql_formula', 'search_group'], 'safe'],
+            [['name', 'label', 'type', 'fun', 'search_value', 'search_group'], 'string', 'max' => 50],
             [['formula'], 'string', 'max' => 255],
             [['resp_fun'], 'string', 'max' => 100],
             [['label'], 'unique', 'filter' => "set_id='{$this->set_id}'"],
@@ -81,6 +81,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'resp_fun' => Yii::t('datacenter', '输出函数'),
             'paixu' => Yii::t('datacenter', '排序'),
             'is_frozen' => Yii::t('datacenter', '是否冻结'),
+            'search_group' => Yii::t('datacenter', '查询分组'),
             'search_params' => Yii::t('datacenter', '查询参数'),
             'search_value' => Yii::t('datacenter', '查询默认值'),
             'search_params_text' => Yii::t('datacenter', '查询参数'),
@@ -130,6 +131,12 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function getV_switch_type($val = null)
     {
         return \webadmin\modules\config\models\SysLdItem::dd('dc_switch_type', ($val !== null ? $val : $this->switch_type));
+    }
+    
+    // 获取查询条件分组
+    public function getV_search_group($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('dc_search_group', ($val !== null ? $val : $this->search_group));
     }
     
     // 获取数据集类型

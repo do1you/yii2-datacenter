@@ -230,6 +230,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),
                         'attribute' => $item['v_alias'],
                         'label_name' => $item['v_label'],
+                        'group_name' => $colnmn['v_search_group'],
                         'config_params' => $colnmn['search_params'],
                         'v_config_params' => $colnmn['v_search_params'],
                         'v_config_ajax' => $colnmn['v_search_ajax'],
@@ -244,6 +245,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                             'value' => (isset($params[$attribute]) ? $params[$attribute] : ''), // $colnmn['v_search_defval']
                             'attribute' => $attribute,
                             'label_name' => $label,
+                            'group_name' => $colnmn['v_search_group'],
                             'config_params' => $colnmn['search_params'],
                             'v_config_params' => $colnmn['v_search_params'],
                             'v_config_ajax' => $colnmn['v_search_ajax'],

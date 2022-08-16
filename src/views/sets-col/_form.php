@@ -85,6 +85,8 @@ $model->afterFind();
             	<?= $form->field($model, 'is_back_search')->textInput()->dropDownList($model->getV_is_back_search(false), []) ?>
             <?php endif;?>
             
+            <?= $form->field($model, 'search_group')->textInput()->select2($model->getV_search_group(false), ['prompt'=>'请选择']) ?>
+            
             <?= $form->field($model, 'type')->textInput(['maxlength' => true])->select2($model->getV_type(false), ['prompt'=>'请选择']) ?>
             
             <?= $form->field($model, 'search_value')->textInput(['maxlength' => true])->select2($model->getV_search_value(false), ['prompt'=>'请选择']) ?>
@@ -152,9 +154,9 @@ $('#dcsetscolumns-type').on('change',function(){
     var isSearch = $('#dcsetscolumns-is_search').val(),
         value = $(this).val(),
         fn = function(id,isShow){ $(id).closest('.form-group')[isShow ? 'slideDown' : 'slideUp'](); };
-    fn('#dcsetscolumns-search_params,#dcsetscolumns-search_params_text,#dcsetscolumns-search_params_dd,#dcsetscolumns-search_value,#dcsetscolumns-search_value_text');
+    fn('#dcsetscolumns-search_group,#dcsetscolumns-is_back_search,#dcsetscolumns-search_params,#dcsetscolumns-search_params_text,#dcsetscolumns-search_params_dd,#dcsetscolumns-search_value,#dcsetscolumns-search_value_text');
     if(isSearch=='1'){
-        fn(this,1);
+        fn(this,1);fn('#dcsetscolumns-search_group,#dcsetscolumns-is_back_search',1);
         if(value=='dd' || value=='ddmulti' || value=='ddselect2' || value=='ddselect2multi'){
             // 字典选项
             fn('#dcsetscolumns-search_value_text,#dcsetscolumns-search_params_dd',1);

@@ -29,21 +29,42 @@ $url = $model['forUserModel']
                             //'data-pjax' => 1,
                             'class' => 'form-inline'
                         ],
-                    ]);?>
-    
-    				<?php foreach($searchList as $k=>$item):?>
-                    	<?php 
-                    	echo $this->render('@webadmin/modules/config/views/sys-config/_config',[
-                    	    'item' => $item,
-                    	    'k' => $item['attribute'],
-                    	    'form' => $form->searchInput(),
-                    	]);
-                    	?>
+                    ])->searchInput();
+                    $groupList = \yii\helpers\ArrayHelper::map($searchList, 'group_name', 'group_name');
+                    unset($groupList['']);
+                    ?>
+                    <?php if($groupList): // 分组条件?>
+                        <div class="more_search_box">
+                            <ul class="pagination">
+                            	<li class="disabled active"><a href="###">开启更多过滤条件</a></li>
+                            	<?php foreach($groupList as $gName):if($gName):?>
+                                	<li><a data-hide="1" href="javascript:void(0)" group="<?php echo $gName?>"><?php echo $gName?></a></li>
+                                <?php endif;endforeach;?>
+                            </ul>
+                        </div>
+                    <?php endif;?>
+    				<?php $groupList = [''] + $groupList;foreach($groupList as $gName):?>
+        				<?php foreach($searchList as $k=>$item):?>
+        					<?php if($item['group_name']==$gName):?>
+                            	<?php 
+                            	if(!empty($item['group_name'])){
+                            	    $form->fieldConfig['options']['group'] = $item['group_name'];
+                            	}else{
+                            	    unset($form->fieldConfig['options']['group']);
+                            	}
+                            	echo $this->render('@webadmin/modules/config/views/sys-config/_config',[
+                            	    'item' => $item,
+                            	    'k' => $item['attribute'],
+                            	    'form' => $form,
+                            	]);
+                            	?>
+                        	<?php endif;?>
+                        <?php endforeach;?>
                     <?php endforeach;?>
     
                     <div class="form-group">
-                    	<?= Html::button(Yii::t('common','查询'), ['class' => 'btn btn-primary report_search_btn']) ?>
-                        <?= Html::button(Yii::t('common','导出'), ['class' => 'btn btn-primary report_export_btn']) ?>
+                    	<?= Html::button('<i class="fa fa-search"></i> '.Yii::t('common','查询'), ['class' => 'btn btn-primary report_search_btn']) ?>
+                        <?= Html::button('<i class="fa fa-download"></i> '.Yii::t('common','导出'), ['class' => 'btn btn-primary report_export_btn']) ?>
                         <?= Html::hiddenInput('is_export',''); ?>
                         <?php  
                         $apiUrl = $this->context->apiUrl;
@@ -63,7 +84,7 @@ $url = $model['forUserModel']
                             }else{
                                 form.submit();
                             }
-                        });$('.dataconter-search').hide()", 4, 'report.search.submit');
+                        });$('.dataconter-search').hide();", 4, 'report.search.submit');
                         ?>
                     </div>
                     
@@ -72,12 +93,25 @@ $url = $model['forUserModel']
                         <a class="btn btn-primary search_box_btn" href="#"><i class='fa fa-angle-double-up'></i> <?= Yii::t('datacenter','收起过滤')?></a>
                         <a class="btn btn-primary search_box_btn" href="#" style="display:none;"><i class='fa fa-angle-double-down'></i> <?= Yii::t('datacenter','展开过滤')?></a>
                         <?php  
-                        $this->registerJs("$('.search_box_btn').off('click').on('click',function(){
+                        $this->registerJs("
+                        // 收缩/展开
+                        $('.search_box_btn').off('click').on('click',function(){
                             $(this).closest('.dataconter-search').find('.form-group').not('.search_box').toggle();
                             $(this).closest('.search_box').find('.search_box_btn').show();
                             $(this).hide();
                             $('.data-report-row').triggerHandler('relad.layout');
-                        });", 4, 'report.search.slide'); // $('.dataconter-search').find('.form-group').not('.search_box').hide();
+                        });
+                        // 更多过滤条件
+                        $('.more_search_box').off('click').on('click','a[group]',function(){
+                            var el = $(this),
+                                group = el.attr('group'),
+                                isHide = el.data('hide'),
+                                box = el.closest('.dataconter-search').find('.form-group[group=\''+ group +'\']');
+                            isHide ? box.show()&&el.closest('li').addClass('active') : box.hide()&&el.closest('li').removeClass('active');
+                            el.data('hide', (isHide ? 0 : 1));
+                        });
+                        $('.dataconter-search .form-group[group]').hide();
+                        ", 4, 'report.search.slide'); // $('.dataconter-search').find('.form-group').not('.search_box').hide();
                         ?>
                     </div>
     
