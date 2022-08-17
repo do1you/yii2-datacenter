@@ -155,7 +155,7 @@ trait ReportOrmTrait
             $this->_setOneColumns = $this->_setTwoColumns = $skipIds = $list = $labelList = [];
             $setColumns = \yii\helpers\ArrayHelper::map($this->columns, 'id', 'v_self', 'set_id');
             foreach($this->columns as $col){
-                if(in_array($col['id'], $skipIds)) continue;
+                if(in_array($col['id'], $skipIds) || $col['is_hide']=='1') continue;
                 if(($this instanceof DcReport)){
                     if($col['user_set_id'] && $col['userSets']){
                         $set = isset($setLists['-'.$col['user_set_id']]) ? $setLists['-'.$col['user_set_id']] : null;

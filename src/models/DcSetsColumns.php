@@ -46,8 +46,8 @@ class DcSetsColumns extends \webadmin\ModelCAR
             [['column_id'], 'required', 'when'=>function($model){
                 return ($model->model_id>0 || $model->for_set_id>0);
             }],
-            [['set_id', 'is_search', 'is_summary', 'paixu', 'is_back_search'], 'integer'],
-            [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type', 'resp_fun', 'sql_formula', 'search_group'], 'safe'],
+            [['set_id', 'is_search', 'is_hide', 'is_summary', 'paixu', 'is_back_search'], 'integer'],
+            [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type', 'resp_fun', 'sql_formula', 'search_group', 'is_hide'], 'safe'],
             [['name', 'label', 'type', 'fun', 'search_value', 'search_group'], 'string', 'max' => 50],
             [['formula'], 'string', 'max' => 255],
             [['resp_fun'], 'string', 'max' => 100],
@@ -72,6 +72,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'name' => Yii::t('datacenter', '名称'),
             'label' => Yii::t('datacenter', '标签'),
             'is_search' => Yii::t('datacenter', '是否可查'),
+            'is_hide' => Yii::t('datacenter', '是否隐藏'),
             'is_back_search' => Yii::t('datacenter', '是否反查'),
             'is_summary' => Yii::t('datacenter', '是否汇总'),
             'type' => Yii::t('datacenter', '查询类型'),
@@ -167,6 +168,12 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function getV_is_search($val = null)
     {
         return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_search));
+    }
+    
+    // 获取是否隐藏
+    public function getV_is_hide($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_hide));
     }
     
     // 获取是否反查

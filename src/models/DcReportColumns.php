@@ -114,6 +114,12 @@ class DcReportColumns extends \webadmin\ModelCAR
         return "{{$this->v_label}}";
     }
     
+    // 获取是否隐藏
+    public function getIs_hide()
+    {
+        return ($this->setsCol ? $this->setsCol['is_hide'] : '0');
+    }
+    
     // 返回字段默认值
     public function getV_default_value()
     {

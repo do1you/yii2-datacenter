@@ -77,6 +77,8 @@ $model->afterFind();
             
             <?= $form->field($model, 'is_frozen')->textInput()->dropDownList($model->getV_is_frozen(false), []) ?>
             
+            <?= $form->field($model, 'is_hide')->textInput()->dropDownList($model->getV_is_hide(false), []) ?>
+            
             <?= $form->field($model, 'is_summary')->textInput()->dropDownList($model->getV_is_summary(false), []) ?>
             
             <?= $form->field($model, 'is_search')->textInput()->dropDownList($model->getV_is_search(false), []) ?>
