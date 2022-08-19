@@ -40,6 +40,11 @@ class DcSets extends \webadmin\ModelCAR
     private $_replace_params;
     
     /**
+     * 关联的所有数据集
+     */
+    private $_setsList;
+    
+    /**
      * 关联的源数据集合
      */
     public $_relation_source = [];
@@ -320,6 +325,18 @@ class DcSets extends \webadmin\ModelCAR
         return null;
     }
     
+    // 返回关联的数据集合
+    public function getV_sets()
+    {
+        if($this->_setsList === null){
+            $query = $this->getDataProvider()->query;
+            $setLists = $this->getV_relation_sets();
+            $this->joinQuerySets($query, $setLists);
+        }
+        
+        return $this->_setsList;
+    }
+    
     // 保存后动作
     public function afterSave($insert, $changedAttributes)
     {
@@ -477,13 +494,14 @@ class DcSets extends \webadmin\ModelCAR
     // 通过子查询的方式连接其他数据集
     public function joinQuerySets(\yii\db\Query $query, &$allSets = [])
     {
+        $this->_setsList = [];
         if(isset($allSets[$this->id])) unset($allSets[$this->id]);
         
         if($allSets && $this->sourceRelation){
             $relations = \yii\helpers\ArrayHelper::map($this->sourceRelation, 'target_sets', 'v_self');
             $allSets = self::model()->getCache('findModel',[['id'=>\yii\helpers\ArrayHelper::map($allSets,'id','id')], true]);
             foreach($allSets as $key=>$sModel){
-                if($sModel['set_type']=='model' && isset($relations[$sModel['id']])){
+                if(in_array($sModel['set_type'],['model','sql']) && isset($relations[$sModel['id']])){
                     $columns = $relations[$sModel['id']]->getV_source_columns($this, 'v_column');
                     $keys = $relations[$sModel['id']]->getV_target_columns($sModel, true);
                     $columns = is_array($columns) ? $columns : [$columns];
@@ -499,6 +517,7 @@ class DcSets extends \webadmin\ModelCAR
                             $query->leftJoin([
                                 $sModel['v_alias'] => $joinQuery
                             ], implode(' and ', $joinCols));
+                            $this->_setsList[$sModel['id']] = $sModel;
                             unset($allSets[$key]);
                         }
                     }

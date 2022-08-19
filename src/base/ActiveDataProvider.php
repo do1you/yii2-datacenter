@@ -34,6 +34,8 @@ class ActiveDataProvider extends BaseDataProvider
             $model = reset($models);
             throw new \yii\web\HttpException(200, Yii::t('datacenter','未关联的模型关系')."{$model['tb_label']}({$model['id']}.{$model['tb_name']})");
         }
+        
+        // 关联数据集
         $sets->joinQuerySets($query, $setLists);
         if($setLists){
             $model = reset($setLists);

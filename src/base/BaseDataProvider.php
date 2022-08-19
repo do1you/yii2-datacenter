@@ -340,6 +340,8 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 }
             }else{
                 // 数据集条件
+                $sets = $this->sets->getV_sets();
+                $setSearchParams = [];
                 foreach($colnmns as $col){
                     if($col['formula']) continue;
                     foreach([$col['v_alias'],'-'.$col['v_alias']] as $attribute){
@@ -347,7 +349,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         if(empty($col['is_back_search']) && $is_back_search) continue; // 没有反向查询的跳过
                         
                         $callFn = $col['v_isfn'] ? 'having' : 'where';
-                        if(isset($params[$attribute]) && (is_array($params[$attribute]) || strlen($params[$attribute])>0) && ($col['model_id'] || $this->sets['set_type']!='model')){
+                        if(isset($params[$attribute]) && (is_array($params[$attribute]) || strlen($params[$attribute])>0) && ($col['model_id'] || $col['for_set_id'] || $this->sets['set_type']!='model')){
                             switch($col['type'])
                             {
                                 case 'date': // 日期
@@ -465,7 +467,43 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                                     }
                                     break;
                             }
+                            
+                            // 关联的数据集条件
+                            if($col['for_set_id']){
+                                $sIndex = $col['for_set_id'];
+                                foreach([$col['v_alias'], '-'.$col['v_alias']] as $attribute){
+                                    $is_back_search = substr($attribute,0,1)=='-';
+                                    if(isset($params[$attribute]) && (is_array($params[$attribute]) || strlen($params[$attribute])>0) && $col['setColumn']){
+                                        $setSearchParams[$sIndex][($is_back_search ? '-' : '').$col['setColumn']['v_alias']] = $params[$attribute];
+                                    }
+                                }
+                            }
                         }
+                    }
+                }
+                
+                // 关联的数据集条件
+                if($sets && is_array($sets)){
+                    foreach($sets as $set){
+                        $sIndex = $set['id'];
+                        
+                        // 同标签条件带入
+                        $label_values = [];
+                        if($set['columns']){
+                            foreach($set['columns'] as $col){
+                                if($col['formula']) continue;
+                                foreach([$col['v_label'], '剔除'.$col['v_label']] as $attribute){
+                                    if(isset($labelParams[$attribute]) && (is_array($labelParams[$attribute]) || strlen($labelParams[$attribute])>0)){
+                                        $is_back_search = strpos($attribute, '剔除')!==false;
+                                        $label_values[($is_back_search ? '-' : '').$col['v_alias']] = $labelParams[$attribute];
+                                    }
+                                }
+                            }
+                        }
+                        
+                        $searchParams = (isset($setSearchParams[$sIndex]) && is_array($setSearchParams[$sIndex])) ? $setSearchParams[$sIndex] : [];
+                        $appleParams = array_merge($label_values, $searchParams);
+                        $set->applySearchModels($appleParams);
                     }
                 }
             }
