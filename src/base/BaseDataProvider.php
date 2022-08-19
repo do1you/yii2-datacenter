@@ -524,7 +524,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 $colnmn = $this->report ? $item['setsCol'] : $item;
                 if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
                 
-                if($colnmn && $colnmn['is_summary'] && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')){
+                if($colnmn && $colnmn['is_summary'] && ($colnmn['model_id'] || $colnmn['for_set_id'] || $colnmn['sets']['set_type']!='model')){
                     $v_column = $colnmn['sets']['set_type']!='model' ? $colnmn->name : $colnmn->v_fncolumn;
                     if($colnmn->v_isfn){
                         $list[] = new \yii\db\Expression("{$v_column} as {$colnmn->v_alias}");
