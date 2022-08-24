@@ -134,7 +134,7 @@ class ActiveDataProvider extends BaseDataProvider
         }else{
             if(($summaryColumns = $this->getSummaryModels())){
                 $query = $this->query;
-                if($query->having || ($query->groupBy && $this->sets->v_sets)){
+                if($query->having){ //  || ($query->groupBy && $this->sets->v_sets)
                     $newQuery = new \yii\db\Query([
                         'from' => ['sub' => $query],
                     ]);
