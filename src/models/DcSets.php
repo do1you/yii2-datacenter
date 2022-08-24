@@ -96,8 +96,8 @@ class DcSets extends \webadmin\ModelCAR
             [['title', 'set_type'], 'string', 'max' => 50],
             [['relation_models'], 'string', 'max' => 255],
             [['run_script', 'excel_file'], 'string', 'max' => 150],
-            [['rel_where'], 'string', 'max' => 200],
-            [['rel_group', 'rel_order', 'rel_having'], 'string', 'max' => 100],
+            [['rel_where'], 'string', 'max' => 250],
+            [['rel_group', 'rel_order', 'rel_having'], 'string', 'max' => 250],
             [['excel_file'], 'required', 'when' => function ($model) {
                 return ($model->set_type=='excel');
             }],

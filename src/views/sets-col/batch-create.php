@@ -52,13 +52,21 @@ Yii::$app->controller->currNav[] = Yii::t('common','批量添加');
             
             <?= $form->field($model, 'paixu')->textInput(['maxlength' => true]) ?>
             
+            <?= $form->field($model, 'resp_fun')->textInput(['maxlength' => true])->select2($model->getV_resp_fun(false), ['prompt'=>'请选择']) ?>
+            
             <?= $form->field($model, 'is_frozen')->textInput()->dropDownList($model->getV_is_frozen(false), []) ?>
+            
+            <?= $form->field($model, 'is_hide')->textInput()->dropDownList($model->getV_is_hide(false), []) ?>
+            
+            <?= $form->field($model, 'is_summary')->textInput()->dropDownList($model->getV_is_summary(false), []) ?>
             
             <?= $form->field($model, 'is_search')->textInput()->dropDownList($model->getV_is_search(false), []) ?>
             
             <?php if(in_array($model['sets']['set_type'], ['model','sql'])):?>
             	<?= $form->field($model, 'is_back_search')->textInput()->dropDownList($model->getV_is_back_search(false), []) ?>
             <?php endif;?>
+            
+            <?= $form->field($model, 'search_group')->textInput()->select2($model->getV_search_group(false), ['prompt'=>'请选择']) ?>
             
             <?= $form->field($model, 'type')->textInput(['maxlength' => true])->dropDownList($model->getV_type(false), ['prompt'=>'请选择']) ?>
             
@@ -101,7 +109,7 @@ $('#dcsetscolumns-switch_type').on('change',function(){
     $('.box_sets,.box_model').slideUp();
     $(value == 1 ? '.box_model' : '.box_sets').slideDown();
 }).triggerHandler('change');
-// 选择数据模型
+// 选择归属数据模型
 $('#dcsetscolumns-model_id').on('change',function(){
     var value = $(this).val();
     location.href = '{$url1}&mId=' + (value || '');
@@ -120,13 +128,13 @@ $('#dcsetscolumns-type').on('change',function(){
     var isSearch = $('#dcsetscolumns-is_search').val(),
         value = $(this).val(),
         fn = function(id,isShow){ $(id).closest('.form-group')[isShow ? 'slideDown' : 'slideUp'](); };
-    fn('#dcsetscolumns-search_params,#dcsetscolumns-search_params_text,#dcsetscolumns-search_params_dd,#dcsetscolumns-search_value,#dcsetscolumns-search_value_text');
+    fn('#dcsetscolumns-search_group,#dcsetscolumns-is_back_search,#dcsetscolumns-search_params,#dcsetscolumns-search_params_text,#dcsetscolumns-search_params_dd,#dcsetscolumns-search_value,#dcsetscolumns-search_value_text');
     if(isSearch=='1'){
-        fn(this,1);
+        fn(this,1);fn('#dcsetscolumns-search_group,#dcsetscolumns-is_back_search',1);
         if(value=='dd' || value=='ddmulti' || value=='ddselect2' || value=='ddselect2multi'){
             // 字典选项
             fn('#dcsetscolumns-search_value_text,#dcsetscolumns-search_params_dd',1);
-        }else if(value=='datetimerange' || value=='daterange' || value=='datetime' || value=='date'){
+        }else if(value=='datetimerange' || value=='daterange' || value=='datetime' || value=='date' || value=='dateyear'){
             // 时间选项
             fn('#dcsetscolumns-search_value',1);
         }else if(value=='select' || value=='select2' || value=='select2mult' || value=='selectmult'){
