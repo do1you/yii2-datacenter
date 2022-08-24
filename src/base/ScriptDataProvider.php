@@ -31,7 +31,7 @@ class ScriptDataProvider extends BaseDataProvider
     /**
      * 初始化
      */
-    public function init()
+    public function initData()
     {
         if(!($sets = $this->sets)){
             throw new \yii\web\HttpException(200, Yii::t('datacenter', '数据集尚未配置正确的数据集.'));
@@ -50,6 +50,8 @@ class ScriptDataProvider extends BaseDataProvider
         Yii::configure($this,[
             'pagination' => ['pageSizeLimit' => [1, 500]],
         ]);
+        
+        $this->report ? $this->report->setSearchValues($this->getSearchValues()) : $this->sets->setSearchValues($this->getSearchValues());
         
         // 增加基础排序
         $sort = $this->getSort();

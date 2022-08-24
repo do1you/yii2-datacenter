@@ -41,7 +41,7 @@ class SqlDataProvider extends BaseDataProvider
     /**
      * 初始化
      */
-    public function init()
+    public function initData()
     {
         if(!($sets = $this->sets) || !$this->sets->source || !($db = $this->sets->source->getSourceDb()) || !$this->sets['run_sql']){
             throw new \yii\web\HttpException(200, Yii::t('datacenter', '数据集尚未配置正确的数据集.'));
@@ -53,6 +53,8 @@ class SqlDataProvider extends BaseDataProvider
             'sourceSql' => $this->sets['run_sql'],
             'pagination' => ['pageSizeLimit' => [1, 500]],
         ]);
+        
+        $this->report ? $this->report->setSearchValues($this->getSearchValues()) : $this->sets->setSearchValues($this->getSearchValues());
         
         // 增加基础排序
         $sort = $this->getSort();

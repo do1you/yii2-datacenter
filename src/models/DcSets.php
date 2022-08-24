@@ -470,6 +470,16 @@ class DcSets extends \webadmin\ModelCAR
     {
         if($this->_replace_params === null || !isset($this->_replace_params['search']) || !isset($this->_replace_params['replace'])){
             $search = $replace = [];
+            
+            // 提取查询条件信息
+            if(($searchValues = $this->getSearchValues($this->id)) && is_array($searchValues)){
+                foreach($searchValues as $label => $value){
+                    $search[] = "{{$label}}";
+                    $replace[] = "{$value}";
+                }
+            }
+
+            // 提取模型替换信息 
             $models = $this->getV_relation_models();
             foreach($models as $model){
                 $search[] = "{{$model['tb_label']}}.";
@@ -477,6 +487,7 @@ class DcSets extends \webadmin\ModelCAR
                 $search[] = "{$model['tb_name']}.";
                 $replace[] = "{$model['v_alias']}.";
             }
+            
             $this->_replace_params['search'] = $search;
             $this->_replace_params['replace'] = $replace;
         }

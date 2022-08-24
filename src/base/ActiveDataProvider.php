@@ -16,7 +16,7 @@ class ActiveDataProvider extends BaseDataProvider
     /**
      * 初始化
      */
-    public function init()
+    public function initData()
     {
         if(!($sets = $this->sets) || !$sets->mainModel || !$sets->mainModel['source'] || !($db = $sets->mainModel['source']->getSourceDb())){
             throw new \yii\web\HttpException(200, Yii::t('datacenter', '数据集尚未配置正确的主模型.'));
@@ -43,6 +43,7 @@ class ActiveDataProvider extends BaseDataProvider
         }
         
         // 默认条件、分组、排序
+        $this->report ? $this->report->setSearchValues($this->getSearchValues()) : $this->sets->setSearchValues($this->getSearchValues());
         $sets->rel_where && $query->andWhere($sets->formatSql($sets->rel_where));
         $sets->rel_group && $query->addGroupBy(new \yii\db\Expression(($gSql = $sets->formatSql($sets->rel_group)))); 
         $sets->rel_having && $query->andHaving($sets->formatSql($sets->rel_having));

@@ -93,7 +93,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     /**
      * 初始化
      */
-    public function init()
+    public function initData()
     {
     }
     
@@ -187,6 +187,11 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             $this->_searchValues = [];
             foreach($list as $item){
                 $this->_searchValues[$item['label_name']] = is_array($item['value']) ? implode(',', $item['value']) : $item['value'];
+                if(in_array($item['config_type'], ['daterange', 'datetimerange']) && $item['value'] && strpos($item['value'], '至')!==false){
+                    list($startTime, $endTime) = explode('至', $item['value']);
+                    $this->_searchValues[$item['label_name'].'_0'] = trim($startTime);
+                    $this->_searchValues[$item['label_name'].'_1'] = trim($endTime);
+                }
             }
         }
         

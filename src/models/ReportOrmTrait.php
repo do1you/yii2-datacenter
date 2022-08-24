@@ -52,6 +52,31 @@ trait ReportOrmTrait
     public $forUserModel;
     
     /**
+     * 记录查询条件的缓存信息
+     */
+    public static $_searchModels = [];
+    
+    /**
+     * 返回数据查询条件的表单构建
+     */
+    public function getSearchValues($id = null)
+    {
+        if($id===null){
+            return self::$_searchModels;
+        }else{
+            return (isset(self::$_searchModels[$id]) ? self::$_searchModels[$id] : []);
+        }
+    }
+    
+    /**
+     * 返回数据查询条件的表单构建
+     */
+    public function setSearchValues($values = [])
+    {
+        self::$_searchModels[$this->id] = $values;
+    }
+    
+    /**
      * 返回报表显示标题
      */
     public function getV_report_title()

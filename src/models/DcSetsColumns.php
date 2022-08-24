@@ -202,7 +202,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function getV_column()
     {
         $column = $this->v_field;
-        if(strpos($column, '.')!==false || preg_match("/[\+\-\*\/]/",$column)){
+        if(preg_match("/[\+\-\*\/\'\.\{\}]/",$column)){ // strpos($column, '.')!==false || 
             $column = $this->sets ? $this->sets->formatSql($column) : $column;
             return "({$column})";
         }elseif($this->switch_type==2){

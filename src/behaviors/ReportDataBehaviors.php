@@ -35,6 +35,7 @@ class ReportDataBehaviors extends \yii\base\Behavior
                 $this->report->initJoinSet();
             }
             $this->_dataProvider = $this->report ? $this->report->prepareDataProvider() : $this->sets->prepareDataProvider();
+            $this->_dataProvider->initData();
         }
         
         return $this->_dataProvider;
@@ -46,6 +47,14 @@ class ReportDataBehaviors extends \yii\base\Behavior
     public function setDataProvider($value)
     {
         $this->_dataProvider = $value;
+    }
+    
+    /**
+     * 初始化数据
+     */
+    public function initData()
+    {
+        return $this->getDataProvider()->initData();
     }
     
     /**
