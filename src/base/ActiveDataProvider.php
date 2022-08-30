@@ -14,6 +14,16 @@ class ActiveDataProvider extends BaseDataProvider
     private $_selects = [];
     
     /**
+     * 查询的字段别名
+     */
+    private $_selectAlias = [];
+    
+    /**
+     * 是否数据集并集
+     */
+    public $isUnion = false;
+    
+    /**
      * 初始化
      */
     public function initData()
@@ -132,12 +142,13 @@ class ActiveDataProvider extends BaseDataProvider
             $row = $this->sets->getSummary();
             $row = $this->filterColumns($row, true);
         }else{
+            $this->union();
             if(($summaryColumns = $this->getSummaryModels())){
                 $query = $this->query;
-                if($query->having){ //  || ($query->groupBy && $this->sets->v_sets)
-                    $newQuery = new \yii\db\Query([
+                if($query->having || $this->isUnion){ //  || ($query->groupBy && $this->sets->v_sets)
+                    $newQuery = $this->isUnion ? $query : (new \yii\db\Query([
                         'from' => ['sub' => $query],
-                    ]);
+                    ]));
                     foreach($summaryColumns as $select){
                         if($select instanceof \yii\db\ExpressionInterface) {
                             $select = $select->expression;
@@ -183,7 +194,7 @@ class ActiveDataProvider extends BaseDataProvider
     {
         if($columns===false){
             $this->query->select([]);
-            $this->_selects = [];
+            $this->_selectAlias = $this->_selects = [];
         }else{
             $values = null;
             $columns = is_array($columns) ? $columns : [$columns];
@@ -193,6 +204,7 @@ class ActiveDataProvider extends BaseDataProvider
                     $v_alias = $this->getColumns($select, $values, 'v_alias');
                     if(!isset($this->_selects[$v_alias])){
                         $this->_selects[$v_alias] = new \yii\db\Expression("{$v_column} as {$v_alias}");
+                        $this->_selectAlias[trim($v_column)] = $v_alias;
                         $this->query->addSelect([$this->_selects[$v_alias]]);
                     }
                 }
@@ -301,14 +313,39 @@ class ActiveDataProvider extends BaseDataProvider
                     $query->addSelect(new \yii\db\Expression("'{$title}' as {$v_alias}"));
                 }
                 $this->query->union($query, true);
+                $this->isUnion = true;
             }
-            
         }
         
         if(!isset($this->_selects[$v_alias])){
             $title = $this->sets['forUserModel'] ? $this->sets['forUserModel']['v_name'] : $this->sets['v_title'];
             $this->_selects[$v_alias] = new \yii\db\Expression("'{$title}' as {$v_alias}");
             $this->query->addSelect([$this->_selects[$v_alias]]);
+        }
+        
+        // 重组SQL
+        if($this->isUnion){
+            $query = new \yii\db\Query();
+            $allQuery = $this->query;
+            $query->from(['c' => $allQuery]);
+            if($allQuery->orderBy && is_array($allQuery->orderBy)){
+                foreach($allQuery->orderBy as $orderBy){
+                    if($orderBy instanceof \yii\db\ExpressionInterface) {
+                        $orderBy = $orderBy->expression;
+                    }
+                    
+                    $orderBy = explode(',', $orderBy);
+                    foreach($orderBy as $order){
+                        list($col, $sort) = explode(' ', trim($order));
+                        $col = trim($col);
+                        
+                        if(isset($this->_selectAlias[$col])){
+                            $query->addOrderBy("{$this->_selectAlias[$col]} {$sort}");
+                        }
+                    }                    
+                }
+            }
+            $this->query = $query;
         }
     }
 }

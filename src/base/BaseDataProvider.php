@@ -204,7 +204,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     public function getSearchModels()
     {
         if($this->_searchModels === null){
-            $list = [];
+            $haveLabels = $list = [];
             $globalParams = Yii::$app->request->get("SysConfig",[]);
             $forUserModel = $this->report ? $this->report['forUserModel'] : $this->sets['forUserModel'];
             if($forUserModel && ($search_values = $forUserModel['v_search_values'])){
@@ -229,7 +229,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     }
                 }
 
-                if($colnmn && $colnmn['is_search']){ // && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')
+                if($colnmn && $colnmn['is_search'] && !isset($haveLabels[$item['v_label']])){ // && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')
                     $_ = [
                         'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
                         'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),
@@ -241,6 +241,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         'v_config_ajax' => $colnmn['v_search_ajax'],
                     ];
                     $list[] = $_;
+                    $haveLabels[$item['v_label']] = $item['v_label'];
                     // 反向查询
                     if($colnmn['is_back_search']){
                         $attribute = '-'.$item['v_alias'];
