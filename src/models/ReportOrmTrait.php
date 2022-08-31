@@ -229,6 +229,7 @@ trait ReportOrmTrait
                                 if($count>1 && $colspan2>=1){
                                     $this->_setTwoColumns[$beginCol2] = [
                                         'begin' => $beginCol2,
+                                        'end' => $data['name'],
                                         'colspan' => $colspan2,
                                         'label' => $v,
                                     ];
@@ -238,6 +239,7 @@ trait ReportOrmTrait
                         if($colspan>=1){
                             $this->_setOneColumns[$beginCol] = [
                                 'begin' => $beginCol,
+                                'end' => $data['name'],
                                 'colspan' => $colspan,
                                 'label' => $set['title'],
                             ];
@@ -291,6 +293,47 @@ trait ReportOrmTrait
         }
         
         return $columns;
+    }
+    
+    /**
+     * 返回构建EXCEL二级标题
+     */
+    public function getV_excelTwoData()
+    {
+        $colspans = [];
+        $columns = $this->getV_twoCols();
+        if($columns && is_array($columns)){
+            foreach($columns as $key=>$item){
+                $colspans[$key] = [
+                    'attribute' => $item['end'],
+                    'label' => $item['label'],
+                ];
+            }
+        }
+        
+        return ($colspans ? $colspans : null);
+    }
+    
+    /**
+     * 返回构建EXCEL的查询条件集
+     */
+    public function getV_excelSearchStr()
+    {
+        $searchValues = $this->getDataProvider()->getSearchValues();
+        $searchValues = is_array($searchValues) ? array_filter($searchValues,function($val){
+            if($val===null || $val===false || $val===''){
+                return false;
+            }
+            return true;
+        }) : [];
+        $searchValuesStr = [];
+        if($searchValues && is_array($searchValues)){
+            foreach($searchValues as $k=>$v){
+                $searchValuesStr[] = "{$k}：{$v}";
+            }
+        }
+        
+        return implode("\r\n",$searchValuesStr);
     }
     
     /**
