@@ -145,6 +145,8 @@ class ActiveDataProvider extends BaseDataProvider
             $this->union();
             if(($summaryColumns = $this->getSummaryModels())){
                 $query = $this->query;
+                $relation = $this->sets ? $this->sets['v_relation'] : null;
+                $values = null;
                 if($query->having || $this->isUnion){ //  || ($query->groupBy && $this->sets->v_sets)
                     $newQuery = $this->isUnion ? $query : (new \yii\db\Query([
                         'from' => ['sub' => $query],
@@ -158,6 +160,12 @@ class ActiveDataProvider extends BaseDataProvider
                         }
                         $newQuery->addSelect($select);
                     }
+                    
+                    // 分组统计
+                    if($relation && $relation['rel_type']=='group'){
+                        $groupColumn = $this->getColumns($relation['v_group_col'], $values, 'v_alias');
+                        $newQuery->addSelect($groupColumn)->groupBy($groupColumn);
+                    }
                 }else{
                     $query->orderBy([]);
                     $this->select(false);
@@ -165,6 +173,12 @@ class ActiveDataProvider extends BaseDataProvider
                     
                     foreach($summaryColumns as $select){
                         $query->addSelect($select);
+                    }
+                    
+                    // 分组统计
+                    if($relation && $relation['rel_type']=='group'){
+                        $groupColumn = $this->getColumns($relation['v_group_col']);
+                        $query->addSelect($groupColumn)->groupBy($groupColumn);
                     }
                     
                     $newQuery = $query;
@@ -193,8 +207,11 @@ class ActiveDataProvider extends BaseDataProvider
     public function select($columns)
     {
         if($columns===false){
-            $this->query->select([]);
-            $this->_selectAlias = $this->_selects = [];
+            $query = $this->query;
+            if(!$query->having){
+                $this->query->select([]);
+                $this->_selectAlias = $this->_selects = [];
+            }
         }else{
             $values = null;
             $columns = is_array($columns) ? $columns : [$columns];
