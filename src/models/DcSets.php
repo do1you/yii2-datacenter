@@ -89,15 +89,14 @@ class DcSets extends \webadmin\ModelCAR
     {
         return [
             [['title', 'set_type', 'cat_id'], 'required'],
-            [['main_model', 'relation_models', 'run_script', 'run_sql', 'excel_file', 'rel_where', 'rel_group', 'rel_order', 'update_time', 'create_user'], 'safe'],
+            [['main_model', 'relation_models', 'run_script', 'run_sql', 'excel_file', 'rel_where', 'rel_group', 'rel_order', 'rel_having', 'update_time', 'create_user'], 'safe'],
             [['main_model', 'state', 'cat_id', 'source_id', 'create_user'], 'integer'],
             [['run_sql'], 'string'],
             [['update_time'], 'safe'],
             [['title', 'set_type'], 'string', 'max' => 50],
             [['relation_models'], 'string', 'max' => 255],
             [['run_script', 'excel_file'], 'string', 'max' => 150],
-            [['rel_where'], 'string', 'max' => 250],
-            [['rel_group', 'rel_order', 'rel_having'], 'string', 'max' => 250],
+            [['rel_group', 'rel_order'], 'string', 'max' => 250],
             [['excel_file'], 'required', 'when' => function ($model) {
                 return ($model->set_type=='excel');
             }],
