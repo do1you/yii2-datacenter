@@ -733,7 +733,7 @@ class DcSets extends \webadmin\ModelCAR
     public function allDefSets($userId='0',$where=[],$group=false)
     {
         $query = self::find();
-        $query->where($userId=='1' ? [] : [
+        $query->where([ // $userId=='1' ? [] : 
             'or',
             ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [$userId,'4'])],
             ['in', 'dc_sets.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [$userId,'4'])],
