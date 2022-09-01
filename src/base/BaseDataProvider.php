@@ -641,7 +641,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 }
             }elseif(strlen($v)<=0){
                 $v = '&nbsp;';
-            }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && (substr($v,0,2)=='0.' || substr($v,0,1)!='0')){
+            }elseif(is_numeric($v) && !preg_match("/\d{8,50}/",$v) && (substr($v,0,2)==='0.' || substr($v,0,1)!=='0')){
                 $v = floatval($v);
             }
             $data[$key] = $this->formatRespFun($col['resp_fun'],$v);
