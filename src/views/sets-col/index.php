@@ -61,6 +61,21 @@ use yii\helpers\Url;
                 	     'label',
                 	     'sql_formula',
                 	     [
+                	         'attribute' => 'is_frozen',
+                	         'value' => 'v_is_frozen',
+                	         'filter' => false,
+                	     ],
+                	     [
+                	         'attribute' => 'is_hide',
+                	         'value' => 'v_is_hide',
+                	         'filter' => false,
+                	     ],
+                	     [
+                	         'attribute' => 'is_summary',
+                	         'value' => 'v_is_summary',
+                	         'filter' => false,
+                	     ],
+                	     [
                 	         'attribute' => 'is_search',
                 	         'value' => 'v_is_search',
                 	         'filter' => false,
@@ -70,11 +85,7 @@ use yii\helpers\Url;
                 	         'value' => 'v_is_back_search',
                 	         'filter' => false,
                 	     ],
-                	     [
-                	         'attribute' => 'is_summary',
-                	         'value' => 'v_is_summary',
-                	         'filter' => false,
-                	     ],
+                	     
                 	     [
                 	         'attribute' => 'type',
                 	         'value' => 'v_type',
@@ -85,11 +96,7 @@ use yii\helpers\Url;
                 	         'value' => 'v_fun',
                 	         'filter' => false,
                 	     ],
-                	     [
-                	         'attribute' => 'is_frozen',
-                	         'value' => 'v_is_frozen',
-                	         'filter' => false,
-                	     ],
+                	     
                 	     [
                 	         'attribute' => 'paixu',
                 	         'value' => 'paixu',

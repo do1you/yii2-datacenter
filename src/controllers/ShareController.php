@@ -8,7 +8,7 @@ use Yii;
 use datacenter\models\DcShare;
 use yii\data\ActiveDataProvider;
 
-class ShareController extends \webadmin\BController
+class ShareController extends ReportViewController // \webadmin\BController
 {
 	// 执行前
     public function beforeAction($action){
@@ -111,7 +111,7 @@ class ShareController extends \webadmin\BController
     /**
      * 查看模型
      */
-    public function actionView($id)
+    public function actionView($id='')
     {
         return $this->render('view', [
             'model' => $this->findModel($id),

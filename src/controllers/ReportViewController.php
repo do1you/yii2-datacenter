@@ -26,22 +26,30 @@ class ReportViewController extends \webadmin\BController
         parent::init();
         
         // 签名效验
-        if(Yii::$app->user->isGuest){
-            $token = Yii::$app->request->get('access-token');
+        if(($token = Yii::$app->request->get('access-token')) || Yii::$app->user->isGuest){
             $params = Yii::$app->request->get();
             $sign = isset($params['sign']) ? $params['sign'] : '';
             $dev = isset($params['dev']) ? $params['dev'] : '';
             unset($params['sign'],$params['dev']);
             $user = $token ? \webadmin\modules\authority\models\AuthUser::findOne(['access_token' => $token, 'state' => '0']) : null;
-
-            if(($token || $sign) && $this->signKey($params, $user['password']) != $sign) { //  && !YII_DEBUG
-                if(!empty($dev) && $dev=='ylltdev') { // 调试模式输出串码
-                    print_r($this->signKey($params, $user['password'], true));
-                    exit;
-                } else {
-                    throw new \yii\web\HttpException(200, Yii::t('datacenter','签名效验失败'));
+            if($token || $sign) { //  && !YII_DEBUG
+                if(empty($user) || $this->signKey($params, $user['password']) != $sign){
+                    if(!empty($dev) && $dev=='ylltdev') { // 调试模式输出串码
+                        print_r(empty($user) ? 'NOT USER' : $this->signKey($params, $user['password'], true));
+                        exit;
+                    } else {
+                        throw new \yii\web\HttpException(200, Yii::t('datacenter','签名效验失败'));
+                    }
+                }else{
+                    // 从接口进来的
+                    Yii::$app->session['API_TOKEN'] = $token;
                 }
             }
+        }
+
+        // 接口进来的默认不显示导航菜单
+        if(Yii::$app->session['API_TOKEN']){
+            $this->layout = '@webadmin/views/html5';
         }
     }
     
@@ -49,7 +57,9 @@ class ReportViewController extends \webadmin\BController
     public function beforeAction($action){
         Yii::$app->controller->pageTitle = Yii::t('datacenter', '数据报表');
         Yii::$app->controller->currNav[] = Yii::$app->controller->pageTitle;
-        Yii::$app->controller->currUrl = $this->module->id.'/report-view/index';
+        if($this->id=='report-view'){
+            Yii::$app->controller->currUrl = $this->module->id.'/report-view/index';
+        }
         
         // 选择动态数据源
         if(($source = Yii::$app->request->get('source')) && is_array($source)){
@@ -300,11 +310,11 @@ class ReportViewController extends \webadmin\BController
     /**
      * 报表显示
      */
-    public function actionView()
+    public function actionView($id='')
     {
         $id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
         $vid = Yii::$app->request->getBodyParam('vid',Yii::$app->getRequest()->getQueryParam('vid'));
-        $list = $this->findModel((is_array($id) ? $id : ($id ? explode(',',$id) : [])),(is_array($vid) ? $vid : ($vid ? explode(',',$vid) : [])));
+        $list = $this->findReportModel((is_array($id) ? $id : ($id ? explode(',',$id) : [])),(is_array($vid) ? $vid : ($vid ? explode(',',$vid) : [])));
         if(!empty(Yii::$app->request->get('is_export'))) return $this->exportExcel($list);
         
         return $this->render('display', [
@@ -315,7 +325,7 @@ class ReportViewController extends \webadmin\BController
     /**
      * 数据集显示
      */
-    public function actionSetView()
+    public function actionSetView($id='')
     {
         $id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
         $vid = Yii::$app->request->getBodyParam('vid',Yii::$app->getRequest()->getQueryParam('vid'));
@@ -375,7 +385,7 @@ class ReportViewController extends \webadmin\BController
     /**
      * 查找模型
      */
-    protected function findModel($id,$vid=[])
+    protected function findReportModel($id,$vid=[])
     {
         if($vid){
             if(is_array($vid)){
@@ -433,7 +443,7 @@ class ReportViewController extends \webadmin\BController
         if($return) {
             return [
                 'sign' => $sign,
-                'signStr' => $signStr . '{私钥}',
+                'signStr' => $signStr . '{私钥}'.$signKey,
             ];
         }else{
             return $sign;

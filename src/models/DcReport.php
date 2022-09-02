@@ -153,7 +153,7 @@ class DcReport extends \webadmin\ModelCAR
     // 返回格式化标题
     public function getV_title()
     {
-        return "{$this->title}"; // [{$this->user['name']}]
+        return "{$this->title}[{$this->id}]"; // [{$this->user['name']}]
     }
     
     // 获取显示模板

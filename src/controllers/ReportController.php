@@ -13,7 +13,7 @@ use datacenter\models\DcReportColumns;
 use datacenter\models\DcRoleAuthority;
 use datacenter\models\DcUserAuthority;
 
-class ReportController extends \webadmin\BController
+class ReportController extends ReportViewController // \webadmin\BController
 {
     public $enableCsrfValidation = false;
     
@@ -410,7 +410,7 @@ class ReportController extends \webadmin\BController
     /**
      * 查看模型
      */
-   /* public function actionView($id)
+   /* public function actionView($id='')
     {
         return $this->render('view', [
             'model' => $this->findModel($id),

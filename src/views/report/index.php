@@ -15,6 +15,7 @@ use yii\helpers\Url;
     		    <div class="widget-buttons">
     				<a href="#" data-toggle="collapse" title="<?= Yii::t('common','最小化')?>"><i class="fa fa-minus"></i></a>
     				<a href="#" data-toggle="maximize" title="<?= Yii::t('common','最大化')?>"><i class="fa fa-expand"></i></a>
+    				<a href="#" data-toggle="modal" data-target=".bs-nav-modal" title="<?= Yii::t('datacenter','报表选择')?>"><i class="fa fa-bars"></i></a>
     		    </div>
     		</div>
     		<div class="widget-body checkForm">
@@ -106,5 +107,6 @@ use yii\helpers\Url;
 	</div>
 </div>
 <?php Pjax::end(); ?>
+<?= $this->render('/report-view/_nav', []) ?>
 
 

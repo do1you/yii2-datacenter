@@ -30,3 +30,4 @@ if($count>1){ // 瀑布流
     	</div>
 	<?php endforeach;?>
 </div>
+<?= $this->render('/report-view/_nav', []) ?>

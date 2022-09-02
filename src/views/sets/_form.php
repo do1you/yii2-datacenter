@@ -33,6 +33,9 @@ use webadmin\widgets\ActiveForm;
 		<div class="widget flat radius-bordered">
 			<div class="widget-header bg-themeprimary">
 			    <span class="widget-caption">数据集 <?php echo $model->id ? $model['title'] : '新增'?></span>
+			    <div class="widget-buttons">
+    				<a href="#" data-toggle="modal" data-target=".bs-nav-modal" title="<?= Yii::t('datacenter','报表选择')?>"><i class="fa fa-bars"></i></a>
+    		    </div>
 			</div>
 			<div class="widget-body">
 			    <div class="widget-main ">
@@ -74,4 +77,5 @@ use webadmin\widgets\ActiveForm;
 </div>
 <?php $this->registerJs("location.hash && $('a[href=\"'+location.hash+'\"]').tab('show');");?>
 <?php Pjax::end(); ?>
+<?= $this->render('/report-view/_nav', []) ?>
 

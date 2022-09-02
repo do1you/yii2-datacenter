@@ -10,7 +10,7 @@ use datacenter\models\DcRoleAuthority;
 use datacenter\models\DcUserAuthority;
 use yii\data\ActiveDataProvider;
 
-class SetsController extends \webadmin\BController
+class SetsController extends ReportViewController // \webadmin\BController
 {
 	// 执行前
     public function beforeAction($action){
@@ -104,7 +104,7 @@ class SetsController extends \webadmin\BController
     /**
      * 查看模型
      */
-    public function actionView($id)
+    public function actionView($id='')
     {
         return $this->render('view', [
             'model' => $this->findModel($id),

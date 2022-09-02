@@ -29,7 +29,7 @@ $sourceList = $model ? $model['v_source'] : [];
                     }
                     ?>
                 <?php //endif;?>
-                <?php if($model['forUserModel'] && $model['forUserModel'] instanceof DcShare):?>
+                <?php if($model['forUserModel'] && $model['forUserModel'] instanceof DcShare): // 分享时?>
                 	<?php if(Yii::$app->user->id && (!$model['forUserModel']['user_ids'] || in_array(Yii::$app->user->id, $model['forUserModel']['v_user_ids']))):?>
                 		<!-- a href="#" data-toggle="save" title="<?= Yii::t('datacenter','保存为我的报表（预留）')?>"><i class="fa fa-save"></i></a -->
                 	<?php endif;?>
@@ -44,8 +44,7 @@ $sourceList = $model ? $model['v_source'] : [];
         				<?php if(!Yii::$app->request->get('access-token')):?>
             				<!-- 分享 -->
             				<a href="#" data-toggle="share" <?php echo ($model instanceof \datacenter\models\DcReport ? 'report-id' : 'set-id')?>="<?php echo $model['id']?>" 
-            				before-title="<?php echo $model['title']?>"
-            				title="<?= Yii::t('datacenter','分享')?>"><i class="fa fa-share"></i></a>
+            				before-title="<?php echo $model['title']?>" title="<?= Yii::t('datacenter','分享')?>"><i class="fa fa-share"></i></a>
             				<!-- 保存 -->
             				<a href="#" data-toggle="collection" 
                             <?php if($model['forUserModel']):?>
@@ -54,6 +53,7 @@ $sourceList = $model ? $model['v_source'] : [];
                             <?php endif;?>
             				<?php echo ($model instanceof \datacenter\models\DcReport ? 'report-id' : 'set-id')?>="<?php echo $model['id']?>" 
             				title="<?= Yii::t('datacenter','保存')?>"><i class="fa fa-save"></i></a>
+            				<!-- 删除 -->
             				<?php if($model['forUserModel']):?>
             					<a href="#" data-toggle="cancel" <?php echo ($model instanceof \datacenter\models\DcReport ? 'user-report-id' : 'user-set-id')?>="<?php echo $model['forUserModel']['id']?>" title="<?= Yii::t('datacenter','删除')?>"><i class="fa fa-times"></i></a>
             				<?php endif;?>
@@ -61,6 +61,7 @@ $sourceList = $model ? $model['v_source'] : [];
         			<?php endif;?>
         			<a href="#" data-toggle="collapse" title="<?= Yii::t('common','最小化')?>"><i class="fa fa-minus"></i></a>
         			<a href="#" data-toggle="maximize" title="<?= Yii::t('common','最大化')?>"><i class="fa fa-expand"></i></a>
+        			<a href="#" data-toggle="modal" data-target=".bs-nav-modal" title="<?= Yii::t('datacenter','报表选择')?>"><i class="fa fa-bars"></i></a>
     			<?php endif;?>
     	    </div>
     	</div>
@@ -69,6 +70,7 @@ $sourceList = $model ? $model['v_source'] : [];
         </div>
     </div>
 </div>
+
 <?php 
 $url = \yii\helpers\Url::to(['report-view/set-source']);
 $script = <<<eot

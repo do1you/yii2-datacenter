@@ -72,7 +72,7 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
      */
     public function actionField($id)
     {
-        $model = $this->findModel($id);
+        $model = $this->findReportModel($id);
         return $model['v_columns'];
     }
     
@@ -81,7 +81,7 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
      */
     public function actionData($id,$vid='',$cache='1')
     {
-        $model = $this->findModel($id,$vid,$cache);
+        $model = $this->findReportModel($id,$vid,$cache);
         if(Yii::$app->request->get('debug')){
             return $this->render('/report-view/api', [
                 'dataProvider' => $model->getDataProvider(),
@@ -116,7 +116,7 @@ class ReportApiController extends ReportViewController // \webadmin\BController 
     /**
      * 查找报表模型
      */
-    protected function findModel($id,$vid='',$cache='1')
+    protected function findReportModel($id,$vid='',$cache='1')
     {
         if($vid){
             if (($model = ($cache ? DcUserReport::model()->getCache('findModel',[$vid]) : DcUserReport::model()->findModel($vid)))) {

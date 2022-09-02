@@ -28,6 +28,9 @@ $reportList = \datacenter\models\DcReport::model()->findModel((in_array(Yii::$ap
 		<div class="widget flat radius-bordered">
     		<div class="widget-header bg-themeprimary">
     		    <span class="widget-caption">构建报表</span>
+    	    	<div class="widget-buttons">
+    		    	<a href="#" data-toggle="modal" data-target=".bs-nav-modal" title="<?= Yii::t('datacenter','报表选择')?>"><i class="fa fa-bars"></i></a>
+		    	</div>
     		</div>
     		<div class="widget-body well-min-height" style="min-height:500px;">
     			<div id="report_div">
@@ -62,3 +65,4 @@ if(Yii::$app->controller->action->id=='update'){
         </div>
     </div>
 </div>
+<?= $this->render('/report-view/_nav', []) ?>
