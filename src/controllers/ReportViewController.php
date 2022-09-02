@@ -25,32 +25,7 @@ class ReportViewController extends \webadmin\BController
     {
         parent::init();
         
-        // 签名效验
-        if(($token = Yii::$app->request->get('access-token')) || Yii::$app->user->isGuest){
-            $params = Yii::$app->request->get();
-            $sign = isset($params['sign']) ? $params['sign'] : '';
-            $dev = isset($params['dev']) ? $params['dev'] : '';
-            unset($params['sign'],$params['dev']);
-            $user = $token ? \webadmin\modules\authority\models\AuthUser::findOne(['access_token' => $token, 'state' => '0']) : null;
-            if($token || $sign) { //  && !YII_DEBUG
-                if(empty($user) || $this->signKey($params, $user['password']) != $sign){
-                    if(!empty($dev) && $dev=='ylltdev') { // 调试模式输出串码
-                        print_r(empty($user) ? 'NOT USER' : $this->signKey($params, $user['password'], true));
-                        exit;
-                    } else {
-                        throw new \yii\web\HttpException(200, Yii::t('datacenter','签名效验失败'));
-                    }
-                }else{
-                    // 从接口进来的
-                    Yii::$app->session['API_TOKEN'] = $token;
-                }
-            }
-        }
-
-        // 接口进来的默认不显示导航菜单
-        if(Yii::$app->session['API_TOKEN']){
-            $this->layout = '@webadmin/views/html5';
-        }
+        $this->_tokenLogin();
     }
     
     // 执行前
@@ -144,7 +119,61 @@ class ReportViewController extends \webadmin\BController
         ];
     }
     
-    // 设置数据源
+    /**
+     * API同步登录
+     */
+    protected function _tokenLogin($isToo = false)
+    {
+        // 签名效验
+        if(($token = Yii::$app->request->get('access-token')) || Yii::$app->user->isGuest){
+            $params = Yii::$app->request->get();
+            $sign = isset($params['sign']) ? $params['sign'] : '';
+            $dev = isset($params['dev']) ? $params['dev'] : '';
+            unset($params['sign'],$params['dev']);
+            $user = $token ? \webadmin\modules\authority\models\AuthUser::findOne(['access_token' => $token, 'state' => '0']) : null;
+            
+            // 匹配不上的时候进行一次同步
+            if($token && empty($user)){
+                $app = Yii::$app;
+                \webadmin\modules\config\models\SysCrontab::getConsoleApp()->runAction('datacenter/yezhi-administrator/rsync-admin');
+                Yii::$app = $app;
+                
+                $user = $token ? \webadmin\modules\authority\models\AuthUser::findOne(['access_token' => $token, 'state' => '0']) : null;
+            }
+            
+            if($token || $sign) { //  && !YII_DEBUG
+                if(empty($user) || $this->signKey($params, $user['password']) != $sign){
+                    if(!empty($dev) && $dev=='ylltdev') { // 调试模式输出串码
+                        print_r(empty($user) ? 'NOT USER' : $this->signKey($params, $user['password'], true));
+                        exit;
+                    } else {
+                        // 刚修改过密码
+                        if($user){
+                            $app = Yii::$app;
+                            \webadmin\modules\config\models\SysCrontab::getConsoleApp()->runAction('datacenter/yezhi-administrator/rsync-admin',[trim($user['login_name'], 'YLLT_')]);
+                            Yii::$app = $app;
+                            
+                            return $this->_tokenLogin(true);
+                        }
+                        
+                        throw new \yii\web\HttpException(200, Yii::t('datacenter','签名效验失败'));
+                    }
+                }else{
+                    // 从接口进来的
+                    Yii::$app->session['API_TOKEN'] = $token;
+                }
+            }
+        }
+        
+        // 接口进来的默认不显示导航菜单
+        if(Yii::$app->session['API_TOKEN']){
+            $this->layout = '@webadmin/views/html5';
+        }
+    }
+    
+    /**
+     * 设置数据源
+     */
     public function actionSetSource($id, $sid)
     {
         $source = $sid ? \datacenter\models\DcSource::findOne($sid) : null;
