@@ -10,7 +10,7 @@ use datacenter\models\DcRoleAuthority;
 use datacenter\models\DcUserAuthority;
 use yii\data\ActiveDataProvider;
 
-class SetsRelController extends \webadmin\BController
+class SetsRelController extends ReportViewController // \webadmin\BController
 {
 	// 执行前
     public function beforeAction($action){

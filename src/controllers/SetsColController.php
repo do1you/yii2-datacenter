@@ -11,7 +11,7 @@ use datacenter\models\DcUserAuthority;
 use yii\data\ActiveDataProvider;
 use datacenter\models\DcSets;
 
-class SetsColController extends \webadmin\BController
+class SetsColController extends ReportViewController // \webadmin\BController
 {
 	// 执行前
     public function beforeAction($action){

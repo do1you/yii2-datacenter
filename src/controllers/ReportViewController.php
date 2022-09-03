@@ -129,6 +129,7 @@ class ReportViewController extends \webadmin\BController
             $params = Yii::$app->request->get();
             $sign = isset($params['sign']) ? $params['sign'] : '';
             $dev = isset($params['dev']) ? $params['dev'] : '';
+            $t = isset($params['t']) ? intval($params['t']) : '';
             unset($params['sign'],$params['dev']);
             $user = $token ? \webadmin\modules\authority\models\AuthUser::findOne(['access_token' => $token, 'state' => '0']) : null;
             
@@ -139,6 +140,11 @@ class ReportViewController extends \webadmin\BController
                 Yii::$app = $app;
                 
                 $user = $token ? \webadmin\modules\authority\models\AuthUser::findOne(['access_token' => $token, 'state' => '0']) : null;
+            }
+            
+            // 判断链接是否失效
+            if(empty($t) || time()-$t>3600){
+                throw new \yii\web\HttpException(200, Yii::t('datacenter','该链接已经失效,请重新进入~'));
             }
             
             if($token || $sign) { //  && !YII_DEBUG
@@ -476,6 +482,31 @@ class ReportViewController extends \webadmin\BController
             ];
         }else{
             return $sign;
+        }
+    }
+    
+    /**
+     * 输出前处理
+     */
+    public function beforeSend($event)
+    {
+        parent::beforeSend($event);
+        
+        // iframe cookie处理
+        if(
+            Yii::$app->request->isSecureConnection 
+            && ($userAgent = strtolower(Yii::$app->request->userAgent))
+            && strpos($userAgent, 'chrome')!==false
+            && preg_match('/\schrome\/((\d+)\.[\d\.]+)\s/', $userAgent, $matches)
+            && !empty($matches[2])
+            && intval($matches[2]) >= 80 // chrome大于80的版本设置SameSite属性
+        ){
+            $response = Yii::$app->getResponse();
+            $cookies = $response->getCookies();
+            foreach($cookies as $cookie){
+                $cookie->path = '/; SameSite=None';
+                $cookie->secure = true;
+            }
         }
     }
 }
