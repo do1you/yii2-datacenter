@@ -60,6 +60,7 @@ use yii\helpers\Url;
                 	     'name',
                 	     'label',
                 	     'sql_formula',
+                	     'formula',
                 	     [
                 	         'attribute' => 'is_frozen',
                 	         'value' => 'v_is_frozen',
@@ -102,7 +103,6 @@ use yii\helpers\Url;
                 	         'value' => 'paixu',
                 	         'filter' => false,
                 	     ],
-                	     'formula',
 
                         [
                         	'class' => '\yii\grid\ActionColumn',

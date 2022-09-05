@@ -67,5 +67,9 @@ $this->registerJs("$('.dd').nestable();$('.dd-handle a').on('mousedown', functio
 $this->registerJsFile("@assetUrl/js/masonry.pkgd.min.js",['depends' => \webadmin\WebAdminAsset::className()]);
 $this->registerJs("$('.data-report-row').on('relad.layout',function(){
     $('.data-report-row').masonry({itemSelector:'.data-report-index'});
-}).triggerHandler('relad.layout');", 4, 'report.index.masonry');
+}).triggerHandler('relad.layout');
+setTimeout(function(){
+    $('.data-report-row').triggerHandler('relad.layout');
+},500);
+", 4, 'report.index.masonry');
 ?>

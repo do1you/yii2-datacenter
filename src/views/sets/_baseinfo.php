@@ -20,7 +20,8 @@ use webadmin\widgets\ActiveForm;
 
             <?= $form->field($model, 'main_model',['options'=>['class'=>'form-group box_form box_model']])->textInput()->selectajax(\yii\helpers\Url::toRoute('model'),[]) ?>
 
-            <?= $form->field($model, 'rel_where',['options'=>['class'=>'form-group box_form box_model']])->textarea(['maxlength' => true]) ?>
+            <?= $form->field($model, 'rel_where',['options'=>['class'=>'form-group box_form box_model']])->textarea(['maxlength' => true])
+            ->hint('支持的动态标签示例(下同)：{字段标签}=输入的查询条件[范围条件多了_0和_1字段]; {模型标签}=对应的数据模型表; 表名=对应的数据模型表')?>
 
             <?= $form->field($model, 'rel_group',['options'=>['class'=>'form-group box_form box_model']])->textInput(['maxlength' => true]) ?>
             

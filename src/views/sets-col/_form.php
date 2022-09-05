@@ -56,20 +56,27 @@ $model->afterFind();
         		
         		<?= $form->field($model, 'fun')->textInput(['maxlength' => true])->select2($model->getV_fun(false), ['prompt'=>'请选择']) ?>
             		
-        		<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true]) ?>
+        		<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true])
+        		->hint('支持的动态标签示例(下同)：{字段标签}=输入的查询条件[范围条件多了_0和_1字段]; {模型标签}=对应的数据模型表; 表名=对应的数据模型表')?>
     		<?php elseif($model['sets']['set_type']=='sql'):?>
     			<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
         		
         		<?= $form->field($model, 'label')->textInput(['maxlength' => true]) ?>
         		
-        		<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true]) ?>
+        		<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true])
+        		->hint('支持的动态标签示例(下同)：{字段标签}=输入的查询条件[范围条件多了_0和_1字段]; {模型标签}=对应的数据模型表; 表名=对应的数据模型表')?>
         	<?php else:?>
         		<?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
         		
         		<?= $form->field($model, 'label')->textInput(['maxlength' => true]) ?>
         	<?php endif;?>
             
-            <?= $form->field($model, 'formula')->textInput(['maxlength' => true])->hint('通过字段结果公式计算，以标签做主键计算，例：{微信}+{支付宝}+{银行卡}+{现金}') ?>
+            <?= $form->field($model, 'formula')->textInput(['maxlength' => true])->hint('采用{列名称}进行计算，示例：<span class="orange">{微信}+{支付宝}+{银行卡}+{现金}</span>
+                <br>支持使用条件判断，示例：<span class="orange">{业绩}>10000 ? 500 : 100</span>
+                <br>同时判断多个条件，示例：<span class="orange">{业绩}>10000 && {业绩}<=30000 ? 500 : 100</span>
+                <br>只要有一个条件满足，示例：<span class="orange">{业绩}>10000 || {桌数}>=3 ? 500 : 100</span>
+                <br>多条件判断（阶梯条件）使用嵌套，示例：<span class="orange">{业绩}>100000 ? 500 : ({业绩}>50000 ? 300 : ({业绩}>30000 ? 200 : 100))</span>
+                ') ?>
             
             <?= $form->field($model, 'paixu')->textInput(['maxlength' => true]) ?>
             

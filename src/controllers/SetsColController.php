@@ -140,7 +140,7 @@ class SetsColController extends ReportViewController // \webadmin\BController
     /**
      * 查看模型
      */
-    public function actionView($id)
+    public function actionView($id='')
     {
         return $this->render('view', [
             'model' => $this->findModel($id),
