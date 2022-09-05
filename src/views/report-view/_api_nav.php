@@ -19,6 +19,9 @@
                 		<li class="dd-item">
                 			<a class="dd2-content well bordered-left bordered-orange" href="<?php echo \yii\helpers\Url::to(['share/index'])?>">分享报表 </a>
                 		</li>
+                		<li class="dd-item">
+                			<a class="dd2-content well bordered-left bordered-orange" href="<?php echo \yii\helpers\Url::to(['authority/user/clearcache'])?>">刷新数据缓存 </a>
+                		</li>
                     </ol>
                 </div>
             </div>
