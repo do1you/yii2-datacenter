@@ -344,7 +344,7 @@ class ActiveDataProvider extends BaseDataProvider
         if($this->isUnion){
             $query = new \yii\db\Query();
             $allQuery = $this->query;
-            $query->from(['c' => $allQuery]);
+            $query->from(['sub' => $allQuery]);
             if($allQuery->orderBy && is_array($allQuery->orderBy)){
                 foreach($allQuery->orderBy as $orderBy){
                     if($orderBy instanceof \yii\db\ExpressionInterface) {
