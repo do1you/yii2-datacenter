@@ -38,7 +38,7 @@ $model->afterFind();
 			<?php if($model['sets']['set_type']=='model'):?>
 				<?= $form->field($model, 'switch_type')->textInput()->dropDownList($model->getV_switch_type(false), []) ?>
 				
-            	<?= $form->field($model, 'model_id',['options'=>['class'=>'form-group box_form box_model']])->textInput()->selectajax(\yii\helpers\Url::toRoute('model'),[]) ?>
+            	<?= $form->field($model, 'model_id',['options'=>['class'=>'form-group box_form box_model']])->textInput()->selectajax(\yii\helpers\Url::toRoute(['formodel','fId'=>$model['set_id']]),[]) ?>
             	
             	<?= $form->field($model, 'for_set_id',['options'=>['class'=>'form-group box_form box_sets']])->textInput()->selectajax(\yii\helpers\Url::toRoute(['forsets','fId'=>$model['set_id']]),[]) ?>
   			<?php endif;?>
@@ -82,16 +82,16 @@ $model->afterFind();
             
             <?= $form->field($model, 'resp_fun')->textInput(['maxlength' => true])->select2($model->getV_resp_fun(false), ['prompt'=>'请选择']) ?>
             
-            <?= $form->field($model, 'is_frozen')->textInput()->dropDownList($model->getV_is_frozen(false), []) ?>
+            <?= $form->field($model, 'is_frozen')->textInput()->radioList($model->getV_is_frozen(false), []) ?>
             
-            <?= $form->field($model, 'is_hide')->textInput()->dropDownList($model->getV_is_hide(false), []) ?>
+            <?= $form->field($model, 'is_hide')->textInput()->radioList($model->getV_is_hide(false), []) ?>
             
-            <?= $form->field($model, 'is_summary')->textInput()->dropDownList($model->getV_is_summary(false), []) ?>
+            <?= $form->field($model, 'is_summary')->textInput()->radioList($model->getV_is_summary(false), []) ?>
             
-            <?= $form->field($model, 'is_search')->textInput()->dropDownList($model->getV_is_search(false), []) ?>
+            <?= $form->field($model, 'is_search')->textInput()->radioList($model->getV_is_search(false), []) ?>
             
             <?php if(in_array($model['sets']['set_type'], ['model','sql'])):?>
-            	<?= $form->field($model, 'is_back_search')->textInput()->dropDownList($model->getV_is_back_search(false), []) ?>
+            	<?= $form->field($model, 'is_back_search')->textInput()->radioList($model->getV_is_back_search(false), []) ?>
             <?php endif;?>
             
             <?= $form->field($model, 'search_group')->textInput()->select2($model->getV_search_group(false), ['prompt'=>'请选择']) ?>
@@ -155,12 +155,14 @@ $('#dcsetscolumns-column_id').on('change',function(){
     }
 });
 // 选择是否可查
-$('#dcsetscolumns-is_search').on('change',function(){
-    $('#dcsetscolumns-type').triggerHandler('change');
-}).triggerHandler('change');
+$('#dcsetscolumns-is_search').on('click',function(e){
+    if($(e.target).is('input')){
+        $('#dcsetscolumns-type').triggerHandler('change');
+    }
+}).triggerHandler('click');
 // 选择查询类型
 $('#dcsetscolumns-type').on('change',function(){
-    var isSearch = $('#dcsetscolumns-is_search').val(),
+    var isSearch = $('input[name=\'DcSetsColumns[is_search]\']:checked').val(),
         value = $(this).val(),
         fn = function(id,isShow){ $(id).closest('.form-group')[isShow ? 'slideDown' : 'slideUp'](); };
     fn('#dcsetscolumns-search_group,#dcsetscolumns-is_back_search,#dcsetscolumns-search_params,#dcsetscolumns-search_params_text,#dcsetscolumns-search_params_dd,#dcsetscolumns-search_value,#dcsetscolumns-search_value_text');

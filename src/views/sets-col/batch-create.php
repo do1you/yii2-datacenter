@@ -29,7 +29,7 @@ Yii::$app->controller->currNav[] = Yii::t('common','批量添加');
 			<?php if($model['sets']['set_type']=='model'):?>
 				<?= $form->field($model, 'switch_type')->textInput()->dropDownList($model->getV_switch_type(false), []) ?>
 				
-            	<?= $form->field($model, 'model_id',['options'=>['class'=>'form-group box_form box_model']])->textInput()->selectajax(\yii\helpers\Url::toRoute('model'),[]) ?>
+            	<?= $form->field($model, 'model_id',['options'=>['class'=>'form-group box_form box_model']])->textInput()->selectajax(\yii\helpers\Url::toRoute(['formodel','fId'=>$model['set_id']]),[]) ?>
             	
             	<?= $form->field($model, 'for_set_id',['options'=>['class'=>'form-group box_form box_sets']])->textInput()->selectajax(\yii\helpers\Url::toRoute(['forsets','fId'=>$model['set_id']]),[]) ?>
   			<?php endif;?>
@@ -47,23 +47,28 @@ Yii::$app->controller->currNav[] = Yii::t('common','批量添加');
         		
         		<?= $form->field($model, 'sql_formula')->textInput(['maxlength' => true])->hint('使用各字段对应的名称标签：{name}，例：table.{name}/100') ?>
         	<?php endif;?>
-            
-            <?= $form->field($model, 'formula')->textInput(['maxlength' => true])->hint('通过字段结果公式计算，以标签做主键计算，例：{微信}+{支付宝}+{银行卡}+{现金}') ?>
+
+            <?= $form->field($model, 'formula')->textInput(['maxlength' => true])->hint('采用{列名称}进行计算，示例：<span class="orange">{微信}+{支付宝}+{银行卡}+{现金}</span>
+                <br>支持使用条件判断，示例：<span class="orange">{业绩}>10000 ? 500 : 100</span>
+                <br>同时判断多个条件，示例：<span class="orange">{业绩}>10000 && {业绩}<=30000 ? 500 : 100</span>
+                <br>只要有一个条件满足，示例：<span class="orange">{业绩}>10000 || {桌数}>=3 ? 500 : 100</span>
+                <br>多条件判断（阶梯条件）使用嵌套，示例：<span class="orange">{业绩}>100000 ? 500 : ({业绩}>50000 ? 300 : ({业绩}>30000 ? 200 : 100))</span>
+            ')?>
             
             <?= $form->field($model, 'paixu')->textInput(['maxlength' => true]) ?>
             
             <?= $form->field($model, 'resp_fun')->textInput(['maxlength' => true])->select2($model->getV_resp_fun(false), ['prompt'=>'请选择']) ?>
             
-            <?= $form->field($model, 'is_frozen')->textInput()->dropDownList($model->getV_is_frozen(false), []) ?>
+            <?= $form->field($model, 'is_frozen')->textInput()->radioList($model->getV_is_frozen(false), []) ?>
             
-            <?= $form->field($model, 'is_hide')->textInput()->dropDownList($model->getV_is_hide(false), []) ?>
+            <?= $form->field($model, 'is_hide')->textInput()->radioList($model->getV_is_hide(false), []) ?>
             
-            <?= $form->field($model, 'is_summary')->textInput()->dropDownList($model->getV_is_summary(false), []) ?>
+            <?= $form->field($model, 'is_summary')->textInput()->radioList($model->getV_is_summary(false), []) ?>
             
-            <?= $form->field($model, 'is_search')->textInput()->dropDownList($model->getV_is_search(false), []) ?>
+            <?= $form->field($model, 'is_search')->textInput()->radioList($model->getV_is_search(false), []) ?>
             
             <?php if(in_array($model['sets']['set_type'], ['model','sql'])):?>
-            	<?= $form->field($model, 'is_back_search')->textInput()->dropDownList($model->getV_is_back_search(false), []) ?>
+            	<?= $form->field($model, 'is_back_search')->textInput()->radioList($model->getV_is_back_search(false), []) ?>
             <?php endif;?>
             
             <?= $form->field($model, 'search_group')->textInput()->select2($model->getV_search_group(false), ['prompt'=>'请选择']) ?>
@@ -120,12 +125,14 @@ $('#dcsetscolumns-for_set_id').on('change',function(){
     location.href = '{$url1}&fId=' + (value || '');
 });
 // 选择是否可查
-$('#dcsetscolumns-is_search').on('change',function(){
-    $('#dcsetscolumns-type').triggerHandler('change');
-}).triggerHandler('change');
+$('#dcsetscolumns-is_search').on('click',function(e){
+    if($(e.target).is('input')){
+        $('#dcsetscolumns-type').triggerHandler('change');
+    }
+}).triggerHandler('click');
 // 选择查询类型
 $('#dcsetscolumns-type').on('change',function(){
-    var isSearch = $('#dcsetscolumns-is_search').val(),
+    var isSearch = $('input[name=\'DcSetsColumns[is_search]\']:checked').val(),
         value = $(this).val(),
         fn = function(id,isShow){ $(id).closest('.form-group')[isShow ? 'slideDown' : 'slideUp'](); };
     fn('#dcsetscolumns-search_group,#dcsetscolumns-is_back_search,#dcsetscolumns-search_params,#dcsetscolumns-search_params_text,#dcsetscolumns-search_params_dd,#dcsetscolumns-search_value,#dcsetscolumns-search_value_text');

@@ -28,8 +28,9 @@ class SetsColController extends ReportViewController // \webadmin\BController
     public function actions()
     {
         $fId = Yii::$app->request->get('fId');
-        $fModel = $fId ? DcSets::findOne($fId) : null;
+        $fModel = $fId ? DcSets::find()->with(['columns.model'])->where(['id'=>$fId])->one() : null;
         $mModel = $fModel ? $fModel['mainModel'] : null;
+        $modelIds = $fModel ? array_keys($fModel['v_relation_models']) : [];
         return [
             // 数据模型查询
             'model' => [
@@ -44,6 +45,27 @@ class SetsColController extends ReportViewController // \webadmin\BController
                         \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2'])
                     ),
                 ]),
+                'model_withs' => ['source'],
+            ],
+            // 数据模型查询
+            'formodel' => [
+                'class' => '\webadmin\actions\Select2Action',
+                'className' => '\datacenter\models\DcModel',
+                'col_id' => 'dc_model.id',
+                'col_text' => ['tb_name','tb_label'],
+                'col_v_text' => 'v_tb_name',
+                'join_withs' => ['sourceRelation'],
+                'col_where' => [
+                    'and',
+                    (Yii::$app->user->id=='1' ? [] : [
+                        'source_db'=>\yii\helpers\ArrayHelper::merge(
+                            \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2']),
+                            \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2'])
+                        ),
+                    ]), 
+                    ['in', 'dc_relation.target_model', $modelIds],
+                    "dc_model.source_db='{$mModel['source_db']}'"
+                ],
                 'model_withs' => ['source'],
             ],
             // 数据集查询
@@ -150,16 +172,16 @@ class SetsColController extends ReportViewController // \webadmin\BController
     /**
      * 添加模型
      */
-    public function actionCreate($sId='',$mId='',$fId='',$cId='')
+    public function actionCreate($sId=null,$mId=null,$fId=null,$cId=null)
     {
         $model = new DcSetsColumns();
         $model->loadDefaultValues();
         $model->setScenario('insertForm');
         
-        if($sId) $model->set_id = $sId;
-        if($mId) $model->model_id = $mId;
-        if($fId) $model->for_set_id = $fId;
-        if($cId) $model->column_id = $cId;
+        if(isset($sId)) $model->set_id = $sId;
+        if(isset($mId)) $model->model_id = $mId;
+        if(isset($fId)) $model->for_set_id = $fId;
+        if(isset($cId)) $model->column_id = $cId;
 
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));
@@ -174,15 +196,15 @@ class SetsColController extends ReportViewController // \webadmin\BController
     /**
      * 批量添加模型
      */
-    public function actionBatchCreate($sId='',$mId='',$fId='')
+    public function actionBatchCreate($sId=null,$mId=null,$fId=null)
     {
         $model = new DcSetsColumns();
         $model->loadDefaultValues();
         $model->setScenario('batchInsertForm');
         
-        if($sId) $model->set_id = $sId;
-        if($mId) $model->model_id = $mId;
-        if($fId) $model->for_set_id = $fId;
+        if(isset($sId)) $model->set_id = $sId;
+        if(isset($mId)) $model->model_id = $mId;
+        if(isset($fId)) $model->for_set_id = $fId;
         
         if($model['sets']['set_type']!='model'){
             throw new \yii\web\HttpException(200, Yii::t('datacenter','只有数据集类型为模型的数据集才允许批量添加字段'));
@@ -194,12 +216,15 @@ class SetsColController extends ReportViewController // \webadmin\BController
             $fModel = $model['switch_type']==2 ? $model['forSets'] : $model['model'];
             $labels = $fModel ? \yii\helpers\ArrayHelper::map($fModel['columns'], 'id', 'label') : [];
             $names = $fModel ? \yii\helpers\ArrayHelper::map($fModel['columns'], 'id', 'name') : [];
-            foreach($model->column_id as $cid){
+            foreach($model->column_id as $key=>$cid){
                 $newModel = clone $model;
                 $newModel->column_id = $cid;
                 $newModel->label = isset($labels[$cid]) ? $labels[$cid] : $cid;
                 if($newModel->sql_formula && isset($names[$cid])){
                     $newModel->sql_formula = str_replace('{name}',$names[$cid],$newModel->sql_formula);
+                }
+                if($newModel->paixu){
+                    $newModel->paixu = $newModel->paixu-10*$key;
                 }
                 $newModel->save(false);
             }
@@ -218,15 +243,15 @@ class SetsColController extends ReportViewController // \webadmin\BController
     /**
      * 修改模型
      */
-    public function actionUpdate($id,$sId='',$mId='',$fId='',$cId='')
+    public function actionUpdate($id,$sId=null,$mId=null,$fId=null,$cId=null)
     {
         $model = $this->findModel($id);
         $model->setScenario('updateForm');
         
-        if($sId) $model->set_id = $sId;
-        if($mId) $model->model_id = $mId;
-        if($fId) $model->for_set_id = $fId;
-        if($cId) $model->column_id = $cId;
+        if(isset($sId)) $model->set_id = $sId;
+        if(isset($mId)) $model->model_id = $mId;
+        if(isset($fId)) $model->for_set_id = $fId;
+        if(isset($cId)) $model->column_id = $cId;
         
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息修改成功'));
