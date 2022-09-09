@@ -555,7 +555,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     /**
      * 过滤出报表的字段
      */
-    public function filterColumns($values, $isSummery = false)
+    public function filterColumns($values, $isSummery = false, $totalRow = [])
     {
         if(!$this->report) return $values;
         $data = [];
@@ -601,13 +601,13 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         }
         
         if(isset($values['title'])) $data['title'] = $values['title'];
-        return $this->formatValue($data);
+        return $this->formatValue($data, $totalRow);
     }
     
     /**
      * 过滤出数据集的字段
      */
-    public function filterSetsColumns($values, $isSummery = false)
+    public function filterSetsColumns($values, $isSummery = false, $totalRow = [])
     {
         if(!$this->sets) return $values;
         
@@ -648,7 +648,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         }
         
         if(isset($values['title'])) $data['title'] = $values['title'];
-        return $this->formatValue($data);
+        return $this->formatValue($data, $totalRow);
     }
     
     // 返回输出函数处理过的内容
@@ -691,6 +691,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     $formatFn[$col['v_alias']] = $col;
                 }
                 
+                $formatLabels["{{$col['v_format_label']}}"] = "\$totalRow[\"{$col['v_alias']}\"]";
                 $formatLabels[$col['v_format_label']] = "\${$col['v_alias']}";
             }
             $this->_replace_params['format_formulas'] = $formatFormulas;
@@ -702,7 +703,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     }
     
     // 格式化计算公式字符串
-    public function formatValue($values)
+    public function formatValue($values, $totalRow = [])
     {
         list($formatFormulas, $formatLabels, $formatDd, $formatFn) = $this->formatValueTpl();
         
@@ -728,6 +729,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         $values[$key] = '&nbsp;';
                     }
                 }catch(\Exception $e) {
+                    $values[$key] = $e->getMessage();
                 }
             }
         }
@@ -748,6 +750,28 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             }
         }
         return $columns;
+    }
+    
+    /**
+     * 返回汇总行数据
+     */
+    protected function summaryLists($list = [])
+    {
+        $totalRow = [];
+        if($list && is_array($list)){
+            foreach($list as $item){
+                if($item && is_array($item)){
+                    foreach($item as $attribute=>$value){
+                        if(is_numeric($value) && !preg_match("/^\d{8,50}$/",$value) && (!preg_match("/^\d{2,50}$/",$value) || substr($value,0,1)!='0')){ // 汇总
+                            if(!isset($totalRow[$attribute])) $totalRow[$attribute] = 0;
+                            $totalRow[$attribute] += $value;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $totalRow;
     }
     
     /**

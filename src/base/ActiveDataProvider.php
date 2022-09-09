@@ -101,8 +101,9 @@ class ActiveDataProvider extends BaseDataProvider
     {
         if($this->report){
             $list = $this->sets->getModels();
+            $totalRow = $this->summaryLists($list);
             foreach($list as $key=>$item){
-                $list[$key] = $this->filterColumns($item);
+                $list[$key] = $this->filterColumns($item, false, $totalRow);
             }
         }else{
             if (!$this->query instanceof \yii\db\QueryInterface) {
@@ -125,8 +126,9 @@ class ActiveDataProvider extends BaseDataProvider
             }
             
             $list = $query->all($this->db);
+            $totalRow = $this->summaryLists($list);
             foreach($list as $key=>$item){
-                $list[$key] = $this->filterSetsColumns($item);
+                $list[$key] = $this->filterSetsColumns($item, false, $totalRow);
             }
         }
         return $list;
