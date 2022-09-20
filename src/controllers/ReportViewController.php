@@ -352,6 +352,10 @@ class ReportViewController extends \webadmin\BController
         $list = $this->findReportModel((is_array($id) ? $id : ($id ? explode(',',$id) : [])),(is_array($vid) ? $vid : ($vid ? explode(',',$vid) : [])));
         if(!empty(Yii::$app->request->get('is_export'))) return $this->exportExcel($list);
         
+        if(($titles = $list ? \yii\helpers\ArrayHelper::map($list,'id','title') : [])){
+            Yii::$app->controller->pageTitle = implode(" ", $titles);
+        }
+        
         return $this->render('display', [
             'list' => $list,
         ]);
@@ -366,6 +370,10 @@ class ReportViewController extends \webadmin\BController
         $vid = Yii::$app->request->getBodyParam('vid',Yii::$app->getRequest()->getQueryParam('vid'));
         $list = $this->findSetModel((is_array($id) ? $id : ($id ? explode(',',$id) : [])),(is_array($vid) ? $vid : ($vid ? explode(',',$vid) : [])));
         if(!empty(Yii::$app->request->get('is_export'))) return $this->exportExcel($list);
+        
+        if(($titles = $list ? \yii\helpers\ArrayHelper::map($list,'id','title') : [])){
+            Yii::$app->controller->pageTitle = implode(" ", $titles);
+        }
         
         return $this->render('display', [
             'list' => $list,
