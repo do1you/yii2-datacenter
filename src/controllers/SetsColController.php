@@ -63,7 +63,11 @@ class SetsColController extends ReportViewController // \webadmin\BController
                             \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'2'])
                         ),
                     ]), 
-                    ['in', 'dc_relation.target_model', $modelIds],
+                    [
+                        'or',
+                        ['in', 'dc_relation.target_model', $modelIds],
+                        ['=', 'dc_model.id', $mModel['id']],
+                    ],
                     "dc_model.source_db='{$mModel['source_db']}'"
                 ],
                 'model_withs' => ['source'],
