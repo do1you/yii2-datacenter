@@ -206,24 +206,26 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         if($this->_searchModels === null){
             $haveLabels = $list = [];
             $globalParams = Yii::$app->request->get("SysConfig",[]);
+            $labelParams = Yii::$app->request->get("labels",[]);
             $forUserModel = $this->report ? $this->report['forUserModel'] : $this->sets['forUserModel'];
             if($forUserModel && ($search_values = $forUserModel['v_search_values'])){
-                $globalParams = array_merge($search_values,$globalParams);
+                $defaultParams = $search_values;
+            }else{
+                $defaultParams = [];
             }
             $columns = $this->report ? $this->report->columns : $this->sets->columns;
             foreach($columns as $item){
                 $colnmn = $this->report ? $item['setsCol'] : $item;
                 
                 // 引入数据集默认条件
-                $params = $globalParams;
                 if($this->report && $item['user_set_id'] && ($forUserSet = $item['userSets']) 
                     && ($search_values = $forUserSet['v_search_values'])
                 ){
                     foreach([$colnmn['v_alias'], '-'.$colnmn['v_alias']] as $attribute){
                         if(isset($search_values[$attribute]) && (is_array($search_values[$attribute]) || strlen($search_values[$attribute])>0)){
                             $is_back_search = substr($attribute,0,1)=='-';
-                            if(!isset($params[($is_back_search ? '-' : '').$item['v_alias']])){
-                                $params[($is_back_search ? '-' : '').$item['v_alias']] = $search_values[$attribute];
+                            if(!isset($defaultParams[($is_back_search ? '-' : '').$item['v_alias']])){
+                                $defaultParams[($is_back_search ? '-' : '').$item['v_alias']] = $search_values[$attribute];
                             }
                         }
                     }
@@ -232,7 +234,14 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 if($colnmn && $colnmn['is_search'] && !isset($haveLabels[$item['v_label']])){ // && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')
                     $_ = [
                         'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
-                        'value' => (isset($params[$item['v_alias']]) ? $params[$item['v_alias']] : $colnmn['v_search_defval']),
+                        'value' => (isset($globalParams[$item['v_alias']]) // 查询条件栏条件
+                            ? $globalParams[$item['v_alias']] 
+                            : (
+                                isset($labelParams[$item['v_label']]) // label查询条件
+                                ? $labelParams[$item['v_label']] 
+                                : (isset($defaultParams[$item['v_alias']]) ? $defaultParams[$item['v_alias']] : $colnmn['v_search_defval']) // 默认条件
+                              )
+                        ),
                         'attribute' => $item['v_alias'],
                         'label_name' => $item['v_label'],
                         'group_name' => $colnmn['v_search_group'],
@@ -248,7 +257,14 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         $label = "剔除{$item['v_label']}";
                         $_ = [
                             'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
-                            'value' => (isset($params[$attribute]) ? $params[$attribute] : ''), // $colnmn['v_search_defval']
+                            'value' => (isset($globalParams[$attribute]) 
+                                ? $globalParams[$attribute] 
+                                : (
+                                    isset($labelParams[$label]) 
+                                    ? $labelParams[$label] 
+                                    : (isset($defaultParams[$attribute]) ? $defaultParams[$attribute] : '')
+                                  )
+                            ), // $colnmn['v_search_defval']
                             'attribute' => $attribute,
                             'label_name' => $label,
                             'group_name' => $colnmn['v_search_group'],
