@@ -64,7 +64,15 @@ trait ReportOrmTrait
         if($id===null){
             return self::$_searchModels;
         }else{
-            return (isset(self::$_searchModels[$id]) ? self::$_searchModels[$id] : []);
+            if($this instanceof DcReport){ // 报表
+                return (isset(DcSets::$_searchModels[-$id]) ? DcSets::$_searchModels[-$id] : []);
+            }else{ // 数据集
+                $result = (isset(DcSets::$_searchModels[$id]) ? DcSets::$_searchModels[$id] : []);
+                if($this->report && $this->report['id']){
+                    $result += (isset(DcSets::$_searchModels[-$this->report['id']]) ? DcSets::$_searchModels[-$this->report['id']] : []);
+                }
+                return $result;
+            }
         }
     }
     
@@ -73,7 +81,14 @@ trait ReportOrmTrait
      */
     public function setSearchValues($values = [])
     {
-        self::$_searchModels[$this->id] = $values;
+        if($this instanceof DcReport){ // 报表
+            DcSets::$_searchModels[-$this->id] = $values;
+            if(($mainSet = $this->getV_mainSet())){
+                DcSets::$_searchModels[$mainSet['id']] = $values;
+            }
+        }else{ // 数据集
+            DcSets::$_searchModels[$this->id] = $values;
+        }
     }
     
     /**

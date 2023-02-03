@@ -234,6 +234,7 @@ class DcSource extends \webadmin\ModelCAR
                 'username' => $model['dbuser'],
                 'password' => $model['dbpass'],
                 'charset' => 'utf8',
+                'attributes' => [\PDO::ATTR_TIMEOUT => 8,],
             ]);
         }
         

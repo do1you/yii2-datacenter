@@ -481,8 +481,11 @@ class DcSets extends \webadmin\ModelCAR
             // 提取模型替换信息 
             $models = $this->getV_relation_models();
             foreach($models as $model){
-                $search[] = "{{$model['tb_label']}}.";
-                $replace[] = "{$model['v_alias']}.";
+                if($model['tb_label']){
+                    $search[] = "{{$model['tb_label']}}.";
+                    $replace[] = "{$model['v_alias']}.";
+                }
+                
                 $search[] = "{$model['tb_name']}.";
                 $replace[] = "{$model['v_alias']}.";
             }
