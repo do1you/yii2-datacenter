@@ -69,7 +69,7 @@ $script = <<<eot
 (function(){
 var colModel = {$colModel};
 var draw,table = $("#{$id}").dataTable({
-	"sDom": "<'row'<'col-xs-12 col-md-8'i><'col-xs-12 col-md-4 text-right'<'pull-right'B>>>t<'row'<'col-xs-12 col-md-4 margin-top-10'<'pull-left'l>><'col-xs-12 col-md-8 margin-top-10'p>>",
+	"sDom": "<'row'<'col-xs-8 col-md-8'i><'col-xs-4 col-md-4 text-right'<'pull-right'B>>>t<'row'<'col-xs-12 col-md-4 hidden-xs margin-top-10'<'pull-left'l>><'col-xs-12 col-md-8 margin-top-10'p>>",
     "buttons": ['colvis'],
     "initComplete": function(){ $('.data-report-row').triggerHandler('relad.layout'); },
     "processing" : true,
