@@ -39,14 +39,13 @@ use webadmin\widgets\ActiveForm;
             
             <?= $form->field($model, 'paixu')->textInput() ?>
             
-            <?= $form->field($model, 'search_values')->textarea(['rows'=>20]) ?>
-
 			<?php if(Yii::$app->controller->action->id!='create'):?>
 				<?= $form->field($model, 'grant_user')->textInput()->selectajax(\yii\helpers\Url::toRoute('user'),['disabled'=>'disabled','readonly'=>'readonly']) ?>
 				
             	<?= $form->field($model, 'create_time')->textInput(['disabled'=>'disabled','readonly'=>'readonly']) ?>
             <?php endif;?>
-
+            
+            <?= $form->field($model, 'search_values')->textarea(['rows'=>20]) ?>
 
             <?php if(Yii::$app->controller->action->id!='view'):?>
                 <div class="form-group">

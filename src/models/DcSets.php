@@ -330,7 +330,7 @@ class DcSets extends \webadmin\ModelCAR
         if($this->_setsList === null){
             $query = $this->getDataProvider()->query;
             $setLists = $this->getV_relation_sets();
-            $this->joinQuerySets($query, $setLists);
+            $query && $setLists && $this->joinQuerySets($query, $setLists);
         }
         
         return $this->_setsList;

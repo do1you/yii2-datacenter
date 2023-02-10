@@ -142,8 +142,25 @@ class ReportController extends ReportViewController // \webadmin\BController
     public function actionBuild($id=null)
     {
         $this->is_open_nav = false; // 隐藏左侧菜单
+        $reportList = \datacenter\models\DcReport::model()->findModel((in_array($this->action->id,['copy','update'])
+            ? [ 'id' => (!empty($id) ? $id : '-999') ]
+            : [
+                'create_user' => Yii::$app->user->id,
+                'state' => '9',
+            ]),true);
+        
+        if(in_array($this->action->id,['copy','update'])){
+            foreach($reportList as $report){
+                if($report['create_user'] != Yii::$app->user->id && Yii::$app->user->id!='1'){
+                    Yii::$app->session->setFlash('error',Yii::t('datacenter', '不允许编辑其他用户的报表，您可以复制一份报表进行编辑'));
+                    return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
+                }
+            }
+        }
+        
         return $this->render('build', [
             'id' => $id,
+            'reportList' => $reportList,
         ]);
     }
     
@@ -461,8 +478,12 @@ class ReportController extends ReportViewController // \webadmin\BController
         $id = Yii::$app->request->getBodyParam('id',Yii::$app->getRequest()->getQueryParam('id'));
         if($id && ($models = DcReport::findAll($id))){
         	$transaction = DcReport::getDb()->beginTransaction(); // 使用事务关联
-        	foreach($models as $model){
-        		$model->delete();
+        	foreach($models as $report){
+    	        if($report['create_user'] != Yii::$app->user->id && Yii::$app->user->id!='1'){
+    	            Yii::$app->session->setFlash('error',Yii::t('datacenter', '不允许删除其他用户的报表，请联系管理员'));
+    	            return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
+    	        }
+    	        $report->delete();
         	}
             $transaction->commit(); // 提交事务
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息删除成功'));

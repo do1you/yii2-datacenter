@@ -141,6 +141,11 @@ class SetsController extends ReportViewController // \webadmin\BController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        
+        if($model['create_user'] != Yii::$app->user->id && Yii::$app->user->id!='1'){
+            Yii::$app->session->setFlash('error',Yii::t('datacenter', '不允许编辑其他用户的数据集，请联系管理员'));
+            return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
+        }
 
         if($model->load(Yii::$app->request->post()) && $model->ajaxValidation() &&
             ($transaction = DcSets::getDb()->beginTransaction()) && $model->save()
@@ -165,6 +170,11 @@ class SetsController extends ReportViewController // \webadmin\BController
         if($id && ($models = DcSets::findAll($id))){
         	$transaction = DcSets::getDb()->beginTransaction(); // 使用事务关联
         	foreach($models as $model){
+        	    if($model['create_user'] != Yii::$app->user->id && Yii::$app->user->id!='1'){
+        	        Yii::$app->session->setFlash('error',Yii::t('datacenter', '不允许删除其他用户的数据集，请联系管理员'));
+        	        return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
+        	    }
+        	    
         		$model->delete();
         	}
             $transaction->commit(); // 提交事务

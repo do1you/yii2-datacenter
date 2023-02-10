@@ -1,12 +1,6 @@
 <?php
 use webadmin\widgets\ActiveForm;
 use \yii\helpers\Url;
-$reportList = \datacenter\models\DcReport::model()->findModel((in_array(Yii::$app->controller->action->id,['copy','update'])
-    ? [ 'id' => (!empty($id) ? $id : '-999') ]
-    : [
-        'create_user' => Yii::$app->user->id,
-        'state' => '9',
-    ]),true);
 ?>
 <div class="row">
 	<div class="col-sm-2 col-xs-12 report_box_left">
