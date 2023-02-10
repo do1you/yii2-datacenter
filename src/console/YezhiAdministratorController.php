@@ -25,7 +25,7 @@ class YezhiAdministratorController extends \webadmin\console\CController
     public function actionRsyncAdmin()
     {
         $args = func_get_args();
-        $source = \datacenter\models\DcSource::findOne(["dbname"=>'clouddb']);
+        $source = \datacenter\models\DcSource::findOne(["dbname"=>'clouddb','is_dynamic'=>'1']);
         $db = $source ? $source->getDbConnection() : null;
         
         if($db){

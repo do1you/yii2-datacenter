@@ -131,10 +131,10 @@ class ReportViewController extends \webadmin\BController
             $dev = isset($params['dev']) ? $params['dev'] : '';
             $t = isset($params['t']) ? intval($params['t']) : '';
             unset($params['sign'],$params['dev']);
-            $user = $token ? \webadmin\modules\authority\models\AuthUser::findOne(['access_token' => $token, 'state' => '0']) : null;
+            $user = ($token && !Yii::$app->user->isGuest) ? \webadmin\modules\authority\models\AuthUser::findOne(['access_token' => $token, 'state' => '0']) : null;
             
-            // 匹配不上的时候进行一次同步
-            if($token && empty($user)){
+            // 匹配不上或者首次登录的时候进行一次同步
+            if($token && (empty($user) || Yii::$app->user->isGuest)){
                 $app = Yii::$app;
                 \webadmin\modules\config\models\SysCrontab::getConsoleApp()->runAction('datacenter/yezhi-administrator/rsync-admin');
                 Yii::$app = $app;
@@ -173,7 +173,8 @@ class ReportViewController extends \webadmin\BController
         
         // 接口进来的默认不显示导航菜单
         if(Yii::$app->session['API_TOKEN']){
-            $this->layout = '@webadmin/views/html5';
+            // $this->layout = '@webadmin/views/html5';
+            $this->layout = 'html5';
         }
     }
     
