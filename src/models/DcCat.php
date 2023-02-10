@@ -107,6 +107,7 @@ class DcCat extends \webadmin\ModelCAR
     public function findModel($condition, $muli = false)
     {
         $query = parent::findByCondition($condition);
+        $query->with(['parent.parent.parent']);
         
         return ($muli ? $query->all() : $query->one());
     }

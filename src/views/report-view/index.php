@@ -8,7 +8,7 @@
         		<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 data-report-index">
                 	<div class="widget flat margin-bottom-10">
                         <div class="widget-header bg-purple">
-                            <span class="widget-caption">我的<?php echo $cat['name']?></span>
+                            <span class="widget-caption">我的<?php echo $cat['v_parentName']?></span>
                         </div>
                         <div class="widget-body no-padding" style="background:none;">
                             <div class="dd dd-draghandle">
@@ -35,7 +35,7 @@
         		<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 data-report-index">
                 	<div class="widget flat margin-bottom-10">
                         <div class="widget-header bg-info">
-                            <span class="widget-caption"><?php echo $cat['name']?></span>
+                            <span class="widget-caption"><?php echo $cat['v_parentName']?></span>
                         </div>
                         <div class="widget-body no-padding" style="background:none;">
                             <div class="dd dd-draghandle">
