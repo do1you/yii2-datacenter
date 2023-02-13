@@ -784,6 +784,7 @@ class DcSets extends \webadmin\ModelCAR
         $model = new DcSets();
         $attributes = $this->attributes;
         unset($attributes['id']);
+        $attributes['title'] .= "_副本";
         if($model->load($attributes, '') && $model->save()){
             $columnsMap = [];
             if($this->columns){

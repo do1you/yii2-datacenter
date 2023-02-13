@@ -256,10 +256,16 @@ class SetsColController extends ReportViewController // \webadmin\BController
         if(isset($mId)) $model->model_id = $mId;
         if(isset($fId)) $model->for_set_id = $fId;
         if(isset($cId)) $model->column_id = $cId;
-        
+
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
-        	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息修改成功'));
-            return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
+            if(Yii::$app->request->isAjax && Yii::$app->request->getBodyParam('saveOneCol')){
+                return ['success'=>true];
+            }else{
+                Yii::$app->session->setFlash('success',Yii::t('common', '对象信息修改成功'));
+                return $this->redirect(!empty(Yii::$app->session[$this->id]) ? Yii::$app->session[$this->id] : ['index']);
+            }
+        }elseif(Yii::$app->request->getBodyParam('saveOneCol') && ($errors = $model->getErrorSummary(true))){
+            return ['msg'=>implode("\r\n", $errors)];
         }
 
         return $this->render('update', [
@@ -292,7 +298,13 @@ class SetsColController extends ReportViewController // \webadmin\BController
      */
     protected function findModel($id)
     {
-        if (($model = DcSetsColumns::find()->where(['id'=>$id])->one()) !== null) { // ->with(['model','model.columns.model.source'])
+        if (($model = DcSetsColumns::find()->where(['id'=>$id])->with([
+            'sets.mainModel.sourceRelation.sourceModel',
+            'sets.mainModel.sourceRelation.targetModel',
+            'sets.columns.forSets',
+            'sets.columns.model.sourceRelation.sourceModel',
+            'sets.columns.model.sourceRelation.targetModel',
+        ])->one()) !== null) {
             return $model;
         }
 

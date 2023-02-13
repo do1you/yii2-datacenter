@@ -251,7 +251,7 @@ class DcModel extends \webadmin\ModelCAR
         $model = new DcModel();
         if($model->load([
             'tb_name' => $this->tb_name,
-            'tb_label' => $this->tb_label,
+            'tb_label' => $this->tb_label."_副本",
             'paixu' => $this->paixu,
             'cat_id' => $this->cat_id,
             'source_db' => $this->source_db,
