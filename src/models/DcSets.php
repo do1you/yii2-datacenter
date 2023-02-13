@@ -242,6 +242,19 @@ class DcSets extends \webadmin\ModelCAR
         return '\\datacenter\\base\\script\\'.ucfirst($this->run_script);
     }
     
+    // 返回下一个排序数值
+    public function getV_paixu()
+    {
+        $paixu = 1000;
+        if($this->columns){
+            foreach($this->columns as $item){
+                $paixu = min($paixu, $item['paixu']-10);
+            }
+        }
+        
+        return $paixu;
+    }
+    
     // 获取模型匹配关系
     public function getV_relation_models()
     {

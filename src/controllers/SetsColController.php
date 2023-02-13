@@ -184,8 +184,10 @@ class SetsColController extends ReportViewController // \webadmin\BController
         
         if(isset($sId)) $model->set_id = $sId;
         if(isset($mId)) $model->model_id = $mId;
+        elseif($model->set_id && $model->sets) $model->model_id = $model->sets->mainModel['id'];
         if(isset($fId)) $model->for_set_id = $fId;
         if(isset($cId)) $model->column_id = $cId;
+        if($model->sets) $model->paixu = $model->sets['v_paixu'];
 
         if ($model->load(Yii::$app->request->post()) && $model->ajaxValidation() && $model->save()) {
         	Yii::$app->session->setFlash('success',Yii::t('common', '对象信息添加成功'));
