@@ -389,7 +389,7 @@ class ReportController extends ReportViewController // \webadmin\BController
 		    ['in', 'dc_report.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'5'])],
 		    ['in', 'dc_report.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'5'])],
 		    ['=', 'dc_report.create_user', Yii::$app->user->id],
-		]),['columns.sets','user','cat.parent.parent.parent']);
+		]),['columns.sets','user','cat.parent.parent.parent','columns.userSets']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 

@@ -66,7 +66,7 @@ class SetsController extends ReportViewController // \webadmin\BController
 		    ['in', 'dc_sets.id', \datacenter\models\DcRoleAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
 		    ['in', 'dc_sets.id', \datacenter\models\DcUserAuthority::model()->getCache('getAuthorityIds', [Yii::$app->user->id,'4'])],
 		    ['=', 'dc_sets.create_user', Yii::$app->user->id],
-		]),['cat.parent.parent.parent','mainModel.source','columns.model.source']);
+		]),['cat.parent.parent.parent','mainModel.source','columns.model.source','user','columns.forSets']);
         
         if(!empty(Yii::$app->request->get('is_export'))) return $this->export($model, $dataProvider);
 
