@@ -28,14 +28,17 @@ class ReportDataBehaviors extends \yii\base\Behavior
     /**
      * 获取数据处理器
      */
-    public function getDataProvider()
+    public function getDataProvider($params=null)
     {
         if($this->_dataProvider === null){
             if($this->report){
                 $this->report->initJoinSet();
             }
             $this->_dataProvider = $this->report ? $this->report->prepareDataProvider() : $this->sets->prepareDataProvider();
+            $this->_dataProvider->initSearchParams($params);
             $this->_dataProvider->initData();
+        }else{
+            $this->_dataProvider->initSearchParams($params);
         }
         
         return $this->_dataProvider;
@@ -254,7 +257,7 @@ class ReportDataBehaviors extends \yii\base\Behavior
      */
     public function applySearchModels($params = null)
     {
-        return $this->getDataProvider()->applySearchModels($params);
+        return $this->getDataProvider($params)->applySearchModels($params);
     }
 }
 

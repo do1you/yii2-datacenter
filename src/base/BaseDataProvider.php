@@ -91,6 +91,23 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     private $_replace_params;
     
     /**
+     * 初始化查询条件
+     */
+    public function initSearchParams($params = [])
+    {
+        if(!$this->report && $params){
+            $searchModels = $this->getSearchModels();
+            $searchValues = $this->getSearchValues();
+            foreach($searchModels as $sModel){
+                if(isset($params[$sModel['attribute']])){
+                    $searchValues[$sModel['label_name']] = is_array($params[$sModel['attribute']]) ? implode(',', $params[$sModel['attribute']]) : $params[$sModel['attribute']];
+                }
+            }
+            $this->_searchValues = $searchValues;
+        }
+    }
+    
+    /**
      * 初始化
      */
     public function initData()
