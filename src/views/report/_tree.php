@@ -265,7 +265,9 @@ $(document).contextmenu({
                             }
                         }
                     }),colnmnId = (target.is('.update') ? column.colnmnId : '');
-                    $('#saveReportColDiv').load('{$url4}?id='+colnmnId);
+                    setTimeout(function(){
+                        $('#saveReportColDiv').load('{$url4}?id='+colnmnId);
+                    },500);
                 }else{
                     // 冻结/删除列
                     $.getJSON('{$url2}',{id:column.colnmnId,rid:reportId,type:(target.is('.frozen') ? 6 : 7)},function(json){
