@@ -127,6 +127,11 @@ var draw,table = $("#{$id}").dataTable({
 		}
 	},
 	"sAjaxDataProp" : 'rows',
+    "rowCallback" : function(row, data){
+        if(data && data.bgcolor){
+            $(row).css("background", data.bgcolor);
+        }
+    },
 	"columns": colModel
 });
 {$fixedScript}

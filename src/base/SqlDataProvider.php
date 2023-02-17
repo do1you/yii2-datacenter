@@ -123,6 +123,7 @@ class SqlDataProvider extends BaseDataProvider
                 $models[$key] = $this->filterSetsColumns($item); // 格式化数据
             }
         }
+        $models = $this->filterGroupColumns($models);
         return $models;
     }
     

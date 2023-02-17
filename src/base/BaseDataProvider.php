@@ -684,6 +684,63 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         return $this->formatValue($data, $totalRow);
     }
     
+    /**
+     * 分组小计的字段
+     */
+    public function filterGroupColumns($list = [])
+    {
+        if($this->forReport || !($subtotal = $this->report ? $this->report->v_group_subtotal : $this->sets->v_group_subtotal)){
+            return $list;
+        }
+        
+        $groupColKeys = \yii\helpers\ArrayHelper::map($subtotal, 'v_alias', 'v_alias');
+        $row = reset($list);
+        $keys = $row ? array_keys($row) : [];
+        $groupTotal = [];
+        foreach($list as $key=>$item){
+            $index = [];
+            foreach($groupColKeys as $gKey){
+                $index[] = $item[$gKey];
+            }
+            $index = implode(".",$index);
+            foreach($keys as $k){
+                if(in_array($k,$groupColKeys)){
+                    $groupTotal[$index][$k] = $item[$k];
+                }elseif(strlen($item[$k]) && is_numeric($item[$k]) && !preg_match("/^\d{8,50}$/",$item[$k])){
+                    if(!isset($groupTotal[$index][$k]) || strlen($groupTotal[$index][$k])<=0) $groupTotal[$index][$k] = 0;
+                    $groupTotal[$index][$k] += $item[$k];
+                }elseif(!isset($groupTotal[$index][$k])){
+                    $groupTotal[$index][$k] = '';
+                }
+            }
+        }
+        
+        $totalRow = $this->summaryLists($groupTotal);
+        foreach($groupTotal as $key=>$item){
+            $groupTotal[$key] = $this->formatValue($item, $totalRow);
+            $groupTotal[$key]['bgcolor'] = '#fff1a8';
+        }
+        
+        $list = array_merge($list,$groupTotal);
+        usort($list, function ($a, $b) use ($groupColKeys){
+            foreach($groupColKeys as $k){
+                if($a[$k]==$b[$k]){
+                    continue;
+                }else{
+                    return $a[$k]>$b[$k];
+                }
+            }
+            if(isset($a['bgcolor'])){
+                return 1;
+            }elseif(isset($b['bgcolor'])){
+                return 0;
+            }else{
+                return -1;
+            }
+        });
+        return $list;
+    }
+    
     // 返回输出函数处理过的内容
     public function formatRespFun($respFun,$val)
     {

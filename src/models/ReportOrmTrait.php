@@ -300,7 +300,7 @@ trait ReportOrmTrait
     /**
      * 返回分组小计的列
      */
-    public function getV_group()
+    public function getV_group_subtotal()
     {
         if($this->_group_col === null){
             $this->_group_col = [];

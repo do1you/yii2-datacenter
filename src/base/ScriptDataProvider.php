@@ -107,6 +107,7 @@ class ScriptDataProvider extends BaseDataProvider
                 $models[$key] = $this->filterSetsColumns($item);
             }
         }
+        $models = $this->filterGroupColumns($models);
         return $models;
     }
     

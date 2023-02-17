@@ -131,6 +131,7 @@ class ActiveDataProvider extends BaseDataProvider
                 $list[$key] = $this->filterSetsColumns($item, false, $totalRow);
             }
         }
+        $list = $this->filterGroupColumns($list);
         return $list;
     }
     
