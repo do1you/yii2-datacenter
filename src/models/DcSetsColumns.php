@@ -46,7 +46,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             [['column_id'], 'required', 'when'=>function($model){
                 return ($model->model_id>0 || $model->for_set_id>0);
             }],
-            [['set_id', 'is_search', 'is_hide', 'is_summary', 'paixu', 'is_back_search'], 'integer'],
+            [['set_id', 'is_search', 'is_hide', 'is_summary', 'paixu', 'is_back_search', 'is_group'], 'integer'],
             [['name', 'label', 'type', 'model_id', 'for_set_id', 'column_id', 'formula', 'fun', 'is_frozen', 'search_params', 'switch_type', 'resp_fun', 'sql_formula', 'search_group', 'is_hide'], 'safe'],
             [['name', 'label', 'type', 'fun', 'search_value', 'search_group'], 'string', 'max' => 50],
             [['formula'], 'string', 'max' => 255],
@@ -75,6 +75,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
             'is_hide' => Yii::t('datacenter', '是否隐藏'),
             'is_back_search' => Yii::t('datacenter', '是否反查'),
             'is_summary' => Yii::t('datacenter', '是否汇总'),
+            'is_group' => Yii::t('datacenter', '是否分组小计'),
             'type' => Yii::t('datacenter', '查询类型'),
             'formula' => Yii::t('datacenter', '计算公式'),
             'sql_formula' => Yii::t('datacenter', 'SQL公式'),
@@ -186,6 +187,12 @@ class DcSetsColumns extends \webadmin\ModelCAR
     public function getV_is_summary($val = null)
     {
         return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_summary));
+    }
+    
+    // 获取是否分组
+    public function getV_is_group($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_group));
     }
     
     // 返回格式化名称

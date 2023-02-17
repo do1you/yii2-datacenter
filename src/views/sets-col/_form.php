@@ -88,6 +88,8 @@ $model->afterFind();
             
             <?= $form->field($model, 'is_summary')->textInput()->radioList($model->getV_is_summary(false), []) ?>
             
+            <?= $form->field($model, 'is_group')->textInput()->radioList($model->getV_is_group(false), []) ?>
+            
             <?= $form->field($model, 'is_search')->textInput()->radioList($model->getV_is_search(false), []) ?>
             
             <?php if(in_array($model['sets']['set_type'], ['model','sql'])):?>

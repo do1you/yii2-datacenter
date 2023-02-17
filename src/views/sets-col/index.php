@@ -105,6 +105,13 @@ use yii\helpers\Url;
                 	         },
                 	     ],
                 	     [
+                	         'attribute' => 'is_group',
+                	         'format' => 'raw',
+                	         'value' => function ($model) {
+                	         return Html::button($model->v_is_group,['name'=>'DcSetsColumns[is_group]','class'=>'btn btn-xs shiny'.($model->is_group ? ' btn-primary' : ''),'updateid'=>$model['id']]);
+                	         },
+            	         ],                	     
+                	     [
                 	         'attribute' => 'is_search',
                 	         'format' => 'raw',
                 	         'value' => function ($model) {

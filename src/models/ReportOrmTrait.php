@@ -32,6 +32,11 @@ trait ReportOrmTrait
     private $_frozen_num;
     
     /**
+     * 分组小计的列
+     */
+    private $_group_col;
+    
+    /**
      * 数据源信息
      */
     private $_cache_source;
@@ -290,6 +295,29 @@ trait ReportOrmTrait
             $this->_frozen_num = $num;
         }
         return $this->_frozen_num;
+    }
+    
+    /**
+     * 返回分组小计的列
+     */
+    public function getV_group()
+    {
+        if($this->_group_col === null){
+            $this->_group_col = [];
+            foreach($this->columns as $colItem){
+                if($this instanceof DcReport){ // 报表
+                    if($colItem['col_id'] && $colItem['setsCol']['is_group']){
+                        $this->_group_col[] = $colItem;
+                    }
+                }else{
+                    if($colItem['is_group']){
+                        $this->_group_col[] = $colItem;
+                    }
+                }
+                
+            }
+        }
+        return $this->_group_col;
     }
     
     /**
