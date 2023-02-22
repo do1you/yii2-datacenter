@@ -28,6 +28,7 @@ class DcReportColumns extends \webadmin\ModelCAR
     public function rules()
     {
         return [
+            [['is_hide', 'is_summary', 'is_group'], 'integer'],
             [['report_id', 'set_id', 'col_id', 'paixu', 'is_frozen', 'user_set_id', 'resp_fun'], 'safe'],
             [['formula'], 'string', 'max' => 255],
             [['label'], 'string', 'max' => 50],
@@ -50,6 +51,9 @@ class DcReportColumns extends \webadmin\ModelCAR
             'paixu' => Yii::t('datacenter', '排序'),
             'formula' => Yii::t('datacenter', '计算公式'),
             'is_frozen' => Yii::t('datacenter', '是否冻结'),
+            'is_hide' => Yii::t('datacenter', '是否隐藏'),
+            'is_summary' => Yii::t('datacenter', '是否汇总'),
+            'is_group' => Yii::t('datacenter', '是否分组小计'),
             'resp_fun' => Yii::t('datacenter', '输出函数'),
         ];
     }
@@ -84,6 +88,24 @@ class DcReportColumns extends \webadmin\ModelCAR
         return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_frozen));
     }
     
+    // 获取是否隐藏
+    public function getV_is_hide($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_hide));
+    }
+    
+    // 获取是否汇总
+    public function getV_is_summary($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_summary));
+    }
+    
+    // 获取是否分组
+    public function getV_is_group($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_group));
+    }
+    
     // 获取输出函数
     public function getV_resp_fun($val = null)
     {
@@ -112,12 +134,6 @@ class DcReportColumns extends \webadmin\ModelCAR
     public function getV_format_label()
     {
         return "{{$this->v_label}}";
-    }
-    
-    // 获取是否隐藏
-    public function getIs_hide()
-    {
-        return ($this->setsCol ? $this->setsCol['is_hide'] : '0');
     }
     
     // 返回字段默认值
