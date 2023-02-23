@@ -305,15 +305,15 @@ trait ReportOrmTrait
         if($this->_group_col === null){
             $this->_group_col = [];
             foreach($this->columns as $colItem){
-                if($this instanceof DcReport){ // 报表
+                /*if($this instanceof DcReport){ // 报表
                     if($colItem['col_id'] && $colItem['setsCol']['is_group']){
                         $this->_group_col[] = $colItem;
                     }
-                }else{
+                }else{*/
                     if($colItem['is_group']){
                         $this->_group_col[] = $colItem;
                     }
-                }
+                //}
                 
             }
         }

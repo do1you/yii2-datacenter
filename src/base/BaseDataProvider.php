@@ -563,7 +563,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                 $colnmn = $this->report ? $item['setsCol'] : $item;
                 if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
                 
-                if($colnmn && $colnmn['is_summary'] && ($colnmn['model_id'] || $colnmn['for_set_id'] || $colnmn['sets']['set_type']!='model')){
+                if($colnmn && $item['is_summary'] && ($colnmn['model_id'] || $colnmn['for_set_id'] || $colnmn['sets']['set_type']!='model')){
                     $v_column = $colnmn['sets']['set_type']!='model' ? $colnmn->name : $colnmn->v_fncolumn;
                     if($colnmn->v_isfn){
                         $list[] = new \yii\db\Expression("{$v_column} as {$colnmn->v_alias}");
@@ -595,7 +595,8 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         $setLists = $this->report->v_sets;
         $labelColmns = \yii\helpers\ArrayHelper::map($this->report->getV_columns(), 'label', 'name');
         foreach($this->report->columns as $col){
-            if($isSummery && $col['setsCol'] && $col['setsCol']['is_summary']!='1') continue;
+            //if($isSummery && $col['setsCol'] && $col['setsCol']['is_summary']!='1') continue;
+            if($isSummery && $col['setsCol'] && $col['is_summary']!='1') continue;
             $sIndex = ($col['user_set_id'] && $col['userSets']) ? '-'.$col['user_set_id'] : $col['set_id'];
             $set = isset($setLists[$sIndex]) ? $setLists[$sIndex] : null;
             $relation = $set ? $set['v_relation'] : null;
