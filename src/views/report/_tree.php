@@ -16,13 +16,15 @@
 
 <div id="context-menu">
   	<ul class="dropdown-menu" role="menu">
-        <li><a tabindex="-1" class="frozen">冻结/取消</a></li>
-        <li class="divider"></li>
         <li><a tabindex="-1" class="create">创建列</a></li>
-        <li class="divider"></li>
         <li><a tabindex="-1" class="update">修改列</a></li>
+        <li><a tabindex="-1" class="remove">删除列</a></li>
         <li class="divider"></li>
-        <li><a tabindex="-1" class="remove">删除列</a></li>        
+        <li><a tabindex="-1" act="frozen">冻结/取消</a></li>
+        <li><a tabindex="-1" act="group">分组小计/取消</a></li>
+        <li><a tabindex="-1" act="summary">汇总/取消</a></li>
+        <li><a tabindex="-1" act="hide">隐藏本列</a></li>
+        <li><a tabindex="-1" act="show">取消所有隐藏</a></li>  
   	</ul>
 </div>                               
                                     
@@ -270,7 +272,7 @@ $(document).contextmenu({
                     },500);
                 }else{
                     // 冻结/删除列
-                    $.getJSON('{$url2}',{id:column.colnmnId,rid:reportId,type:(target.is('.frozen') ? 6 : 7)},function(json){
+                    $.getJSON('{$url2}',{id:column.colnmnId,rid:reportId,type:(target.is('.remove') ? 7 : 6),action:target.attr('act')},function(json){
                         if(json.success){
                             $('#report_div').load('{$url3}');
                             Notify('操作成功！', 'top-right', '5000', 'success', 'fa-check', true);

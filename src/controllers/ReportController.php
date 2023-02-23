@@ -215,8 +215,8 @@ class ReportController extends ReportViewController // \webadmin\BController
             case '5': // 字段顺序
                 $result = $this->_orderReport($result,$model,$id,$rid,$type,$nid,$act);
                 break;
-            case '6': // 冻结/取消列
-                $result = $this->_frozenReport($result,$model,$id,$rid,$type,$nid,$act);
+            case '6': // 冻结汇总分组隐藏/取消列
+                $result = $this->_quickReport($result,$model,$id,$rid,$type,$nid,$act);
                 break;
             case '7': // 删除列
                 $result = $this->_removeReport($result,$model,$id,$rid,$type,$nid,$act);
@@ -266,12 +266,32 @@ class ReportController extends ReportViewController // \webadmin\BController
     }
     
     // 冻结/取消数据表
-    private function _frozenReport($result,$model,$id,$rid,$type,$nid,$act)
+    private function _quickReport($result,$model,$id,$rid,$type,$nid,$act)
     {
         if($model && ($cModel = $id ? DcReportColumns::findOne($id) : null)){
             $result['success'] = true;
-            $cModel->is_frozen = $cModel->is_frozen=='1' ? '0' : '1';
-            $cModel->save(false);
+            $action = Yii::$app->request->get('action');
+            if($action=='show'){ // 取消所有隐藏
+                if($model && $model['columns']){
+                    foreach($model['columns'] as $item){
+                        if($item->is_hide=='1'){
+                            $item->is_hide = '0';
+                            $item->save(false);
+                        }
+                    }
+                }
+            }else{
+                if($action=='frozen'){ // 冻结/取消
+                    $cModel->is_frozen = $cModel->is_frozen=='1' ? '0' : '1';
+                }elseif($action=='group'){ // 分组小计/取消
+                    $cModel->is_group = $cModel->is_group=='1' ? '0' : '1';
+                }elseif($action=='summary'){ // 汇总/取消
+                    $cModel->is_summary = $cModel->is_summary=='1' ? '0' : '1';
+                }elseif($action=='hide'){ // 汇总/取消
+                    $cModel->is_hide = $cModel->is_hide=='1' ? '0' : '1';
+                }
+                $cModel->save(false);
+            }
         }else{
             $result['msg'] = "参数有误";
         }
