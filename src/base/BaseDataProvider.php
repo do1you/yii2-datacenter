@@ -557,13 +557,22 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     public function getSummaryModels()
     {
         if($this->_summaryModels === null){
-            $list = [];
+            $reportColumns = $list = [];
+            if($this->forReport && $this->forReport!==true){
+                foreach($this->forReport['columns'] as $column){
+                    if($column['col_id']){
+                        $reportColumns[$column['col_id']] = $column;
+                    }
+                }
+            }
+            
             $columns = $this->report ? $this->report->columns : $this->sets->columns;
             foreach($columns as $item){
                 $colnmn = $this->report ? $item['setsCol'] : $item;
                 if(!empty($item['formula']) || !empty($colnmn['formula'])) continue;
                 
-                if($colnmn && $item['is_summary'] && ($colnmn['model_id'] || $colnmn['for_set_id'] || $colnmn['sets']['set_type']!='model')){
+                $is_summary = isset($reportColumns[$colnmn['id']]) ? $reportColumns[$colnmn['id']]['is_summary'] : $item['is_summary'];
+                if($colnmn && $is_summary && ($colnmn['model_id'] || $colnmn['for_set_id'] || $colnmn['sets']['set_type']!='model')){
                     $v_column = $colnmn['sets']['set_type']!='model' ? $colnmn->name : $colnmn->v_fncolumn;
                     if($colnmn->v_isfn){
                         $list[] = new \yii\db\Expression("{$v_column} as {$colnmn->v_alias}");
@@ -596,7 +605,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
         $labelColmns = \yii\helpers\ArrayHelper::map($this->report->getV_columns(), 'label', 'name');
         foreach($this->report->columns as $col){
             //if($isSummery && $col['setsCol'] && $col['setsCol']['is_summary']!='1') continue;
-            if($isSummery && $col['setsCol'] && $col['is_summary']!='1') continue;
+            if($isSummery && $col['is_summary']!='1') continue;
             $sIndex = ($col['user_set_id'] && $col['userSets']) ? '-'.$col['user_set_id'] : $col['set_id'];
             $set = isset($setLists[$sIndex]) ? $setLists[$sIndex] : null;
             $relation = $set ? $set['v_relation'] : null;
