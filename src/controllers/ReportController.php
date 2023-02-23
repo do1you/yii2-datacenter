@@ -387,6 +387,10 @@ class ReportController extends ReportViewController // \webadmin\BController
                     'set_id' => $column->set_id,
                     'user_set_id' => Yii::$app->request->post('vid',Yii::$app->request->get('vid','0')),
                     'col_id' => $column->id,
+                    'is_hide' => $column->is_hide,
+                    'is_summary' => $column->is_summary,
+                    'is_group' => $column->is_group,
+                    'is_frozen' => $column->is_frozen,
                 ],'');
                 $colModel->save(false);
             }
