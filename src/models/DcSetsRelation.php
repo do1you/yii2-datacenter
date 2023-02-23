@@ -346,13 +346,14 @@ class DcSetsRelation extends \webadmin\ModelCAR
             // 写入汇总条件
             $columns = $this->getV_target_columns($target);
             $keys = $this->getV_source_columns($source);
-            $source->filterSourceSelect()->order(false);
             $target->select(false)->group(false)->order(false)->select($this['v_group_col']);
             if(in_array($source['set_type'], ['model','sql']) && in_array($target['set_type'], ['model','sql'])
                 && $source->getDataProvider()->db==$target->getDataProvider()->db
             ){
+                $source->select(false)->order(false)->select($keys);
                 $target->where($columns, $source);
             }else{
+                $source->filterSourceSelect(false)->order(false);
                 // 关闭事件处理
                 $source->off(\datacenter\base\ActiveDataProvider::$EVENT_AFTER_MODEL, [$source, 'sourceAfterFindModels']);
                 $this->putSetPagination($source);
