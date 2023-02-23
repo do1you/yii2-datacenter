@@ -58,11 +58,16 @@ class DcSets extends \webadmin\ModelCAR
      * 关联的本数据集信息
      */
     public $_relation_union = [];
-    
+
     /**
      * 数据集所属的报表实例
      */
     public $report;
+    
+    /**
+     * 关联的数据集查询字段是否已写入
+     */
+    private $_filterSourceSelectState = false;
     
     /**
      * 数据提供器驱动类
@@ -633,20 +638,6 @@ class DcSets extends \webadmin\ModelCAR
         }
     }
     
-    // 同时匹配出汇总数据集合
-    public function sourceAfterFindSummary()
-    {
-        if($this->_relation_source){
-            foreach($this->_relation_source as $key=>$item){
-                list($relation, $target) = $item;
-                $relation->joinWhere($this, $target, false, true);
-                $target->getSummary();
-            }
-        }else{
-            $this->select(false)->order(false);
-        }
-    }
-    
     // 数据结果集合匹配
     public function targetAfterFindModels()
     {
@@ -695,6 +686,20 @@ class DcSets extends \webadmin\ModelCAR
         }
     }
     
+    // 同时匹配出汇总数据集合
+    public function sourceAfterFindSummary()
+    {
+        if($this->_relation_source){
+            foreach($this->_relation_source as $key=>$item){
+                list($relation, $target) = $item;
+                $relation->joinWhere($this, $target, false, true);
+                $target->getSummary();
+            }
+        }else{
+            $this->select(false)->order(false);
+        }
+    }
+    
     //　汇总数据集合匹配
     public function targetAfterFindSummary()
     {
@@ -703,7 +708,7 @@ class DcSets extends \webadmin\ModelCAR
             foreach($this->_relation_target as $key=>$item){
                 list($relation, $source) = $item;
                 $buckets = [];
-                
+
                 // 目标数据汇总
                 $targetList = $target->getSummary();
                 if($relation['rel_type']=='group'){
@@ -727,6 +732,21 @@ class DcSets extends \webadmin\ModelCAR
                 $source->setSummary($sourceList);
             }
         }
+    }
+    
+    // 将目标数据集的过滤条件写入
+    public function filterSourceSelect()
+    {
+        if($this->_relation_target && !$this->_filterSourceSelectState){
+            $this->select(false);
+            foreach($this->_relation_source as $key=>$item){
+                list($relation, $target) = $item;
+                $keys = $relation->getV_source_columns($this);
+                $this->select($keys);
+            }
+            $this->_filterSourceSelectState = true;
+        }
+        return $this;
     }
     
     // 目标数据集写入到源数据集查询条件
