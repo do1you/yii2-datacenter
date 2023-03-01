@@ -29,8 +29,7 @@ class DcReportColumns extends \webadmin\ModelCAR
     {
         return [
             [['is_hide', 'is_summary', 'is_group'], 'integer'],
-            [['report_id', 'set_id', 'col_id', 'paixu', 'is_frozen', 'user_set_id', 'resp_fun'], 'safe'],
-            [['formula'], 'string', 'max' => 255],
+            [['report_id', 'set_id', 'col_id', 'paixu', 'is_frozen', 'user_set_id', 'resp_fun', 'formula'], 'safe'],
             [['label'], 'string', 'max' => 50],
             [['resp_fun'], 'string', 'max' => 100],
         ];
