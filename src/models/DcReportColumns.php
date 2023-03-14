@@ -28,7 +28,7 @@ class DcReportColumns extends \webadmin\ModelCAR
     public function rules()
     {
         return [
-            [['is_hide', 'is_summary', 'is_group'], 'integer'],
+            [['is_hide', 'is_summary', 'is_group', 'user_set_id'], 'integer'],
             [['report_id', 'set_id', 'col_id', 'paixu', 'is_frozen', 'user_set_id', 'resp_fun', 'formula'], 'safe'],
             [['label'], 'string', 'max' => 50],
             [['resp_fun'], 'string', 'max' => 100],

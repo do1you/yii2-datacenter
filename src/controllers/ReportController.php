@@ -372,6 +372,7 @@ class ReportController extends ReportViewController // \webadmin\BController
                 return $result;
             }
             $model = new DcReport;
+            $model->loadDefaultValues();
             $model->state = 9;
             $model->title = (($sets = reset($setLists)) ? $sets['title'] : "新报表").date('YmdHis');
             $model->save(false);
@@ -381,11 +382,12 @@ class ReportController extends ReportViewController // \webadmin\BController
         if($model){
             foreach($columns as $column){
                 $colModel = new DcReportColumns();
+                $colModel->loadDefaultValues();
                 $colModel->load([
                     'label' => $column->label,
                     'report_id' => $model->id,
                     'set_id' => $column->set_id,
-                    'user_set_id' => Yii::$app->request->post('vid',Yii::$app->request->get('vid','0')),
+                    'user_set_id' => intval(Yii::$app->request->post('vid',Yii::$app->request->get('vid','0'))),
                     'col_id' => $column->id,
                     'is_hide' => $column->is_hide,
                     'is_summary' => $column->is_summary,
