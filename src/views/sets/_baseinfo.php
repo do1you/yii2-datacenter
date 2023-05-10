@@ -11,6 +11,8 @@ use webadmin\widgets\ActiveForm;
             
             <?= $form->field($model, 'state')->textInput()->dropDownList($model->getV_state(false), []) ?>
             
+            <?= $form->field($model, 'is_index_show')->textInput()->dropDownList($model->getV_is_index_show(false), []) ?>
+            
             <?= $form->field($model, 'cat_id')->textInput()->select2($model->getV_cat_id(false), []) ?>
 
             <?= $form->field($model, 'set_type')->textInput(['maxlength' => true])->dropDownList($model->getV_set_type(false), (

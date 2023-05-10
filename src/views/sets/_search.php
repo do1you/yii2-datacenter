@@ -33,6 +33,7 @@ use webadmin\widgets\ActiveForm;
 
 				<?= $form->field($model, 'state')->searchInput()->dropDownList($model->getV_state(false),['prompt'=>'请选择']) ?>
 
+				<?= $form->field($model, 'is_index_show')->searchInput()->dropDownList($model->getV_is_index_show(false),['prompt'=>'请选择']) ?>
                 <div class="form-group">
                     <?= Html::submitButton(Yii::t('common','查询'), ['class' => 'btn btn-primary', 'id'=>'search_btn']) ?>
                     <?//= Html::submitButton(Yii::t('common','导出'), ['class' => 'btn btn-primary', 'id'=>'export_btn']) ?>

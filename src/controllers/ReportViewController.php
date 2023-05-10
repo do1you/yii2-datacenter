@@ -207,7 +207,7 @@ class ReportViewController extends \webadmin\BController
         $userReport = \datacenter\models\DcReport::model()->allUserReport(Yii::$app->user->id,null,1);
         */
         
-        $defSets = \datacenter\models\DcSets::model()->getCache('allDefSets',[Yii::$app->user->id,null,1]);
+        $defSets = \datacenter\models\DcSets::model()->getCache('allDefSets',[Yii::$app->user->id,['=','is_index_show','1'],1]);
         $userSets = \datacenter\models\DcSets::model()->getCache('allUserSets',[Yii::$app->user->id,null,1]);
         $defReport = \datacenter\models\DcReport::model()->getCache('allDefReport',[Yii::$app->user->id,null,1]);
         $userReport = \datacenter\models\DcReport::model()->getCache('allUserReport',[Yii::$app->user->id,null,1]);

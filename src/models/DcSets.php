@@ -100,7 +100,7 @@ class DcSets extends \webadmin\ModelCAR
         return [
             [['title', 'set_type', 'cat_id'], 'required'],
             [['main_model', 'relation_models', 'run_script', 'run_sql', 'excel_file', 'rel_where', 'rel_group', 'rel_order', 'rel_having', 'update_time', 'create_user'], 'safe'],
-            [['main_model', 'state', 'cat_id', 'source_id', 'create_user'], 'integer'],
+            [['main_model', 'state', 'cat_id', 'source_id', 'create_user', 'is_index_show'], 'integer'],
             [['run_sql'], 'string'],
             [['update_time'], 'safe'],
             [['title', 'set_type'], 'string', 'max' => 50],
@@ -135,6 +135,7 @@ class DcSets extends \webadmin\ModelCAR
             'source_id' => Yii::t('datacenter', 'SQL数据源'),
             'excel_file' => Yii::t('datacenter', 'EXCEL文件'),
             'state' => Yii::t('datacenter', '状态'),
+            'is_index_show' => Yii::t('datacenter', '首页显示'),
             'rel_where' => Yii::t('datacenter', '条件'),
             'rel_group' => Yii::t('datacenter', '分组'),
             'rel_having' => Yii::t('datacenter', '分组条件'),
@@ -231,6 +232,12 @@ class DcSets extends \webadmin\ModelCAR
     public function getV_state($val = null)
     {
         return \webadmin\modules\config\models\SysLdItem::dd('record_status', ($val !== null ? $val : $this->state));
+    }
+    
+    // 获取是否首页显示
+    public function getV_is_index_show($val = null)
+    {
+        return \webadmin\modules\config\models\SysLdItem::dd('enum', ($val !== null ? $val : $this->is_index_show));
     }
     
     // 返回格式化标题

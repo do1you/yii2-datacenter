@@ -75,6 +75,11 @@ use yii\helpers\Url;
                 	         'filter' => false,
                 	     ],
                 	     [
+                	         'attribute' => 'is_index_show',
+                	         'value' => 'v_is_index_show',
+                	         'filter' => false,
+                	     ],
+                	     [
                 	         'attribute' => 'create_user',
                 	         'value' => 'user.name',
                 	         'filter' => false,
