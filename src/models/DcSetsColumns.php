@@ -333,7 +333,7 @@ class DcSetsColumns extends \webadmin\ModelCAR
     // 返回默认值
     public function getV_search_defval()
     {
-        $finance_sec = 36000; // 定义营业日自然时间误差10个小时
+        $finance_sec = 3600*8; // 定义营业日自然时间误差10个小时
         $defaultValue = $this->search_value;
         switch($defaultValue){
             case 'doyesterday': // 昨天营业日
@@ -402,6 +402,10 @@ class DcSetsColumns extends \webadmin\ModelCAR
             }elseif($this['type']=='dateyear'){
                 $defaultValue = date('Y',strtotime($currTime));
             }
+        }
+        
+        if(in_array($this['type'],['select2mult', 'ddmulti', 'ddselect2multi', 'selectajaxmult', 'selectmult'])){
+            $defaultValue = is_array($defaultValue) ? $defaultValue : explode(',',$defaultValue);
         }
         
         return $defaultValue;

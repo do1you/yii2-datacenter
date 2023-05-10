@@ -118,6 +118,9 @@ class SqlDataProvider extends BaseDataProvider
             
             $sql = $this->db->getQueryBuilder()->buildOrderByAndLimit($sql, $orders, $limit, $offset);
             
+            // 预设变量
+            $this->setVars($sql);
+            
             $models = $this->db->createCommand($sql, $this->params)->queryAll();
             foreach($models as $key=>$item){
                 $models[$key] = $this->filterSetsColumns($item); // 格式化数据

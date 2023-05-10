@@ -125,6 +125,9 @@ class ActiveDataProvider extends BaseDataProvider
                 $query->addOrderBy($orderBy);
             }
             
+            // 预设变量
+            $this->setVars($query);
+            
             $list = $query->all($this->db);
             $totalRow = $this->summaryLists($list);
             foreach($list as $key=>$item){
@@ -190,6 +193,7 @@ class ActiveDataProvider extends BaseDataProvider
                 if($newQuery->where && preg_match('/\s+\(?0\=1\)?\s*?/', $newQuery->createCommand($this->db)->sql)){
                     $row = [];
                 }else{
+                    $this->setVars($newQuery);
                     if($newQuery->groupBy){
                         $row = $newQuery->all($this->db);
                         foreach($row as $key=>$item){

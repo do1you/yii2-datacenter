@@ -101,6 +101,13 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
             foreach($searchModels as $sModel){
                 if(isset($params[$sModel['attribute']])){
                     $searchValues[$sModel['label_name']] = is_array($params[$sModel['attribute']]) ? implode(',', $params[$sModel['attribute']]) : $params[$sModel['attribute']];
+                    if(in_array($sModel['config_type'], ['daterange', 'datetimerange']) && $searchValues[$sModel['label_name']] && strpos($searchValues[$sModel['label_name']], '至')!==false){
+                        list($startTime, $endTime) = explode('至', $searchValues[$sModel['label_name']]);
+                        $searchValues[$sModel['label_name'].'_0'] = trim($startTime);
+                        $searchValues[$sModel['label_name'].'_1'] = trim($endTime);
+                    }elseif(in_array($sModel['config_type'], ['select2mult', 'ddmulti', 'ddselect2multi', 'selectajaxmult', 'selectmult'])){
+                        $searchValues[$sModel['label_name'].'_'] = is_array($searchValues[$sModel['label_name']]) ? $searchValues[$sModel['label_name']] : explode(',',$searchValues[$sModel['label_name']]);
+                    }
                 }
             }
             $this->_searchValues = $searchValues;
@@ -208,6 +215,8 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     list($startTime, $endTime) = explode('至', $item['value']);
                     $this->_searchValues[$item['label_name'].'_0'] = trim($startTime);
                     $this->_searchValues[$item['label_name'].'_1'] = trim($endTime);
+                }elseif(in_array($item['config_type'], ['select2mult', 'ddmulti', 'ddselect2multi', 'selectajaxmult', 'selectmult'])){
+                    $this->_searchValues[$item['label_name'].'_'] = is_array($this->_searchValues[$item['label_name']]) ? $this->_searchValues[$item['label_name']] : explode(',',$this->_searchValues[$item['label_name']]);
                 }
             }
         }
@@ -1120,5 +1129,23 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
     public function order($columns)
     {
         return $this;
+    }
+    
+    /**
+     * 预设变量
+     */
+    public function setVars($query)
+    {
+        // 预设变量
+        if(is_string($query)){
+            $sql = $query;
+        }elseif($query instanceof \yii\db\QueryInterface){
+            list($sql, $params) = $this->db->getQueryBuilder()->build($query);
+        }
+        
+        if(!empty($sql) && preg_match_all('/\@[A-Za-z]+/', $sql, $matches)) {
+            $vars = array_unique($matches[0]);
+            $vars && $this->db->createCommand("set ".implode("=0,",$vars)."=0;")->execute();
+        }
     }
 }

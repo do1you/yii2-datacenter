@@ -40,6 +40,11 @@ class DcSets extends \webadmin\ModelCAR
     private $_replace_params;
     
     /**
+     * 用于格式化判断上一次的请求参数
+     */
+    private $_replace_last_search;
+    
+    /**
      * 关联的所有数据集
      */
     private $_setsList;
@@ -485,14 +490,23 @@ class DcSets extends \webadmin\ModelCAR
     // 返回格式化SQL的参数
     public function formatSqlTpl()
     {
-        if($this->_replace_params === null || !isset($this->_replace_params['search']) || !isset($this->_replace_params['replace'])){
+        $searchValues = $this->getSearchValues($this->id);
+        if($this->_replace_params === null || $this->_replace_last_search != $searchValues || !isset($this->_replace_params['search']) || !isset($this->_replace_params['replace'])){
             $search = $replace = [];
+            $this->_replace_last_search = $searchValues;
             
             // 提取查询条件信息
-            if(($searchValues = $this->getSearchValues($this->id)) && is_array($searchValues)){
+            if($searchValues && is_array($searchValues)){
                 foreach($searchValues as $label => $value){
-                    $search[] = "{{$label}}";
-                    $replace[] = "{$value}";
+                    if(is_array($value)){
+                        $search[] = "{{$label}}";
+                        $replace[] = $value ? "('".implode("','",$value)."')" : "(-9999)";
+                        $search[] = "[{$label}]";
+                        $replace[] = reset($value);
+                    }else{
+                        $search[] = "{{$label}}";
+                        $replace[] = "{$value}";
+                    }
                 }
             }
 
