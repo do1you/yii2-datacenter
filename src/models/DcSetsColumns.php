@@ -404,8 +404,8 @@ class DcSetsColumns extends \webadmin\ModelCAR
             }
         }
         
-        if(in_array($this['type'],['select2mult', 'ddmulti', 'ddselect2multi', 'selectajaxmult', 'selectmult'])){
-            $defaultValue = is_array($defaultValue) ? $defaultValue : explode(',',$defaultValue);
+        if(in_array($this['type'],['select2mult', 'ddmulti', 'ddselect2multi', 'selectajaxmult', 'selectmult']) && strlen($defaultValue)){
+            $defaultValue = explode(',',$defaultValue);
         }
         
         return $defaultValue;

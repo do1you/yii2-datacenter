@@ -106,7 +106,12 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         $searchValues[$sModel['label_name'].'_0'] = trim($startTime);
                         $searchValues[$sModel['label_name'].'_1'] = trim($endTime);
                     }elseif(in_array($sModel['config_type'], ['select2mult', 'ddmulti', 'ddselect2multi', 'selectajaxmult', 'selectmult'])){
-                        $searchValues[$sModel['label_name'].'_'] = is_array($searchValues[$sModel['label_name']]) ? $searchValues[$sModel['label_name']] : explode(',',$searchValues[$sModel['label_name']]);
+                        if(strlen($searchValues[$sModel['label_name']])){
+                            $searchValues[$sModel['label_name'].'_'] = is_array($searchValues[$sModel['label_name']]) ? $searchValues[$sModel['label_name']] : explode(',',$searchValues[$sModel['label_name']]);
+                        }else{
+                            $searchValues[$sModel['label_name'].'_'] = [];
+                        }
+                        
                     }
                 }
             }
@@ -216,7 +221,11 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                     $this->_searchValues[$item['label_name'].'_0'] = trim($startTime);
                     $this->_searchValues[$item['label_name'].'_1'] = trim($endTime);
                 }elseif(in_array($item['config_type'], ['select2mult', 'ddmulti', 'ddselect2multi', 'selectajaxmult', 'selectmult'])){
-                    $this->_searchValues[$item['label_name'].'_'] = is_array($this->_searchValues[$item['label_name']]) ? $this->_searchValues[$item['label_name']] : explode(',',$this->_searchValues[$item['label_name']]);
+                    if(strlen($this->_searchValues[$item['label_name']])){
+                        $this->_searchValues[$item['label_name'].'_'] = is_array($this->_searchValues[$item['label_name']]) ? $this->_searchValues[$item['label_name']] : explode(',',$this->_searchValues[$item['label_name']]);
+                    }else{
+                        $this->_searchValues[$item['label_name'].'_'] = [];
+                    }
                 }
             }
         }
@@ -256,7 +265,7 @@ abstract class BaseDataProvider extends \yii\data\ActiveDataProvider implements 
                         }
                     }
                 }
-
+                
                 if($colnmn && $colnmn['is_search'] && !isset($haveLabels[$item['v_label']])){ // && ($colnmn['model_id'] || $colnmn['sets']['set_type']!='model')
                     $_ = [
                         'config_type' => ($colnmn['type'] ? $colnmn['type'] : 'text'),
